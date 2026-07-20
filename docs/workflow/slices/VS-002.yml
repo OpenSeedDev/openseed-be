@@ -1,0 +1,70 @@
+schema_version: 1
+
+slice:
+  id: VS-002
+  title: "로그인"
+
+status: CREATING_PR
+branch: codex/vs-002-login
+base_commit: 95eba2572147227b24ac86e33d1c3ee17876343d
+current_commit: 95eba2572147227b24ac86e33d1c3ee17876343d
+
+approvals:
+  test: { approved: true, approved_at: "2026-07-20T19:21:32+09:00", scope_sha256: "a3079505a37399a01a4151a986ef90b43347d8af9efd229d755dce81577f300d" }
+  change: { approved: true, approved_at: "2026-07-20T19:36:36+09:00", scope_sha256: "e6f8af5260780bad95fe8936c41a1498d65a854d524dabb08533ed007ed30b17" }
+  review_plan: { approved: false, approved_at: null, scope_sha256: null }
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+
+evidence:
+  red_test: "2026-07-20T19:23:03+09:00 LoginIntegrationTest: 4 tests failed because auth_sessions and login endpoint were absent"
+  focused_tests: "2026-07-20T19:34:10+09:00 login package tests: 8 passed"
+  full_tests: "2026-07-20T19:34:41+09:00 ./gradlew clean test: 21 passed, 0 failures"
+  migration: "V3__create_auth_sessions.sql applied on PostgreSQL 17 Testcontainers; schema validation passed"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-20T19:19:16+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "VS-002 시작"
+    note: "백로그, 최종 기획서, VS-001 워크플로우 실패와 구현 교훈을 확인했다."
+  - at: "2026-07-20T19:19:16+09:00"
+    from: PLANNING
+    to: AWAITING_TEST_APPROVAL
+    command: "VS-002 시작"
+    note: "로그인 인증 방식, API·데이터 계약과 테스트 목록을 작성하고 승인을 대기한다."
+  - at: "2026-07-20T19:21:32+09:00"
+    from: AWAITING_TEST_APPROVAL
+    to: IMPLEMENTING
+    command: "VS-002 테스트 승인"
+    note: "승인 범위를 SHA-256으로 고정하고 TDD 구현을 시작한다."
+  - at: "2026-07-20T19:32:07+09:00"
+    from: IMPLEMENTING
+    to: AWAITING_CHANGE_APPROVAL
+    command: "VS-002 테스트 승인"
+    note: "Red, 최소 구현, 보안 보강, 집중·전체 테스트, OpenAPI·ERD·Migration 갱신과 diff 검토를 완료했다."
+  - at: "2026-07-20T19:36:36+09:00"
+    from: AWAITING_CHANGE_APPROVAL
+    to: CREATING_PR
+    command: "VS-002 변경 승인"
+    note: "승인 변경 범위를 SHA-256으로 고정하고 커밋·Push·PR 생성을 시작한다."
+
+created_at: "2026-07-20T19:19:16+09:00"
+updated_at: "2026-07-20T19:36:36+09:00"

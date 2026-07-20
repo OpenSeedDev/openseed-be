@@ -30,3 +30,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "PR #15 인라인 댓글 3613409768 및 TimeConfigTest Red-Green 결과"
+  - id: IL-003
+    fingerprint: "crypto-regression-test-missing-checked-exception-declaration"
+    status: resolved
+    occurred_at: "2026-07-20T19:32:30+09:00"
+    slice_id: VS-002
+    category: test_setup
+    review_comment_id: null
+    symptom: "JWT 서명 회귀 테스트가 암호화 API의 checked exception을 선언하지 않아 컴파일에 실패했다."
+    root_cause: "Mac 초기화 호출을 추가하면서 테스트 메서드 예외 선언을 함께 반영하지 않았다."
+    fix: "테스트 메서드에 checked exception 선언을 추가하고 집중·전체 테스트를 재실행했다."
+    regression_test: "TokenIssuerTest.jwtContainsOnlyApprovedIdentityClaims"
+    applies_to: "JCA 암호화 API를 직접 호출하는 테스트"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "compileTestJava 실패 후 로그인 8개 및 전체 21개 테스트 성공"

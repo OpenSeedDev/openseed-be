@@ -10,3 +10,8 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+app:
+  auth:
+    jwt-secret: test-signing-key-with-at-least-32-bytes
+    cookie-secure: false
