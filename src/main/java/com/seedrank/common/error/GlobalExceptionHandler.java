@@ -14,6 +14,7 @@ import com.seedrank.auth.signup.SignupValidationException;
 import com.seedrank.auth.login.InvalidCredentialsException;
 import com.seedrank.auth.login.InvalidRefreshTokenException;
 import com.seedrank.auth.login.InvalidAccessTokenException;
+import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -72,6 +73,17 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 requestId(request),
                 List.of(new ApiFieldError(exception.getField(), exception.getMessage()))));
+    }
+
+    @ExceptionHandler(ProfileIdValidationException.class)
+    ResponseEntity<ApiError> handleProfileIdValidation(
+            ProfileIdValidationException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "INVALID_PROFILE_ID",
+                exception.getMessage(),
+                requestId(request),
+                List.of(new ApiFieldError("profileId", exception.getMessage()))));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
