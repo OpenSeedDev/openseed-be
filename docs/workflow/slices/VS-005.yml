@@ -1,0 +1,89 @@
+schema_version: 1
+
+slice:
+  id: VS-005
+  title: "내 계정 조회"
+
+status: AWAITING_USER_MERGE
+branch: codex/vs-005-my-account
+base_commit: c6c5acc313f8f03195f266c98681621491c4a0ae
+current_commit: 978c1820fbaf420dc5ecc030fda45157c6a12bbd
+
+approvals:
+  test:
+    approved: true
+    approved_at: "2026-07-20T23:10:15+09:00"
+    scope_sha256: "2d9d14c06fc50033a7075d872d3d0a863b4707ac32e321a414465a146c8bad6d"
+  change:
+    approved: true
+    approved_at: "2026-07-20T23:20:21+09:00"
+    scope_sha256: "ff4ea8e573b80e52ba7d1fab1030a9a5cb2e6c361e883590d942db87ce2b5db1"
+  review_plan:
+    approved: false
+    approved_at: null
+    scope_sha256: null
+
+review:
+  pr_number: 24
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/24"
+  handled_comment_ids: []
+
+evidence:
+  red_test: "2026-07-20T23:14:39+09:00 MyAccountIntegrationTest: 7 tests failed because /api/v1/me and its OpenAPI contract were absent"
+  focused_tests: "2026-07-20T23:16:50+09:00 MyAccountIntegrationTest: 7 passed, 0 failures"
+  full_tests: "2026-07-20T23:18:30+09:00 ./gradlew clean test --no-daemon: 43 passed, 0 failures"
+  migration: "No new migration; PostgreSQL 17 Testcontainers applied and validated existing V1-V5 migrations, and ddl-auto validation passed"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29750464661"
+  ci_result: success
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-20T23:01:32+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "VS-005 시작"
+    note: "백로그, 기능 명세, 인증 구현, 워크플로우 실패와 구현 교훈을 확인했다."
+  - at: "2026-07-20T23:01:32+09:00"
+    from: PLANNING
+    to: AWAITING_TEST_APPROVAL
+    command: "VS-005 시작"
+    note: "내 계정 응답, 인증·민감정보 정책, 회사 인증 상태 계약과 테스트 목록을 작성했다."
+  - at: "2026-07-20T23:10:15+09:00"
+    from: AWAITING_TEST_APPROVAL
+    to: IMPLEMENTING
+    command: "VS-005 테스트 승인"
+    note: "승인 범위를 SHA-256으로 고정하고 TDD 구현을 시작한다."
+  - at: "2026-07-20T23:18:54+09:00"
+    from: IMPLEMENTING
+    to: AWAITING_CHANGE_APPROVAL
+    command: "VS-005 테스트 승인"
+    note: "Red, 내 계정 조회 최소 구현, 집중·전체 테스트와 OpenAPI 계약 검증을 완료했다. DB 구조 변경은 없다."
+  - at: "2026-07-20T23:20:21+09:00"
+    from: AWAITING_CHANGE_APPROVAL
+    to: CREATING_PR
+    command: "VS-005 변경 승인"
+    note: "승인 변경 범위를 SHA-256으로 고정하고 커밋·Push·PR 생성을 시작한다."
+  - at: "2026-07-20T23:23:19+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "VS-005 변경 승인"
+    note: "기능 커밋을 Push하고 PR #24를 생성했으며 Build and Test 성공과 리뷰 전 Merge Guard 차단을 확인했다."
+  - at: "2026-07-20T23:42:29+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "VS-005 리뷰 가져와"
+    note: "일반·인라인 리뷰와 미해결 대화가 없고 최신 Build and Test가 성공해 사용자 Merge 대기로 전환한다."
+
+created_at: "2026-07-20T23:01:32+09:00"
+updated_at: "2026-07-20T23:42:29+09:00"
