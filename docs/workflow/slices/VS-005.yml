@@ -4,7 +4,7 @@ slice:
   id: VS-005
   title: "내 계정 조회"
 
-status: AWAITING_PR_REVIEW
+status: AWAITING_USER_MERGE
 branch: codex/vs-005-my-account
 base_commit: c6c5acc313f8f03195f266c98681621491c4a0ae
 current_commit: 978c1820fbaf420dc5ecc030fda45157c6a12bbd
@@ -33,7 +33,7 @@ evidence:
   focused_tests: "2026-07-20T23:16:50+09:00 MyAccountIntegrationTest: 7 passed, 0 failures"
   full_tests: "2026-07-20T23:18:30+09:00 ./gradlew clean test --no-daemon: 43 passed, 0 failures"
   migration: "No new migration; PostgreSQL 17 Testcontainers applied and validated existing V1-V5 migrations, and ddl-auto validation passed"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29750296482"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29750464661"
   ci_result: success
   merge_commit: null
   synced_main_commit: null
@@ -79,6 +79,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "VS-005 변경 승인"
     note: "기능 커밋을 Push하고 PR #24를 생성했으며 Build and Test 성공과 리뷰 전 Merge Guard 차단을 확인했다."
+  - at: "2026-07-20T23:42:29+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "VS-005 리뷰 가져와"
+    note: "일반·인라인 리뷰와 미해결 대화가 없고 최신 Build and Test가 성공해 사용자 Merge 대기로 전환한다."
 
 created_at: "2026-07-20T23:01:32+09:00"
-updated_at: "2026-07-20T23:23:19+09:00"
+updated_at: "2026-07-20T23:42:29+09:00"
