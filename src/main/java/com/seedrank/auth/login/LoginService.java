@@ -22,11 +22,13 @@ class LoginService {
         String email=request.email().strip().toLowerCase(Locale.ROOT);
         var candidate=users.findByEmail(email);
         boolean passwordMatches=passwords.matches(request.password(), candidate.map(User::getPasswordHash).orElse(dummyPasswordHash));
-        User user=candidate.orElseThrow(InvalidCredentialsException::new);
-        if (user.getStatus()!=User.Status.ACTIVE || !passwordMatches) throw new InvalidCredentialsException();
+        User candidateUser=candidate.orElseThrow(InvalidCredentialsException::new);
+        if (candidateUser.getStatus()!=User.Status.ACTIVE || !passwordMatches) throw new InvalidCredentialsException();
+        User user=users.findByIdForUpdate(candidateUser.getId()).orElseThrow(InvalidCredentialsException::new);
+        if (user.getStatus()!=User.Status.ACTIVE) throw new InvalidCredentialsException();
         var now=clock.instant(); String refresh=tokens.refresh();
-        sessions.saveAndFlush(new AuthSession(user, tokens.hash(refresh), now));
-        return new LoginResult(new LoginResponse(tokens.access(user, now), "Bearer", 900, user.getId(), user.getRole()), refresh);
+        var session=sessions.saveAndFlush(new AuthSession(user, tokens.hash(refresh), now));
+        return new LoginResult(new LoginResponse(tokens.access(user, session.id(), now), "Bearer", 900, user.getId(), user.getRole()), refresh);
     }
     record LoginResult(LoginResponse response, String refreshToken) {}
 }

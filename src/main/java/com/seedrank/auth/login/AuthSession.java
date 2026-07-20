@@ -28,6 +28,7 @@ class AuthSession {
     }
     AuthSession rotateTo(String hash, Instant now) { revoke(now, "ROTATED"); return new AuthSession(user, hash, now, familyId, id); }
     void revoke(Instant now, String reason) { if (revokedAt==null) { revokedAt=now; revocationReason=reason; } }
+    UUID id() { return id; }
     UUID familyId() { return familyId; }
     User user() { return user; }
     Instant expiresAt() { return expiresAt; }
