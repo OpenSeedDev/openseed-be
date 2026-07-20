@@ -90,3 +90,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "VS-004 집중 테스트에서 활성 family 세션 expected 0 but was 1 확인 후 스칼라 선조회 방식으로 11개 집중 테스트 성공"
+  - id: IL-007
+    fingerprint: "dependent-profile-fk-blocks-user-cleanup"
+    status: resolved
+    occurred_at: "2026-07-21T01:34:26+09:00"
+    slice_id: VS-006
+    category: database_lifecycle
+    review_comment_id: null
+    symptom: "회사 프로필 테스트 뒤 실행된 기존 내 계정 테스트가 사용자 정리 중 company_profiles 외래 키 위반으로 7건 실패했다."
+    root_cause: "사용자에 완전히 종속된 회사 프로필의 삭제 생명주기를 FK에 표현하지 않았다."
+    fix: "company_profiles.user_id 외래 키에 ON DELETE CASCADE를 적용했다."
+    regression_test: "CompanyProfileIntegrationTest와 MyAccountIntegrationTest를 포함한 전체 테스트"
+    applies_to: "사용자 삭제에 종속되는 신규 프로필·설정 데이터와 통합 테스트 정리"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "./gradlew clean test에서 MyAccountIntegrationTest 7건 FK 실패 후 Migration 수정"
