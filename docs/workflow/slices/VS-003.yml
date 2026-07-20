@@ -4,10 +4,10 @@ slice:
   id: VS-003
   title: "인증 갱신·회전·재사용 방지"
 
-status: AWAITING_PR_REVIEW
+status: COMPLETED_SYNCED
 branch: codex/vs-003-refresh-token
 base_commit: 1e7a247233ab787b2c56d67cfcd8220b5cb5d0db
-current_commit: 44e1be5565765fb90a60e125c2aa11b5374a1ba1
+current_commit: c4354d0eda23f04eb30f904481f01649581cb368
 
 approvals:
   test: { approved: true, approved_at: "2026-07-20T20:00:28+09:00", scope_sha256: "9737be49c84a212538828957de7fae4441adc4d769014f45537dc2b9758ffc54" }
@@ -21,10 +21,10 @@ evidence:
   focused_tests: "2026-07-20T20:06:55+09:00 RefreshTokenIntegrationTest: 6 passed"
   full_tests: "2026-07-20T20:07:33+09:00 ./gradlew clean test: 27 passed, 0 failures"
   migration: "V4__add_refresh_token_rotation.sql applied on PostgreSQL 17 Testcontainers; locking and schema validation passed"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29737686701/job/88336813310"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29738332506"
   ci_result: success
-  merge_commit: null
-  synced_main_commit: null
+  merge_commit: c4354d0eda23f04eb30f904481f01649581cb368
+  synced_main_commit: c4354d0eda23f04eb30f904481f01649581cb368
 
 failure:
   active: false
@@ -67,6 +67,21 @@ history:
     to: AWAITING_PR_REVIEW
     command: "VS-003 변경 승인"
     note: "기능 커밋을 Push하고 PR #19를 생성했으며 첫 Build and Test 성공을 확인했다."
+  - at: "2026-07-20T20:34:21+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "VS-003 계속"
+    note: "리뷰 댓글이 없고 최신 CI가 성공했음을 확인한 뒤 이미 수행된 사용자 Merge를 정합화한다."
+  - at: "2026-07-20T20:34:21+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "VS-003 계속"
+    note: "PR #19 Merge 커밋 c4354d0과 VS-003 전체 변경 포함 여부를 확인했다."
+  - at: "2026-07-20T20:34:21+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "VS-003 계속"
+    note: "로컬 main을 c4354d0으로 fast-forward하고 Merge 후 Backend CI 성공을 확인했다."
 
 created_at: "2026-07-20T19:58:29+09:00"
-updated_at: "2026-07-20T20:13:09+09:00"
+updated_at: "2026-07-20T20:34:21+09:00"
