@@ -4,10 +4,10 @@ slice:
   id: VS-004
   title: "로그아웃·인증 무효화"
 
-status: AWAITING_USER_MERGE
+status: COMPLETED_SYNCED
 branch: codex/vs-004-logout
 base_commit: 0c290126ddb9773657f555de52bdf960d762277d
-current_commit: 6b058a952fa814f913301da9b6812245a53547ba
+current_commit: a731a33c6ebac65a39d623db7b6f88455b3f9fd0
 
 approvals:
   test:
@@ -33,10 +33,10 @@ evidence:
   focused_tests: "2026-07-20T21:24:30+09:00 LogoutIntegrationTest and TokenIssuerTest: 11 passed"
   full_tests: "2026-07-20T21:27:18+09:00 ./gradlew clean test --no-daemon: 36 passed, 0 failures"
   migration: "V5__add_logout_revocation_reasons.sql applied on PostgreSQL 17 Testcontainers; LOGOUT and LOGOUT_ALL constraint values and ddl-auto validation passed"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29742722117/job/88353046580"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29743909448"
   ci_result: success
-  merge_commit: null
-  synced_main_commit: null
+  merge_commit: a731a33c6ebac65a39d623db7b6f88455b3f9fd0
+  synced_main_commit: a731a33c6ebac65a39d623db7b6f88455b3f9fd0
 
 failure:
   active: false
@@ -84,6 +84,16 @@ history:
     to: AWAITING_USER_MERGE
     command: "VS-004 리뷰 가져와"
     note: "일반·인라인 리뷰와 미해결 대화가 없고 최신 Build and Test가 성공해 사용자 Merge 대기로 전환한다."
+  - at: "2026-07-20T21:57:17+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "VS-004 머지 완료"
+    note: "PR #22 Merge 커밋 a731a33과 VS-004 전체 변경 포함 여부를 확인했다."
+  - at: "2026-07-20T21:57:17+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "VS-004 머지 완료"
+    note: "로컬 main을 a731a33으로 fast-forward하고 Merge 후 Backend CI 성공을 확인했다."
 
 created_at: "2026-07-20T21:01:03+09:00"
-updated_at: "2026-07-20T21:48:31+09:00"
+updated_at: "2026-07-20T21:57:17+09:00"
