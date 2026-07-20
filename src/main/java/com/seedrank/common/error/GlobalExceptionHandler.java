@@ -11,11 +11,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.seedrank.auth.signup.EmailAlreadyExistsException;
 import com.seedrank.auth.signup.SignupValidationException;
+import com.seedrank.auth.login.InvalidCredentialsException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiError.of("INVALID_CREDENTIALS", "이메일 또는 비밀번호를 확인해 주세요.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException exception, HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of("VALIDATION_ERROR", "입력값을 확인해 주세요.", requestId(request), List.of()));
+    }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     ResponseEntity<ApiError> handleEmailAlreadyExists(

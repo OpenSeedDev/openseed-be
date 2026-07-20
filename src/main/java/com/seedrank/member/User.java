@@ -66,6 +66,9 @@ public class User {
         return profileId;
     }
 
+    public String getPasswordHash() { return passwordHash; }
+    public Role getRole() { return role; }
+
     public Status getStatus() {
         return status;
     }
@@ -79,6 +82,6 @@ public class User {
     }
 
     public enum Status {
-        ACTIVE
+        ACTIVE, SUSPENDED
     }
 }

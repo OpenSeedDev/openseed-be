@@ -6,6 +6,7 @@
 erDiagram
     USERS ||--|| POINT_WALLETS : owns
     USERS ||--o{ POINT_LEDGERS : receives
+    USERS ||--o{ AUTH_SESSIONS : authenticates
 
     USERS {
         uuid id PK
@@ -38,6 +39,15 @@ erDiagram
         uuid source_id
         timestamptz created_at
     }
+
+    AUTH_SESSIONS {
+        uuid id PK
+        uuid user_id FK
+        varchar refresh_token_hash UK
+        timestamptz expires_at
+        timestamptz created_at
+        timestamptz revoked_at
+    }
 ```
 
 ## VS-001 제약
@@ -47,3 +57,4 @@ erDiagram
 - 가입 시 User, PointWallet, PointLedger를 같은 트랜잭션에 저장한다.
 - 가입 원장은 `300 = paidAmount(300) + expiredAmount(0)`을 만족한다.
 - PointLedger는 append-only 데이터로 취급한다.
+- 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
