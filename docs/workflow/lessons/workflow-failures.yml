@@ -3,14 +3,14 @@ failures:
   - id: WF-001
     fingerprint: "pr-merged-before-awaiting-user-merge-state"
     status: resolved
-    occurred_at: "2026-07-20T19:08:38+09:00"
-    slice_id: "VS-001, VS-002"
-    stage: review_recheck
-    command: "VS-001 머지 완료"
-    symptom: "PR이 상태 기록 커밋보다 먼저 Merge되어 저장소의 슬라이스 상태가 실제 GitHub 상태보다 뒤처지는 문제가 VS-001과 VS-002에서 반복됐다."
+    occurred_at: "2026-07-20T20:24:23+09:00"
+    slice_id: "VS-001, VS-002, VS-003"
+    stage: review_fetch
+    command: "VS-003 리뷰 가져와"
+    symptom: "PR이 AWAITING_USER_MERGE 상태에 도달하기 전에 Merge되어 저장소의 슬라이스 상태가 실제 GitHub 상태보다 뒤처지는 문제가 VS-001, VS-002, VS-003에서 반복됐다."
     root_cause: "사용자 Merge가 AWAITING_USER_MERGE 상태 커밋보다 먼저 수행될 수 있고 이를 차단하는 자동 검증이 없다."
-    resolution: "Merge에 기능 커밋이 포함됐음을 확인하고 main을 동기화한 뒤 상태 전용 후속 PR로 완료 증거를 기록했다."
-    prevention: "다음 워크플로우 개선에서 PR Merge 가능 조건으로 상태 파일의 AWAITING_USER_MERGE를 검사하는 자동 검증 또는 상태의 저장소 외부 관리를 도입한다."
-    recurrence_count: 2
-    promoted_to: "proposed: pre-merge state guard"
-    evidence: "PR #15 merge e0ee1fb 및 PR #17 merge d0e2c55, 각 main CI 성공, local/main equality"
+    resolution: "세 사례 모두 Merge 포함 내역과 main CI를 확인하고 main을 동기화했으며, 상태 전용 후속 PR로 완료 증거를 기록한다."
+    prevention: "반복 3회 기준에 따라 사용자 승인 후 GitHub Ruleset의 필수 상태 검사로 AWAITING_USER_MERGE 상태를 검증하는 pre-merge guard를 추가한다."
+    recurrence_count: 3
+    promoted_to: "approval-required: pre-merge state guard"
+    evidence: "PR #15 merge e0ee1fb, PR #17 merge d0e2c55, PR #19 merge c4354d0; PR #19 comments=0, reviews=0, reviewThreads=0, main CI run 29738332506 success"
