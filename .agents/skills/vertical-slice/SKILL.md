@@ -14,6 +14,8 @@ description: Manage SeedRank backend vertical slices through a stateful TDD, app
 - 사용자의 명시적인 승인 없이 승인 단계를 통과하지 않는다.
 - 실패한 단계에서는 상태를 다음 단계로 변경하지 않는다.
 - PR Merge는 수행하지 않고 항상 사용자가 직접 Merge하도록 기다린다.
+- 수직 슬라이스 PR의 `Vertical Slice Merge Guard`는 상태가 `AWAITING_USER_MERGE`가 될 때까지 실패하는 것이 정상이다.
+- Guard가 성공하기 전에는 사용자에게 Merge를 요청하지 않는다.
 - 각 작업을 시작하기 전에 현재 브랜치, 작업 트리, 상태 파일을 확인한다.
 - 다른 슬라이스나 사용자의 기존 변경을 함께 수정하지 않는다.
 
@@ -148,9 +150,10 @@ AWAITING_PR_REVIEW
    - DB와 Migration 변경
    - 문서 변경
    - 알려진 제한
-8. GitHub CI 완료를 확인한다.
-9. CI가 성공하면 상태를 `AWAITING_PR_REVIEW`로 변경한다.
-10. CI가 실패하면 상태를 유지하고 실패 내용을 기록한다.
+8. `Build and Test` 완료를 확인한다.
+9. 빌드가 성공하면 상태를 `AWAITING_PR_REVIEW`로 변경하고 상태 변경을 같은 PR 브랜치에 커밋·Push한다.
+10. 이 단계의 `Vertical Slice Merge Guard` 실패는 Merge 준비 전 정상 상태이며 워크플로우 실패로 기록하지 않는다.
+11. `Build and Test`가 실패하면 상태를 유지하고 실패 내용을 기록한다.
 
 ## Handle PR Reviews
 
@@ -175,6 +178,13 @@ AWAITING_PR_REVIEW
 - 문서·Migration 변경 여부
 
 수정할 내용이 없고 모든 대화가 해결됐으며 CI가 성공하면 `AWAITING_USER_MERGE`로 이동한다.
+
+`AWAITING_USER_MERGE`로 이동할 때에는 다음을 추가로 수행한다.
+
+1. 상태 파일을 검증한다.
+2. 상태 변경을 같은 PR 브랜치에 커밋·Push한다.
+3. `Build and Test`와 `Vertical Slice Merge Guard`가 모두 성공하는지 확인한다.
+4. 두 검사가 성공한 뒤에만 사용자에게 Merge를 요청한다.
 
 ## Apply Review Changes
 
