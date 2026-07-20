@@ -13,6 +13,7 @@ import com.seedrank.auth.signup.EmailAlreadyExistsException;
 import com.seedrank.auth.signup.SignupValidationException;
 import com.seedrank.auth.login.InvalidCredentialsException;
 import com.seedrank.auth.login.InvalidRefreshTokenException;
+import com.seedrank.auth.login.InvalidAccessTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -31,6 +32,14 @@ public class GlobalExceptionHandler {
                 .sameSite("Lax").path("/api/v1/auth").maxAge(0).build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.SET_COOKIE, expired.toString())
                 .body(ApiError.of("INVALID_REFRESH_TOKEN", "인증을 갱신할 수 없습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(InvalidAccessTokenException.class)
+    ResponseEntity<ApiError> handleInvalidAccessToken(InvalidAccessTokenException exception, HttpServletRequest request) {
+        var expired = ResponseCookie.from("refresh_token", "").httpOnly(true).secure(cookieSecure)
+                .sameSite("Lax").path("/api/v1/auth").maxAge(0).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.SET_COOKIE, expired.toString())
+                .body(ApiError.of("INVALID_ACCESS_TOKEN", "인증이 유효하지 않습니다.", requestId(request), List.of()));
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)

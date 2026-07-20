@@ -1,0 +1,79 @@
+schema_version: 1
+
+slice:
+  id: VS-004
+  title: "로그아웃·인증 무효화"
+
+status: CREATING_PR
+branch: codex/vs-004-logout
+base_commit: 0c290126ddb9773657f555de52bdf960d762277d
+current_commit: 0c290126ddb9773657f555de52bdf960d762277d
+
+approvals:
+  test:
+    approved: true
+    approved_at: "2026-07-20T21:07:58+09:00"
+    scope_sha256: "400eacc4adc9eee7e1cb6ef761772b2f61e08f6057a6497f0e511521390e9764"
+  change:
+    approved: true
+    approved_at: "2026-07-20T21:30:19+09:00"
+    scope_sha256: "1b34a8a919b9819394fd1bb8ccec3000651bf76d3a57f1b73fa15761f4def5ff"
+  review_plan:
+    approved: false
+    approved_at: null
+    scope_sha256: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+
+evidence:
+  red_test: "2026-07-20T21:14:34+09:00 LogoutIntegrationTest: 7 tests failed because logout endpoints, sid-bound access tokens, and OpenAPI contracts were absent"
+  focused_tests: "2026-07-20T21:24:30+09:00 LogoutIntegrationTest and TokenIssuerTest: 11 passed"
+  full_tests: "2026-07-20T21:27:18+09:00 ./gradlew clean test --no-daemon: 36 passed, 0 failures"
+  migration: "V5__add_logout_revocation_reasons.sql applied on PostgreSQL 17 Testcontainers; LOGOUT and LOGOUT_ALL constraint values and ddl-auto validation passed"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-20T21:01:03+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "VS-004 시작"
+    note: "백로그, 인증 구현, 워크플로우 실패와 구현 교훈을 확인했다."
+  - at: "2026-07-20T21:01:03+09:00"
+    from: PLANNING
+    to: AWAITING_TEST_APPROVAL
+    command: "VS-004 시작"
+    note: "현재·전체 세션 로그아웃, Access Token 즉시 무효화, 동시성 정책과 테스트 목록을 작성했다."
+  - at: "2026-07-20T21:07:58+09:00"
+    from: AWAITING_TEST_APPROVAL
+    to: IMPLEMENTING
+    command: "VS-004 테스트 승인"
+    note: "승인 범위를 SHA-256으로 고정하고 TDD 구현을 시작한다."
+  - at: "2026-07-20T21:28:07+09:00"
+    from: IMPLEMENTING
+    to: AWAITING_CHANGE_APPROVAL
+    command: "VS-004 테스트 승인"
+    note: "Red, 현재·전체 로그아웃, 세션 연결 Access Token, 동시성 보강, 집중·전체 테스트, OpenAPI·ERD·Migration 갱신을 완료했다."
+  - at: "2026-07-20T21:30:19+09:00"
+    from: AWAITING_CHANGE_APPROVAL
+    to: CREATING_PR
+    command: "VS-004 변경 승인"
+    note: "승인 변경 범위를 SHA-256으로 고정하고 커밋·Push·PR 생성을 시작한다."
+
+created_at: "2026-07-20T21:01:03+09:00"
+updated_at: "2026-07-20T21:30:19+09:00"

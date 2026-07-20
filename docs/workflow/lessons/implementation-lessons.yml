@@ -60,3 +60,33 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "OpenAPI 계약 테스트 1건 실패 후 VS-003 집중 6개 및 전체 27개 성공"
+  - id: IL-005
+    fingerprint: "objectmapper-not-available-as-test-bean"
+    status: resolved
+    occurred_at: "2026-07-20T21:11:25+09:00"
+    slice_id: VS-004
+    category: test_setup
+    review_comment_id: null
+    symptom: "LogoutIntegrationTest가 ObjectMapper Bean을 주입받지 못해 기능 검증 전에 7개 테스트가 컨텍스트 생성 단계에서 실패했다."
+    root_cause: "현재 Spring Boot 테스트 구성에 ObjectMapper Bean이 제공된다고 가정했다."
+    fix: "테스트가 JSON Payload 해석에 사용할 ObjectMapper를 테스트 내부에서 명시적으로 생성했다."
+    regression_test: "LogoutIntegrationTest의 컨텍스트 생성과 기능 부재 원인의 7개 Red 확인"
+    applies_to: "ObjectMapper 자동 구성을 명시하지 않은 Spring Boot 통합 테스트"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "LogoutIntegrationTest 첫 실행 7개 UnsatisfiedDependencyException 후 두 번째 실행에서 엔드포인트·sid 부재로 7개 실패"
+  - id: IL-006
+    fingerprint: "pre-lock-entity-read-causes-stale-auth-session"
+    status: resolved
+    occurred_at: "2026-07-20T21:21:04+09:00"
+    slice_id: VS-004
+    category: concurrency
+    review_comment_id: null
+    symptom: "동시 Refresh와 현재 로그아웃에서 로그아웃이 먼저 폐기해도 갱신 트랜잭션이 stale AuthSession을 활성으로 판단해 새 세션 1개를 남겼다."
+    root_cause: "사용자 잠금 전에 AuthSession Entity를 조회해 영속성 컨텍스트에 보관했고, 잠금 후 같은 Entity 조회가 DB의 최신 폐기 상태를 다시 반영하지 않았다."
+    fix: "잠금 전에는 사용자 ID만 스칼라로 조회하고 사용자 행 잠금 후 AuthSession Entity를 처음 조회하도록 변경했다."
+    regression_test: "LogoutIntegrationTest.concurrentRefreshAndCurrentLogoutLeaveNoActiveFamilySession 및 사용자 잠금 기반 갱신·로그인 대 전체 로그아웃 테스트"
+    applies_to: "잠금 전 후보 조회와 잠금 후 상태 재검증을 수행하는 모든 인증·지갑·투자 트랜잭션"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "VS-004 집중 테스트에서 활성 family 세션 expected 0 but was 1 확인 후 스칼라 선조회 방식으로 11개 집중 테스트 성공"
