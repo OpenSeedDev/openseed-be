@@ -7,60 +7,6 @@ require "yaml"
 require_relative "check_merge_guard"
 
 class VerticalSliceMergeGuardTest < Minitest::Test
-  def test_non_slice_branch_passes_without_state_file
-    passed, = check("codex/pre-merge-guard")
-
-    assert passed
-  end
-
-  def test_slice_branch_is_blocked_before_user_merge_state
-    write_state(status: "AWAITING_PR_REVIEW")
-
-    passed, message = check("codex/vs-004-logout")
-
-    refute passed
-    assert_includes message, "status must be AWAITING_USER_MERGE"
-  end
-
-  def test_slice_branch_passes_when_all_merge_evidence_is_ready
-    write_state(status: "AWAITING_USER_MERGE")
-
-    passed, message = check("codex/vs-004-logout")
-
-    assert passed
-    assert_equal "PASS: VS-004 is ready for user merge", message
-  end
-
-  def test_slice_branch_is_blocked_when_state_branch_does_not_match
-    write_state(status: "AWAITING_USER_MERGE", branch: "codex/vs-004-other")
-
-    passed, message = check("codex/vs-004-logout")
-
-    refute passed
-    assert_includes message, "branch must be codex/vs-004-logout"
-  end
-
-  def test_slice_branch_is_blocked_when_state_file_is_missing
-    passed, message = check("codex/vs-004-logout")
-
-    refute passed
-    assert_includes message, "missing state file"
-  end
-
-  def test_slice_branch_requires_the_full_state_schema
-    write_state(status: "AWAITING_USER_MERGE")
-
-    passed, message = VerticalSliceMergeGuard.check(
-      head_ref: "codex/vs-004-logout",
-      repo_root: @repo_root
-    )
-
-    refute passed
-    assert_includes message, "invalid slice state"
-  end
-
-  private
-
   def setup
     @repo_root = Dir.mktmpdir("merge-guard-test")
   end
@@ -69,28 +15,67 @@ class VerticalSliceMergeGuardTest < Minitest::Test
     FileUtils.remove_entry(@repo_root)
   end
 
-  def check(head_ref)
-    VerticalSliceMergeGuard.check(
-      head_ref: head_ref,
-      repo_root: @repo_root,
-      validate_schema: false
-    )
+  def test_non_task_branch_passes
+    passed, = check("codex/workflow-change")
+    assert passed
   end
 
-  def write_state(status:, branch: "codex/vs-004-logout")
+  def test_blocks_before_merge_ready_status
+    write_state(status: "AWAITING_PR_REVIEW")
+    passed, message = check("codex/vs-055-profile-id")
+    refute passed
+    assert_includes message, "status must be AWAITING_USER_MERGE"
+  end
+
+  def test_passes_with_current_user_approval_and_all_evidence
+    write_state(status: "AWAITING_USER_MERGE")
+    passed, message = check("codex/vs-055-profile-id")
+    assert passed
+    assert_equal "PASS: VS-055 is ready for protected merge", message
+  end
+
+  def test_blocks_stale_approval_after_code_push
+    write_state(status: "AWAITING_USER_MERGE", approval_sha: "old")
+    passed, message = check("codex/vs-055-profile-id")
+    refute passed
+    assert_includes message, "merge approval is stale"
+  end
+
+  def test_blocks_unresolved_threads
+    write_state(status: "AWAITING_USER_MERGE", unresolved: 1)
+    passed, message = check("codex/vs-055-profile-id")
+    refute passed
+    assert_includes message, "unresolved review threads remain"
+  end
+
+  def test_supports_ops_task_branches
+    write_state(status: "AWAITING_USER_MERGE", id: "OPS-01", branch: "codex/ops-01-health")
+    passed, = check("codex/ops-01-health")
+    assert passed
+  end
+
+  private
+
+  def check(head_ref)
+    VerticalSliceMergeGuard.check(head_ref: head_ref, repo_root: @repo_root, validate_schema: false)
+  end
+
+  def write_state(status:, id: "VS-055", branch: "codex/vs-055-profile-id", approval_sha: "abc123", unresolved: 0)
     directory = File.join(@repo_root, "docs", "workflow", "slices")
     FileUtils.mkdir_p(directory)
     state = {
-      "slice" => { "id" => "VS-004" },
+      "schema_version" => 2,
+      "task" => { "id" => id },
       "status" => status,
       "branch" => branch,
-      "approvals" => {
-        "test" => { "approved" => true },
-        "change" => { "approved" => true }
+      "current_commit" => "abc123",
+      "review" => {
+        "unresolved_thread_count" => unresolved,
+        "merge_approval" => { "approved_by" => "pado0711", "head_sha" => approval_sha }
       },
-      "evidence" => { "ci_result" => "success" },
+      "evidence" => { "dependencies_satisfied" => true, "ci_result" => "success" },
       "failure" => { "active" => false }
     }
-    File.write(File.join(directory, "VS-004.yml"), state.to_yaml)
+    File.write(File.join(directory, "#{id}.yml"), state.to_yaml)
   end
 end

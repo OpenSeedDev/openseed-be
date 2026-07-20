@@ -1,34 +1,32 @@
-schema_version: 1
+schema_version: 2
 
-slice:
+task:
   id: VS-000
-  title: "Replace with slice title"
+  title: "Replace with task title"
+  dependencies: []
+  resource_locks: []
 
 status: NOT_STARTED
 branch: null
 base_commit: null
 current_commit: null
 
-approvals:
-  test:
-    approved: false
-    approved_at: null
-    scope_sha256: null
-  change:
-    approved: false
-    approved_at: null
-    scope_sha256: null
-  review_plan:
-    approved: false
-    approved_at: null
-    scope_sha256: null
-
 review:
   pr_number: null
   pr_url: null
   handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
 
 evidence:
+  dependencies_satisfied: false
+  dependency_prs: []
   red_test: null
   focused_tests: null
   full_tests: null
@@ -49,6 +47,5 @@ failure:
   attempts: 0
 
 history: []
-
 created_at: null
 updated_at: null

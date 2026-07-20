@@ -3,42 +3,44 @@
 ## Communication
 
 - 기본 응답과 작업 기록은 한국어로 작성한다.
-- 중요한 정책이 불명확하면 구현하지 말고 사용자에게 확인한다.
 - 기존 사용자 변경 사항과 관련 없는 파일은 수정하지 않는다.
+- 정책이 불명확하면 해당 PR만 `BLOCKED`로 표시하고 다른 독립 작업은 계속한다.
 
-## Vertical Slice Workflow
+## Autonomous Vertical Slice Workflow
 
-- `VS-NNN 시작`, 승인, 계속, 상태, 리뷰 관련 명령을 받으면 반드시 `.agents/skills/vertical-slice/SKILL.md`를 읽고 따른다.
-- 하나의 슬라이스는 테스트, API, 비즈니스 로직, DB, 문서까지 실제 동작하는 상태로 완성한다.
-- `VS-NNN 시작` 단계에서는 기능 설명과 테스트 목록까지만 작성하고 구현을 기다린다.
-- 테스트 목록 승인 전에는 테스트 코드와 구현 코드를 작성하지 않는다.
-- 변경 내용 승인 전에는 커밋, Push, PR 생성을 진행하지 않는다.
-- PR 리뷰 수정 계획 승인 전에는 리뷰 내용을 구현하지 않는다.
-- PR Merge는 항상 사용자가 직접 수행한다.
-- 수직 슬라이스 PR은 `Vertical Slice Merge Guard`가 성공하고 상태가 `AWAITING_USER_MERGE`일 때만 사용자에게 Merge를 요청한다.
-- 사용자가 `VS-NNN 머지 완료`라고 알려주면 원격 상태를 확인하고 로컬 `main`을 `--ff-only`로 동기화한다.
-- 현재 상태 파일을 기준으로 다음 동작을 결정하며 단계를 임의로 건너뛰지 않는다.
+- 백로그 구현, PR 리뷰 반영, 복구 작업에는 `.agents/skills/vertical-slice/SKILL.md`를 반드시 사용한다.
+- `docs/workflow/backlog.yml`을 작업 순서와 의존성의 기준으로 사용한다.
+- 사용자는 생성된 PR을 리뷰하고, 병합 준비가 끝난 PR에 `/merge-approved` 댓글만 남긴다.
+- 기능·테스트 계획 승인, 변경 승인, 리뷰 수정 계획 승인을 기다리지 않는다.
+- 각 슬라이스는 계획, 실패 테스트, 최소 구현, 리팩터링, 전체 테스트, 문서, 커밋, Push, PR까지 자동으로 완성한다.
+- PR 리뷰의 실행 가능한 지적은 회귀 테스트와 함께 자동 반영하고 같은 PR에 Push한다.
+- 질문이 필요한 리뷰는 해당 PR만 `BLOCKED`로 두며 독립 PR 처리를 중단하지 않는다.
+- 선행 작업이 GitHub에서 실제 Merge된 뒤에만 후속 작업을 시작한다.
+- 동시에 최대 3개 작업자를 사용하고, 작업별 Git worktree와 브랜치를 분리한다.
+- 동일한 `resource_locks`를 가진 작업은 동시에 실행하지 않는다.
+- 하나의 PR에는 하나의 백로그 작업만 포함한다.
+- 자동화는 PR을 임의로 병합하지 않는다. `pado0711`의 정확한 `/merge-approved` 댓글과 필수 검사를 모두 확인해야 한다.
 
 ## Development
 
 - Java 21, Spring Boot, Gradle Wrapper를 사용한다.
 - 기능별 패키지와 수직 슬라이스 구조를 우선한다.
-- 전체 TDD 방식으로 실패 테스트부터 작성한다.
+- 전체 TDD 방식으로 실패 테스트부터 작성하고 Red 증거를 남긴다.
 - 필요한 최소 구현으로 테스트를 통과시킨 뒤 리팩터링한다.
 - 전체 검증 명령은 `./gradlew clean test`를 기본으로 한다.
 - PostgreSQL 통합 테스트는 Testcontainers를 사용한다.
 - JPA 스키마는 `ddl-auto: validate`를 유지한다.
-- 적용된 Flyway migration 파일은 수정하지 않고 새 버전 파일을 추가한다.
-- API 변경 시 OpenAPI 문서를 함께 갱신한다.
-- DB 변경 시 Migration과 ERD를 함께 갱신한다.
+- 적용된 Flyway migration은 수정하지 않는다. 새 migration은 충돌을 피하도록 UTC 시각 버전을 사용한다.
+- API 변경 시 OpenAPI 문서를, DB 변경 시 Migration과 ERD를 함께 갱신한다.
 - 실제 비밀번호, 토큰, API 키, 인증서를 저장소에 기록하지 않는다.
 
 ## Git and Pull Requests
 
 - `main`에 직접 개발하지 않는다.
-- 기능 브랜치는 `codex/vs-NNN-short-name` 형식을 사용한다.
-- 하나의 PR에는 하나의 수직 슬라이스만 포함한다.
-- 커밋과 Push는 사용자가 변경 내용을 승인한 이후에만 수행한다.
-- PR 생성 후 CI와 리뷰 상태를 확인한다.
-- 리뷰 댓글은 수정 계획으로 정리하고 사용자 승인 후 반영한다.
-- Merge가 확인된 브랜치만 정리한다.
+- 기능 브랜치는 `codex/vs-NNN-short-name`, 운영 브랜치는 `codex/ops-NN-short-name` 형식을 사용한다.
+- 새 작업은 최신 `origin/main`에서 독립 worktree로 시작한다.
+- 커밋·Push·PR 생성은 자동으로 수행한다.
+- PR 생성 후 CI, 리뷰 댓글, 인라인 대화, 의존성, 충돌 상태를 주기적으로 확인한다.
+- 리뷰 댓글은 댓글 ID로 멱등 처리하고 처리 결과를 PR 답글로 남긴다.
+- 최대 3회 자동 복구 후에도 실패하면 해당 PR만 차단하고 재현 증거를 기록한다.
+- Merge된 브랜치만 정리하고 최신 `main`을 동기화한 뒤 새로 해제된 후속 작업을 시작한다.
