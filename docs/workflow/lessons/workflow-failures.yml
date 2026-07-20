@@ -1,2 +1,16 @@
 schema_version: 1
-failures: []
+failures:
+  - id: WF-001
+    fingerprint: "pr-merged-before-awaiting-user-merge-state"
+    status: resolved
+    occurred_at: "2026-07-20T19:08:38+09:00"
+    slice_id: VS-001
+    stage: review_recheck
+    command: "VS-001 머지 완료"
+    symptom: "PR이 Merge됐지만 저장소의 슬라이스 상태는 AWAITING_REVIEW_RECHECK에 머물렀다."
+    root_cause: "사용자 Merge가 AWAITING_USER_MERGE 상태 기록보다 먼저 수행됐고, Merge 이후 보호된 main에는 완료 상태를 직접 기록할 수 없었다."
+    resolution: "Merge에 리뷰 수정 커밋이 포함됐음을 확인하고 main을 동기화한 뒤 상태 전용 후속 PR로 완료 증거를 기록했다."
+    prevention: "향후에는 리뷰 재확인 후 AWAITING_USER_MERGE 상태 커밋과 CI 성공을 확인한 다음에만 사용자에게 Merge를 요청한다. Merge 후 완료 상태는 보호 브랜치 정책에 맞는 기록 방식을 별도로 개선한다."
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "PR #15 merge e0ee1fb, main CI run 29734011312, local and origin main equality"

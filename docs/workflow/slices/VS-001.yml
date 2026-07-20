@@ -4,10 +4,10 @@ slice:
   id: VS-001
   title: "회원가입과 최초 300P 지급"
 
-status: AWAITING_REVIEW_RECHECK
+status: COMPLETED_SYNCED
 branch: codex/vs-001-signup
 base_commit: e681e00fc67dddfaf1b4fe6293a4658b1d8cacfb
-current_commit: f95e50c60bc68a2a04b4c06faa156661c05bc66a
+current_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
 
 approvals:
   test:
@@ -34,10 +34,10 @@ evidence:
   focused_tests: "2026-07-20T19:03:23+09:00 TimeConfigTest and SignupIntegrationTest: 12 tests passed"
   full_tests: "2026-07-20T19:04:11+09:00 ./gradlew clean test: 13 tests passed, 0 failures"
   migration: "V2__create_signup_accounts.sql applied on PostgreSQL 17 Testcontainers; Hibernate ddl-auto validate passed"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29733801080/job/88324257024"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29734011312"
   ci_result: success
-  merge_commit: null
-  synced_main_commit: null
+  merge_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
+  synced_main_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
 
 failure:
   active: false
@@ -95,6 +95,21 @@ history:
     to: AWAITING_REVIEW_RECHECK
     command: "VS-001 수정 계획 승인"
     note: "댓글 3613409768의 Asia/Seoul Clock 변경, 회귀·전체 테스트, 커밋·Push와 CI 성공을 완료했다."
+  - at: "2026-07-20T19:13:20+09:00"
+    from: AWAITING_REVIEW_RECHECK
+    to: AWAITING_USER_MERGE
+    command: "VS-001 머지 완료"
+    note: "처리된 리뷰 수정과 최종 Head CI 성공을 확인했다. 사용자가 이미 Merge한 외부 상태를 후속 기록으로 정합화한다."
+  - at: "2026-07-20T19:13:20+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "VS-001 머지 완료"
+    note: "GitHub PR #15의 Merge 커밋 e0ee1fb를 확인했다."
+  - at: "2026-07-20T19:13:20+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "VS-001 머지 완료"
+    note: "로컬 main과 origin/main을 e0ee1fb로 동기화하고 Merge 후 Backend CI 성공을 확인했다."
 
 created_at: "2026-07-20T18:17:05+09:00"
-updated_at: "2026-07-20T19:06:14+09:00"
+updated_at: "2026-07-20T19:13:20+09:00"
