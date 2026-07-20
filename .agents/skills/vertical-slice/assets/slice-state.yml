@@ -1,0 +1,54 @@
+schema_version: 1
+
+slice:
+  id: VS-000
+  title: "Replace with slice title"
+
+status: NOT_STARTED
+branch: null
+base_commit: null
+current_commit: null
+
+approvals:
+  test:
+    approved: false
+    approved_at: null
+    scope_sha256: null
+  change:
+    approved: false
+    approved_at: null
+    scope_sha256: null
+  review_plan:
+    approved: false
+    approved_at: null
+    scope_sha256: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+
+evidence:
+  red_test: null
+  focused_tests: null
+  full_tests: null
+  migration: null
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history: []
+
+created_at: null
+updated_at: null

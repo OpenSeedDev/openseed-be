@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vertical Slice Workflow"
+  short_description: "Manage vertical-slice TDD delivery workflows"
+  default_prompt: "Use $vertical-slice to start and manage a backend vertical slice."
