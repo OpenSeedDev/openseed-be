@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.seedrank.member.User;
 
 @Component
-class AccessTokenAuthenticator {
+public class AccessTokenAuthenticator {
     private static final String BEARER_PREFIX = "Bearer ";
     private final TokenIssuer tokens;
     private final AuthSessionRepository sessions;
@@ -20,7 +20,7 @@ class AccessTokenAuthenticator {
         this.clock = clock;
     }
 
-    Principal authenticate(String authorization) {
+    public Principal authenticate(String authorization) {
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
             throw new InvalidAccessTokenException();
         }
@@ -38,6 +38,6 @@ class AccessTokenAuthenticator {
         return new Principal(user.getId(), session.id());
     }
 
-    record Principal(UUID userId, UUID sessionId) {
+    public record Principal(UUID userId, UUID sessionId) {
     }
 }
