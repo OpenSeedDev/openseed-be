@@ -4,7 +4,7 @@ slice:
   id: VS-001
   title: "회원가입과 최초 300P 지급"
 
-status: AWAITING_PR_REVIEW
+status: APPLYING_REVIEW_CHANGES
 branch: codex/vs-001-signup
 base_commit: e681e00fc67dddfaf1b4fe6293a4658b1d8cacfb
 current_commit: 081874c95205993283acb49bb0fcceb94ebf00f5
@@ -19,9 +19,9 @@ approvals:
     approved_at: "2026-07-20T18:41:04+09:00"
     scope_sha256: "4e6338adeb48277848f639fa3588a8c68c62623443275afb019f2977c8d78dff"
   review_plan:
-    approved: false
-    approved_at: null
-    scope_sha256: null
+    approved: true
+    approved_at: "2026-07-20T19:00:44+09:00"
+    scope_sha256: "f22c660d7b3d1fc3d48c5f3afd5e99101afb35954d0c4e109d90c5b53098427e"
 
 review:
   pr_number: 15
@@ -29,9 +29,9 @@ review:
   handled_comment_ids: []
 
 evidence:
-  red_test: "2026-07-20T18:24:20+09:00 ./gradlew test --tests com.seedrank.auth.signup.SignupIntegrationTest: 10 tests failed because VS-001 tables and endpoint were absent"
-  focused_tests: "2026-07-20T18:31:02+09:00 ./gradlew test --tests com.seedrank.auth.signup.SignupIntegrationTest: 11 tests passed"
-  full_tests: "2026-07-20T18:37:02+09:00 ./gradlew clean test: 12 tests passed, 0 failures"
+  red_test: "Initial: 10 signup tests failed before implementation; review: 2026-07-20T19:01:00+09:00 TimeConfigTest failed because Clock zone was Z instead of Asia/Seoul"
+  focused_tests: "2026-07-20T19:03:23+09:00 TimeConfigTest and SignupIntegrationTest: 12 tests passed"
+  full_tests: "2026-07-20T19:04:11+09:00 ./gradlew clean test: 13 tests passed, 0 failures"
   migration: "V2__create_signup_accounts.sql applied on PostgreSQL 17 Testcontainers; Hibernate ddl-auto validate passed"
   ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29732483160/job/88319976857"
   ci_result: success
@@ -79,6 +79,16 @@ history:
     to: AWAITING_PR_REVIEW
     command: "VS-001 변경 승인"
     note: "기능 커밋을 Push하고 PR #15를 생성했으며 Build and Test 성공을 확인했다."
+  - at: "2026-07-20T18:58:59+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_REVIEW_PLAN_APPROVAL
+    command: "VS-001 리뷰 가져와"
+    note: "미해결 인라인 댓글 3613409768의 Asia/Seoul Clock 변경 요청을 수집하고 수정 계획을 작성했다."
+  - at: "2026-07-20T19:00:44+09:00"
+    from: AWAITING_REVIEW_PLAN_APPROVAL
+    to: APPLYING_REVIEW_CHANGES
+    command: "VS-001 수정 계획 승인"
+    note: "승인된 리뷰 수정 계획을 SHA-256으로 고정하고 회귀 테스트부터 반영한다."
 
 created_at: "2026-07-20T18:17:05+09:00"
-updated_at: "2026-07-20T18:44:58+09:00"
+updated_at: "2026-07-20T19:00:44+09:00"

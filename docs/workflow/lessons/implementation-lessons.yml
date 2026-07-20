@@ -15,3 +15,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "./gradlew test --tests com.seedrank.auth.signup.SignupIntegrationTest의 compileTestJava 오류와 후속 성공"
+  - id: IL-002
+    fingerprint: "application-clock-zone-not-explicitly-asia-seoul"
+    status: resolved
+    occurred_at: "2026-07-20T18:56:22+09:00"
+    slice_id: VS-001
+    category: pr_review
+    review_comment_id: 3613409768
+    symptom: "공용 Clock이 UTC Zone ID를 사용해 프로젝트의 대한민국/서울 시간대 정책과 달랐다."
+    root_cause: "초기 구현에서 저장 시각의 UTC 일관성만 고려하고 애플리케이션 날짜 계산 기준 Zone ID를 명시하지 않았다."
+    fix: "공용 Clock을 Asia/Seoul Zone ID로 생성하도록 변경했다."
+    regression_test: "TimeConfigTest.providesAClockUsingAsiaSeoul"
+    applies_to: "Clock을 주입받아 정책 날짜와 현지 시각을 계산하는 모든 기능"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "PR #15 인라인 댓글 3613409768 및 TimeConfigTest Red-Green 결과"
