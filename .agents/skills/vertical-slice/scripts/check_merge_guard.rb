@@ -6,14 +6,14 @@ require "rbconfig"
 require "yaml"
 
 class VerticalSliceMergeGuard
-  FEATURE_BRANCH = %r{\Acodex/vs-(\d{3})-[a-z0-9][a-z0-9-]*\z}
+  TASK_BRANCH = %r{\Acodex/(vs-\d{3}|ops-\d{2}|e2e-\d{2})-[a-z0-9][a-z0-9-]*\z}
 
   def self.check(head_ref:, repo_root:, validate_schema: true)
-    match = FEATURE_BRANCH.match(head_ref)
-    return [true, "PASS: #{head_ref} is not a vertical-slice feature branch"] unless match
+    match = TASK_BRANCH.match(head_ref)
+    return [true, "PASS: #{head_ref} is not an autonomous task branch"] unless match
 
-    slice_id = "VS-#{match[1]}"
-    state_path = File.join(repo_root, "docs", "workflow", "slices", "#{slice_id}.yml")
+    task_id = match[1].upcase
+    state_path = File.join(repo_root, "docs", "workflow", "slices", "#{task_id}.yml")
     return [false, "BLOCKED: missing state file #{state_path}"] unless File.file?(state_path)
 
     if validate_schema
@@ -29,18 +29,27 @@ class VerticalSliceMergeGuard
     end
 
     errors = []
-    errors << "slice.id must be #{slice_id}" unless state.dig("slice", "id") == slice_id
+    state_id = state["schema_version"] == 2 ? state.dig("task", "id") : state.dig("slice", "id")
+    errors << "task ID must be #{task_id}" unless state_id == task_id
     errors << "branch must be #{head_ref}" unless state["branch"] == head_ref
     errors << "status must be AWAITING_USER_MERGE" unless state["status"] == "AWAITING_USER_MERGE"
-    errors << "test approval is missing" unless state.dig("approvals", "test", "approved") == true
-    errors << "change approval is missing" unless state.dig("approvals", "change", "approved") == true
     errors << "CI evidence must be success" unless state.dig("evidence", "ci_result") == "success"
     errors << "an active workflow failure remains" unless state.dig("failure", "active") == false
 
-    if errors.empty?
-      [true, "PASS: #{slice_id} is ready for user merge"]
+    if state["schema_version"] == 2
+      errors << "dependencies are not satisfied" unless state.dig("evidence", "dependencies_satisfied") == true
+      errors << "unresolved review threads remain" unless state.dig("review", "unresolved_thread_count") == 0
+      errors << "merge approval must come from pado0711" unless state.dig("review", "merge_approval", "approved_by") == "pado0711"
+      errors << "merge approval is stale" unless state.dig("review", "merge_approval", "head_sha") == state["current_commit"]
     else
-      [false, "BLOCKED: #{slice_id} is not ready for merge: #{errors.join('; ')}"]
+      errors << "test approval is missing" unless state.dig("approvals", "test", "approved") == true
+      errors << "change approval is missing" unless state.dig("approvals", "change", "approved") == true
+    end
+
+    if errors.empty?
+      [true, "PASS: #{task_id} is ready for protected merge"]
+    else
+      [false, "BLOCKED: #{task_id} is not ready for merge: #{errors.join('; ')}"]
     end
   end
 end

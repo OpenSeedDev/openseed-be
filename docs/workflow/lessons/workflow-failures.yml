@@ -14,3 +14,17 @@ failures:
     recurrence_count: 3
     promoted_to: "implemented: vertical-slice-merge-guard.yml and repository ruleset"
     evidence: "PR #15 merge e0ee1fb, PR #17 merge d0e2c55, PR #19 merge c4354d0; PR #19 comments=0, reviews=0, reviewThreads=0, main CI run 29738332506 success"
+  - id: WF-002
+    fingerprint: "skill-validator-missing-pyyaml-runtime"
+    status: resolved
+    occurred_at: "2026-07-21T01:15:00+09:00"
+    slice_id: "WORKFLOW"
+    stage: skill_validation
+    command: "generate_openai_yaml.py and quick_validate.py"
+    symptom: "공식 Skill 생성기와 검증기가 PyYAML 부재로 실행되지 않았다."
+    root_cause: "기본 macOS Python과 번들 Python 환경에 생성기가 요구하는 PyYAML 모듈이 포함되지 않았다."
+    resolution: "PyYAML을 임시 검증 디렉터리에 설치하고 PYTHONPATH로 격리해 생성기와 검증기를 성공시켰다."
+    prevention: "Skill 검증 시 격리된 검증 의존성 경로를 먼저 확인하고 동일 PYTHONPATH를 재사용한다."
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "초기 ModuleNotFoundError 후 공식 generate_openai_yaml.py 성공 및 quick_validate.py: Skill is valid"

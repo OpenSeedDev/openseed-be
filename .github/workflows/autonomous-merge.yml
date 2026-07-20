@@ -1,0 +1,42 @@
+name: Autonomous Merge Approval
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'pado0711' &&
+      github.event.comment.body == '/merge-approved'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate task PR and enable protected auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          IS_CROSS_REPOSITORY=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json isCrossRepository --jq '.isCrossRepository')
+          HEAD_BRANCH=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json headRefName --jq '.headRefName')
+          BASE_BRANCH=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json baseRefName --jq '.baseRefName')
+          if [ "$IS_CROSS_REPOSITORY" != "false" ]; then
+            echo "Refusing a PR from a fork"
+            exit 1
+          fi
+          if [ "$BASE_BRANCH" != "main" ]; then
+            echo "Refusing a PR not targeting main"
+            exit 1
+          fi
+          if [[ ! "$HEAD_BRANCH" =~ ^codex/(vs-[0-9]{3}|ops-[0-9]{2}|e2e-[0-9]{2})-[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "Refusing a non-task branch: $HEAD_BRANCH"
+            exit 1
+          fi
+          gh pr merge "$PR_NUMBER" --repo "$REPOSITORY" --auto --merge

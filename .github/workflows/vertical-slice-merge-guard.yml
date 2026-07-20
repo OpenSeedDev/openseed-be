@@ -26,6 +26,17 @@ jobs:
       - name: Test merge guard
         run: ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
 
+      - name: Validate autonomous backlog
+        run: |
+          ruby .agents/skills/vertical-slice/scripts/validate_backlog.rb docs/workflow/backlog.yml
+          ruby .agents/skills/vertical-slice/scripts/validate_backlog_test.rb
+
+      - name: Validate task state files
+        run: |
+          for state in docs/workflow/slices/*.yml; do
+            ruby .agents/skills/vertical-slice/scripts/validate_state.rb "$state"
+          done
+
       - name: Check vertical slice state
         env:
           HEAD_REF: ${{ github.head_ref || github.ref_name }}

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Vertical Slice Workflow"
-  short_description: "Manage vertical-slice TDD delivery workflows"
-  default_prompt: "Use $vertical-slice to start and manage a backend vertical slice."
+  display_name: "Autonomous Vertical Slice"
+  short_description: "Deliver dependency-aware TDD PRs and process reviews"
+  default_prompt: "Use $vertical-slice to run the autonomous backlog, implement ready tasks, process PR reviews, and enforce the /merge-approved gate."
