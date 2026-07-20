@@ -1,2 +1,17 @@
 schema_version: 1
-lessons: []
+lessons:
+  - id: IL-001
+    fingerprint: "testcontainers-configuration-package-visibility"
+    status: resolved
+    occurred_at: "2026-07-20T18:23:00+09:00"
+    slice_id: VS-001
+    category: test_setup
+    review_comment_id: null
+    symptom: "기능 하위 패키지의 통합 테스트가 TestcontainersConfiguration에 접근하지 못해 컴파일에 실패했다."
+    root_cause: "공용 테스트 설정 클래스가 package-private로 선언돼 있었다."
+    fix: "TestcontainersConfiguration을 public 클래스로 변경했다."
+    regression_test: "기능 하위 패키지의 SignupIntegrationTest 컴파일 및 전체 테스트 통과"
+    applies_to: "루트 패키지 밖에서 TestcontainersConfiguration을 import하는 모든 통합 테스트"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "./gradlew test --tests com.seedrank.auth.signup.SignupIntegrationTest의 compileTestJava 오류와 후속 성공"
