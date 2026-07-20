@@ -1,0 +1,32 @@
+name: Vertical Slice Merge Guard
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  merge-guard:
+    name: Vertical Slice Merge Guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Test merge guard
+        run: ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
+
+      - name: Check vertical slice state
+        env:
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+        run: ruby .agents/skills/vertical-slice/scripts/check_merge_guard.rb --head-ref "$HEAD_REF" --repo-root "$GITHUB_WORKSPACE"
