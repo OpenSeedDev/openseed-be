@@ -1,0 +1,12 @@
+spring:
+  main:
+    banner-mode: off
+
+  jpa:
+    show-sql: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
