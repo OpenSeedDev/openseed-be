@@ -4,10 +4,10 @@ slice:
   id: VS-002
   title: "로그인"
 
-status: CREATING_PR
+status: COMPLETED_SYNCED
 branch: codex/vs-002-login
 base_commit: 95eba2572147227b24ac86e33d1c3ee17876343d
-current_commit: 95eba2572147227b24ac86e33d1c3ee17876343d
+current_commit: d0e2c556c2add76f6ff2a1634ab5cbf0e120f737
 
 approvals:
   test: { approved: true, approved_at: "2026-07-20T19:21:32+09:00", scope_sha256: "a3079505a37399a01a4151a986ef90b43347d8af9efd229d755dce81577f300d" }
@@ -15,8 +15,8 @@ approvals:
   review_plan: { approved: false, approved_at: null, scope_sha256: null }
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 17
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/17"
   handled_comment_ids: []
 
 evidence:
@@ -24,10 +24,10 @@ evidence:
   focused_tests: "2026-07-20T19:34:10+09:00 login package tests: 8 passed"
   full_tests: "2026-07-20T19:34:41+09:00 ./gradlew clean test: 21 passed, 0 failures"
   migration: "V3__create_auth_sessions.sql applied on PostgreSQL 17 Testcontainers; schema validation passed"
-  ci_url: null
-  ci_result: null
-  merge_commit: null
-  synced_main_commit: null
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29735909211"
+  ci_result: success
+  merge_commit: d0e2c556c2add76f6ff2a1634ab5cbf0e120f737
+  synced_main_commit: d0e2c556c2add76f6ff2a1634ab5cbf0e120f737
 
 failure:
   active: false
@@ -65,6 +65,26 @@ history:
     to: CREATING_PR
     command: "VS-002 변경 승인"
     note: "승인 변경 범위를 SHA-256으로 고정하고 커밋·Push·PR 생성을 시작한다."
+  - at: "2026-07-20T19:48:29+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "VS-002 변경 승인"
+    note: "PR #17 생성과 Build and Test 성공을 확인했다."
+  - at: "2026-07-20T19:48:29+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "VS-002 머지 완료"
+    note: "추가 리뷰 없이 기능 커밋과 CI 성공을 확인하고 이미 수행된 사용자 Merge를 정합화한다."
+  - at: "2026-07-20T19:48:29+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "VS-002 머지 완료"
+    note: "PR #17 Merge 커밋 d0e2c55를 확인했다."
+  - at: "2026-07-20T19:48:29+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "VS-002 머지 완료"
+    note: "로컬 main 동기화와 Merge 후 Backend CI 성공을 확인했다."
 
 created_at: "2026-07-20T19:19:16+09:00"
-updated_at: "2026-07-20T19:36:36+09:00"
+updated_at: "2026-07-20T19:48:29+09:00"
