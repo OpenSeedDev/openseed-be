@@ -45,3 +45,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "compileTestJava 실패 후 로그인 8개 및 전체 21개 테스트 성공"
+  - id: IL-004
+    fingerprint: "openapi-contract-test-disabled-by-test-profile"
+    status: resolved
+    occurred_at: "2026-07-20T20:05:40+09:00"
+    slice_id: VS-003
+    category: test_setup
+    review_comment_id: null
+    symptom: "갱신 OpenAPI 계약 테스트가 테스트 프로필의 API 문서 비활성화 때문에 404로 실패했다."
+    root_cause: "새 통합 테스트 컨텍스트에서 springdoc.api-docs.enabled를 명시적으로 활성화하지 않았다."
+    fix: "RefreshTokenIntegrationTest 속성에서 OpenAPI 문서를 활성화하고 전체 테스트를 재실행했다."
+    regression_test: "RefreshTokenIntegrationTest.publishesRefreshContract"
+    applies_to: "OpenAPI 경로를 검증하는 모든 통합 테스트"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "OpenAPI 계약 테스트 1건 실패 후 VS-003 집중 6개 및 전체 27개 성공"

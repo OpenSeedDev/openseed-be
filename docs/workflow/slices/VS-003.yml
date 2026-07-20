@@ -1,0 +1,72 @@
+schema_version: 1
+
+slice:
+  id: VS-003
+  title: "인증 갱신·회전·재사용 방지"
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-003-refresh-token
+base_commit: 1e7a247233ab787b2c56d67cfcd8220b5cb5d0db
+current_commit: 44e1be5565765fb90a60e125c2aa11b5374a1ba1
+
+approvals:
+  test: { approved: true, approved_at: "2026-07-20T20:00:28+09:00", scope_sha256: "9737be49c84a212538828957de7fae4441adc4d769014f45537dc2b9758ffc54" }
+  change: { approved: true, approved_at: "2026-07-20T20:09:06+09:00", scope_sha256: "30e58ef15f9e270df757757a4303972bbd1cd819ee87aa4decd1b77158b51c0f" }
+  review_plan: { approved: false, approved_at: null, scope_sha256: null }
+
+review: { pr_number: 19, pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/19", handled_comment_ids: [] }
+
+evidence:
+  red_test: "2026-07-20T20:02:05+09:00 RefreshTokenIntegrationTest: 4 of 5 failed because refresh endpoint and rotation model were absent"
+  focused_tests: "2026-07-20T20:06:55+09:00 RefreshTokenIntegrationTest: 6 passed"
+  full_tests: "2026-07-20T20:07:33+09:00 ./gradlew clean test: 27 passed, 0 failures"
+  migration: "V4__add_refresh_token_rotation.sql applied on PostgreSQL 17 Testcontainers; locking and schema validation passed"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29737686701/job/88336813310"
+  ci_result: success
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-20T19:58:29+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "VS-003 시작"
+    note: "백로그, 인증 세션 구현, 워크플로우 실패와 구현 교훈을 확인했다."
+  - at: "2026-07-20T19:58:29+09:00"
+    from: PLANNING
+    to: AWAITING_TEST_APPROVAL
+    command: "VS-003 시작"
+    note: "Refresh Token 회전·재사용·동시성 정책과 테스트 목록을 작성했다."
+  - at: "2026-07-20T20:00:28+09:00"
+    from: AWAITING_TEST_APPROVAL
+    to: IMPLEMENTING
+    command: "VS-003 테스트 승인"
+    note: "승인 범위를 SHA-256으로 고정하고 TDD 구현을 시작한다."
+  - at: "2026-07-20T20:07:51+09:00"
+    from: IMPLEMENTING
+    to: AWAITING_CHANGE_APPROVAL
+    command: "VS-003 테스트 승인"
+    note: "Red, 회전·재사용·동시성 구현, 집중·전체 테스트, OpenAPI·ERD·Migration 갱신을 완료했다."
+  - at: "2026-07-20T20:09:06+09:00"
+    from: AWAITING_CHANGE_APPROVAL
+    to: CREATING_PR
+    command: "VS-003 변경 승인"
+    note: "승인 변경 범위를 SHA-256으로 고정하고 커밋·Push·PR 생성을 시작한다."
+  - at: "2026-07-20T20:13:09+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "VS-003 변경 승인"
+    note: "기능 커밋을 Push하고 PR #19를 생성했으며 첫 Build and Test 성공을 확인했다."
+
+created_at: "2026-07-20T19:58:29+09:00"
+updated_at: "2026-07-20T20:13:09+09:00"

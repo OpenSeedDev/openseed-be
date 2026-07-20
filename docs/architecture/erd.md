@@ -47,6 +47,9 @@ erDiagram
         timestamptz expires_at
         timestamptz created_at
         timestamptz revoked_at
+        uuid family_id
+        uuid rotated_from_id FK
+        varchar revocation_reason
     }
 ```
 
@@ -58,3 +61,4 @@ erDiagram
 - 가입 원장은 `300 = paidAmount(300) + expiredAmount(0)`을 만족한다.
 - PointLedger는 append-only 데이터로 취급한다.
 - 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
+- Refresh Token은 family ID와 이전 세션 ID로 회전 계보를 보존하며 재사용 탐지 시 패밀리를 폐기한다.
