@@ -41,7 +41,7 @@ class LoginIntegrationTest {
     @BeforeEach
     void clean() {
         jdbcTemplate.update("DELETE FROM auth_sessions");
-        jdbcTemplate.update("DELETE FROM point_ledgers");
+        jdbcTemplate.execute("TRUNCATE TABLE point_ledgers");
         jdbcTemplate.update("DELETE FROM point_wallets");
         jdbcTemplate.update("DELETE FROM users");
     }
