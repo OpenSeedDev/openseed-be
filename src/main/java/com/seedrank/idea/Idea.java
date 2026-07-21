@@ -78,7 +78,7 @@ public class Idea {
         this.updatedAt = now;
     }
 
-    public static Idea draft(
+    static Idea draft(
             UUID authorId,
             String title,
             String category,
