@@ -6,16 +6,16 @@ task:
   dependencies: [SETUP-08]
   resource_locks: [ops]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/ops-01-health-logs
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
+current_commit: 065706f3da6da53ebb60736604b25d9afc2a8cd2
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 31
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/31"
   handled_comment_ids: []
-  unresolved_thread_count: null
+  unresolved_thread_count: 0
   merge_approval:
     command: /merge-approved
     approved_by: null
@@ -48,8 +48,8 @@ evidence:
   migration:
     required: false
     evidence: "HTTP 상태·추적 설정만 변경해 DB와 ERD 구조 변경이 없다."
-  ci_url: null
-  ci_result: null
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29794229027"
+  ci_result: success
   merge_commit: null
   synced_main_commit: null
 
@@ -79,5 +79,10 @@ history:
     to: CREATING_PR
     command: "autonomous delivery"
     note: "Red, 최소 구현, 리팩터링, 집중 6개와 전체 49개 테스트, OpenAPI·운영 문서·설정 검증을 완료했다. DB와 ERD 변경은 없다."
+  - at: "2026-07-21T10:51:30+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous PR delivery"
+    note: "PR #31을 생성했고 코드 커밋 065706f의 Build and Test 성공, Merge 가능, 댓글·리뷰와 미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
 created_at: "2026-07-21T10:38:12+09:00"
-updated_at: "2026-07-21T10:48:30+09:00"
+updated_at: "2026-07-21T10:51:30+09:00"
