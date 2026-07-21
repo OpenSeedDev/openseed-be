@@ -100,6 +100,28 @@ public class PointLedger {
         return ledger;
     }
 
+    public static PointLedger unitPurchase(
+            User user,
+            UUID lotId,
+            int principal,
+            int balanceAfter,
+            LocalDate policyDate,
+            Instant now) {
+        PointLedger ledger = new PointLedger();
+        ledger.id = UUID.randomUUID();
+        ledger.user = user;
+        ledger.type = Type.DEBIT;
+        ledger.originalAmount = principal;
+        ledger.paidAmount = principal;
+        ledger.expiredAmount = 0;
+        ledger.balanceAfter = balanceAfter;
+        ledger.sourceType = SourceType.UNIT_PURCHASE;
+        ledger.sourceId = lotId;
+        ledger.createdAt = now;
+        ledger.policyDate = policyDate;
+        return ledger;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -141,7 +163,8 @@ public class PointLedger {
     }
 
     public enum Type {
-        CREDIT
+        CREDIT,
+        DEBIT
     }
 
     public enum SourceType {
@@ -149,6 +172,7 @@ public class PointLedger {
         DAILY_FIRST_ACCESS,
         IDEA_PUBLISHED,
         FEEDBACK_CREATED,
-        FEEDBACK_ACCEPTED
+        FEEDBACK_ACCEPTED,
+        UNIT_PURCHASE
     }
 }
