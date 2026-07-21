@@ -27,6 +27,11 @@ import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
+import com.seedrank.unit.purchase.InsufficientPointException;
+import com.seedrank.unit.purchase.PurchaseLimitExceededException;
+import com.seedrank.unit.purchase.SelfUnitPurchaseException;
+import com.seedrank.unit.purchase.UnitPriceChangedException;
+import com.seedrank.unit.purchase.UnitPurchaseIdeaNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -222,6 +227,40 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(UnitPurchaseIdeaNotFoundException.class)
+    ResponseEntity<ApiError> handleUnitPurchaseIdeaNotFound(
+            UnitPurchaseIdeaNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "IDEA_NOT_FOUND", "아이디어를 찾을 수 없습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(SelfUnitPurchaseException.class)
+    ResponseEntity<ApiError> handleSelfUnitPurchase(SelfUnitPurchaseException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of(
+                "SELF_UNIT_PURCHASE", "본인 아이디어의 Unit은 구매할 수 없습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(UnitPriceChangedException.class)
+    ResponseEntity<ApiError> handleUnitPriceChanged(UnitPriceChangedException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "PRICE_CHANGED", "Unit 가격이 변경되었습니다. 현재 가격을 다시 확인해 주세요.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(InsufficientPointException.class)
+    ResponseEntity<ApiError> handleInsufficientPoint(InsufficientPointException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "INSUFFICIENT_POINT", "사용 가능한 Point가 부족합니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(PurchaseLimitExceededException.class)
+    ResponseEntity<ApiError> handlePurchaseLimitExceeded(
+            PurchaseLimitExceededException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "PURCHASE_LIMIT_EXCEEDED", "Seed Unit 구매 한도를 초과했습니다.", requestId(request), List.of()));
     }
 
     @ExceptionHandler(Exception.class)

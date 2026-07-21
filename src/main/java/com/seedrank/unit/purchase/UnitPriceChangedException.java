@@ -1,0 +1,4 @@
+package com.seedrank.unit.purchase;
+
+public class UnitPriceChangedException extends RuntimeException {
+}

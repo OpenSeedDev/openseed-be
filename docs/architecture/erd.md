@@ -10,6 +10,8 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
+    USERS ||--o{ SEED_UNIT_LOTS : purchases
+    IDEAS ||--o{ SEED_UNIT_LOTS : holds
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
@@ -39,12 +41,12 @@ erDiagram
     POINT_LEDGERS {
         uuid id PK
         uuid user_id FK
-        varchar type "CREDIT"
+        varchar type "CREDIT | DEBIT"
         int original_amount
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED"
+        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE"
         uuid source_id
         date policy_date "nullable for signup, Asia/Seoul"
         timestamptz created_at
@@ -141,6 +143,18 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    SEED_UNIT_LOTS {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        int units "positive integer"
+        int purchase_price "1..100 Point per Unit"
+        int principal "units * purchase_price"
+        timestamptz purchased_at
+        timestamptz unlocked_at "purchased_at + 24 hours"
+        varchar status "LOCKED | RECOVERED"
+    }
 ```
 
 ## VS-001 제약
@@ -218,3 +232,20 @@ erDiagram
 - `(idea_id, company_profile_id, author_id)` 유일 제약과 회사 프로필 행 잠금으로 순차·동시 생성 요청을 멱등 처리한다.
 - 스레드 생성 응답은 ID·아이디어 ID·생성 시각만 제공하며 회사 이메일이나 아이디어 상세를 노출하지 않는다.
 - 메시지, 읽음 상태, 상세 열람 요청은 후속 슬라이스 범위다.
+
+## VS-032 제약
+
+- 게시된 다른 사용자의 아이디어만 구매할 수 있으며 양의 정수 Unit과 처리 시점 현재가를 사용한다.
+- 확인 가격이 처리 시점 현재가와 다르면 구매하지 않고 가격 재확인을 요구한다.
+- 구매 원금은 1회 100P, Asia/Seoul 하루 300P, 사용자별 아이디어 활성 원금 300P를 넘지 않는다.
+- Point 지갑 잔액은 음수가 될 수 없고 Point 차감, `DEBIT/UNIT_PURCHASE` append-only 원장, `LOCKED` Lot을 하나의 트랜잭션으로 생성한다.
+- Lot은 구매 시각, 구매 가격, Unit 수와 원금을 보존하며 잠금 해제 시각은 구매 후 정확히 24시간이다.
+- 동일 요청과 동시 구매 보호는 VS-033, 보유 조회와 회수는 VS-034~036에서 확장한다.
+
+## VS-011 조회 제약
+
+- 공개형은 Guest를 포함한 모든 조회자에게 아이디어 전체 내용과 검증 질문을 반환한다.
+- 반공개형 Guest에는 제목·카테고리·요약·문제 정의와 공통 게시 정보만 반환하며, 로그인 User·Company·작성자는 전체 내용을 조회한다.
+- 매칭형은 Guest·User·Company에 요약과 공통 게시 정보만 반환하고 작성자에게만 전체 내용을 반환한다.
+- 공개 범위상 숨겨진 필드는 `null` 값으로 직렬화하지 않고 JSON 응답 키 자체를 제외한다.
+- Draft와 향후 비게시 상태는 작성자에게만 반환하며 다른 조회자에게는 존재 여부를 숨긴다.
