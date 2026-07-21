@@ -1,5 +1,20 @@
 schema_version: 1
 lessons:
+  - id: IL-015
+    fingerprint: "ambiguous-initial-version-factory-name"
+    status: resolved
+    occurred_at: "2026-07-21T19:10:00+09:00"
+    slice_id: VS-010
+    category: pr_review
+    review_comment_id: 3621204581
+    symptom: "최초 IdeaVersion 스냅샷을 만드는 팩터리가 first라는 일반적인 이름이라 호출 의도와 생성 결과가 명확하지 않았다."
+    root_cause: "버전 번호 1이라는 구현 세부만 이름에 반영하고 최초 불변 스냅샷 생성이라는 도메인 의도를 표현하지 않았다."
+    fix: "팩터리를 initialSnapshot으로 변경하고 게시 서비스 호출부도 같은 용어로 정렬했다."
+    regression_test: "IdeaVersionFactoryContractTest.snapshotFactoryNameExpressesThatItCreatesTheInitialVersion"
+    applies_to: "생성 단계나 결과 의미를 표현해야 하는 도메인 static factory"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "PR #48 인라인 댓글 3621204581; 이름 계약 테스트 Red 1건 후 집중 테스트 성공"
   - id: IL-001
     fingerprint: "testcontainers-configuration-package-visibility"
     status: resolved

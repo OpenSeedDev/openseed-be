@@ -11,6 +11,8 @@ erDiagram
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
+    IDEAS ||--o{ IDEA_VERSIONS : snapshots
+    IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
 
     USERS {
         uuid id PK
@@ -89,6 +91,9 @@ erDiagram
         varchar target_customer "max 1000, nullable"
         varchar solution "max 2000, nullable"
         varchar business_model "max 2000, nullable"
+        varchar visibility "PUBLIC | SEMI_PUBLIC | MATCHING, nullable for Draft"
+        int current_unit_price "10P at publication, nullable for Draft"
+        timestamptz published_at "nullable for Draft"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -98,6 +103,31 @@ erDiagram
         uuid idea_id FK
         text question "not blank"
         int sort_order "1..3, unique per idea"
+    }
+
+    IDEA_VERSIONS {
+        uuid id PK
+        uuid idea_id FK
+        int version_number "unique per idea"
+        varchar title
+        varchar category
+        varchar summary
+        varchar problem
+        varchar target_customer
+        varchar solution
+        varchar business_model
+        varchar visibility
+        text validation_questions "ordered immutable snapshot"
+        uuid editor_id FK
+        timestamptz created_at
+    }
+
+    IDEA_TIMELINE_EVENTS {
+        uuid id PK
+        uuid idea_id FK
+        varchar event_type "PUBLISHED"
+        uuid actor_id FK
+        timestamptz created_at
     }
 ```
 
@@ -160,3 +190,11 @@ erDiagram
 - 요청 배열 순서를 아이디어별 고유한 `sort_order` 1~3으로 보존한다.
 - 질문 문구는 앞뒤 공백을 제거하고 빈 값은 허용하지 않는다.
 - 아이디어 삭제 시 해당 검증 질문도 함께 삭제한다.
+
+## VS-010 제약
+
+- 완성된 Draft와 검증 질문 1~3개만 `PUBLIC`, `SEMI_PUBLIC`, `MATCHING` 중 하나로 게시할 수 있다.
+- 게시 전환, 최초 전체 스냅샷 버전, 10P 현재 Unit 가격, 게시 타임라인과 해당 Point 보상은 하나의 트랜잭션이다.
+- 아이디어 행을 잠가 중복·동시 게시에서도 최초 버전·타임라인·보상 출처가 한 번만 생성되게 한다.
+- 공개형·반공개형 게시 보상은 50P이며 Asia/Seoul 하루 두 번까지 지급한다. 이후 게시 시도는 게시를 허용하되 전액 소멸 원장을 남긴다.
+- 매칭형 게시에는 게시 보상을 지급하거나 원장을 생성하지 않는다.

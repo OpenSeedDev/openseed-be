@@ -26,6 +26,18 @@ public interface PointLedgerRepository extends JpaRepository<PointLedger, UUID> 
             @Param("policyDate") LocalDate policyDate);
 
     @Query("""
+            select count(ledger) from PointLedger ledger
+            where ledger.user.id = :userId
+              and ledger.policyDate = :policyDate
+              and ledger.sourceType = :sourceType
+              and ledger.paidAmount > 0
+            """)
+    long countPaidRewards(
+            @Param("userId") UUID userId,
+            @Param("policyDate") LocalDate policyDate,
+            @Param("sourceType") PointLedger.SourceType sourceType);
+
+    @Query("""
             select ledger from PointLedger ledger
             where ledger.user.id = :userId
             order by ledger.createdAt desc, ledger.id desc

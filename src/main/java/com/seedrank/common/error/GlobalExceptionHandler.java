@@ -22,12 +22,15 @@ import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
+import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -166,6 +169,30 @@ public class GlobalExceptionHandler {
                 "입력값을 확인해 주세요.",
                 requestId(request),
                 fieldErrors));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiError> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "VALIDATION_ERROR", "입력값을 확인해 주세요.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdeaNotReadyToPublishException.class)
+    ResponseEntity<ApiError> handleIdeaNotReadyToPublish(
+            IdeaNotReadyToPublishException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "IDEA_NOT_READY_TO_PUBLISH", "게시 필수 내용을 확인해 주세요.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdeaAlreadyPublishedException.class)
+    ResponseEntity<ApiError> handleIdeaAlreadyPublished(
+            IdeaAlreadyPublishedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEA_ALREADY_PUBLISHED", "이미 게시된 아이디어입니다.", requestId(request), List.of()));
     }
 
     @ExceptionHandler(IdeaDraftNotFoundException.class)
