@@ -6,7 +6,7 @@ task:
   dependencies: [VS-001]
   resource_locks: [company]
 
-status: AWAITING_PR_REVIEW
+status: AWAITING_USER_MERGE
 branch: codex/vs-006-company-profile
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
 current_commit: 792d448ad886bf2b8ea5e74eb787fa908d935724
@@ -28,11 +28,11 @@ review:
   unresolved_thread_count: 0
   merge_approval:
     command: /merge-approved
-    approved_by: null
-    comment_id: null
-    comment_url: null
-    approved_at: null
-    head_sha: null
+    approved_by: pado0711
+    comment_id: 5030454042
+    comment_url: "https://github.com/OpenSeedDev/openseed-be/pull/28#issuecomment-5030454042"
+    approved_at: "2026-07-21T05:23:55Z"
+    head_sha: 792d448ad886bf2b8ea5e74eb787fa908d935724
 
 evidence:
   dependencies_satisfied: true
@@ -57,7 +57,7 @@ evidence:
     at: "2026-07-21T13:48:42+09:00"
     summary: "전체 59개 성공, 실패 0개"
   migration: "V20260721043400__create_company_profiles.sql 적용 및 PostgreSQL ddl-auto validate 성공"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29802280494"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29802383005"
   ci_result: success
   merge_commit: null
   synced_main_commit: null
@@ -113,6 +113,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "autonomous review fix complete: comment 3619484742"
     note: "동시 등록 회귀 테스트, 집중 8개·전체 59개, validator 4종과 Build and Test를 통과했다. 처리 증거 답글 3619520571을 남기고 thread PRRT_kwDOTWkifc6SdgcH를 resolve했으며 코드 Push 이후 승인 증거는 비어 있다."
+  - at: "2026-07-21T14:25:44+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "/merge-approved"
+    note: "현재 코드 792d448 이후 pado0711이 남긴 정확한 승인 댓글 5030454042, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
 
 created_at: "2026-07-21T01:30:00+09:00"
-updated_at: "2026-07-21T13:52:30+09:00"
+updated_at: "2026-07-21T14:25:44+09:00"
