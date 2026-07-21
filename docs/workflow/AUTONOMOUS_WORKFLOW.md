@@ -8,8 +8,8 @@
 flowchart TD
   A["사용자: 다음 tick 실행"] --> B["GitHub 구현 PR 동기화"]
   B --> C{"모든 VS에 PR이 있는가?"}
-  C -- "아니요" --> D["최대 3개 Delivery Lane 선택"]
-  D --> E["main 또는 Parent PR Branch에서 구현"]
+  C -- "아니요" --> D["Ready 작업 1개 선택"]
+  D --> E["Coordinator가 단일 worktree에서 구현"]
   E --> F["Red → Green → 집중·위험 테스트 → Stacked PR"]
   F --> B
   C -- "예" --> G["기존 수동 리뷰·복구·병합 모드"]
@@ -29,10 +29,11 @@ flowchart TD
 ## 자동 처리 순서
 
 1. Build 단계에서는 Merge되었거나 열린 구현 PR이 있는 VS 작업을 계산한다.
-2. Ready 작업을 최대 3개 Delivery Lane에서 고른다.
+2. Ready 작업을 순서대로 하나만 고른다.
 3. Merge되지 않은 선행 작업은 해당 PR branch를 base로 Stacked PR을 만든다.
-4. 리뷰는 `리뷰 tick 실행`에서만 우선 처리한다.
-5. 모든 VS에 PR이 생기면 기존 수동 리뷰·복구·병합 순서로 자동 전환한다.
+4. PR을 만든 즉시 tick을 종료하고 다음 작업은 다음 수동 tick에서 선택한다.
+5. 리뷰는 `리뷰 tick 실행`에서만 우선 처리한다.
+6. 모든 VS에 PR이 생기면 기존 수동 리뷰·복구·병합 순서로 자동 전환한다.
 
 ## 안전 장치
 

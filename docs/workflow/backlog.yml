@@ -5,7 +5,7 @@ settings:
   base_branch: main
   approver: pado0711
   merge_command: /merge-approved
-  max_parallel_workers: 3
+  max_parallel_workers: 1
   review_poll_minutes: 5
   max_recovery_attempts: 3
   delivery_mode: fast_build

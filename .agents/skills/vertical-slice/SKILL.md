@@ -28,8 +28,10 @@ Perform work in this order:
 4. Enable or complete merge only when the approval, checks, resolved threads, dependency, and conflict gates pass.
 5. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
 6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit. Fast Build
-   passes open implementation PRs separately so stacked successors can be selected.
-7. Dispatch each selected task to a separate worktree and agent context.
+   passes open implementation PRs separately so a stacked successor can be selected. The current
+   project setting selects exactly one task per tick.
+7. Deliver the selected task in one isolated worktree. Do not run another implementation task or
+   implementation sub-agent concurrently in single-task mode.
 8. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
 
 In normal mode, do not select a task when any dependency is not actually merged, another active task
