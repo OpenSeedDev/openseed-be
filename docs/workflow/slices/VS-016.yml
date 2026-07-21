@@ -6,14 +6,14 @@ task:
   dependencies: [VS-010]
   resource_locks: [idea]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-016-archive
 base_commit: 180bbee85b2f1efaf322606b86a904afc8ea8007
-current_commit: null
+current_commit: bf7996cd1bcd1abf37f0dd9740ff306b45539250
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 57
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/57"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -72,6 +72,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-016"
     note: "Red 5건 확인 후 작성자 보관과 공개 차단을 구현했다. 집중·위험 회귀 24건, OpenAPI 계약과 상태 검증을 완료했다."
+  - at: "2026-07-21T21:23:40+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-016"
+    note: "구현 커밋 bf7996c을 Push하고 VS-012 PR #52를 base로 Draft PR #57을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:18:23+09:00"
-updated_at: "2026-07-21T21:22:29+09:00"
+updated_at: "2026-07-21T21:23:40+09:00"
