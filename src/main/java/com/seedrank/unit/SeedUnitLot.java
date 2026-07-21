@@ -77,6 +77,8 @@ public class SeedUnitLot {
 
     public UUID id() { return id; }
     public UUID ideaId() { return idea.id(); }
+    public String ideaTitle() { return idea.title(); }
+    public int currentUnitPrice() { return idea.currentUnitPrice(); }
     public UUID userId() { return user.getId(); }
     public int units() { return units; }
     public int purchasePrice() { return purchasePrice; }

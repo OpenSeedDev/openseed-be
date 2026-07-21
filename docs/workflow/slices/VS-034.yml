@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-034
+  title: "보유 Lot 조회"
+  dependencies: [VS-032]
+  resource_locks: [unit]
+
+status: CREATING_PR
+branch: codex/vs-034-owned-lots
+base_commit: 1bee85a3ae491a30ecb7a20691add4a139bd077e
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-032
+      pr_number: 50
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/50"
+      merge_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
+      merged_at: "2026-07-21T11:05:09Z"
+    - task_id: VS-033
+      pr_number: 55
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/55"
+      head_sha: 1bee85a3ae491a30ecb7a20691add4a139bd077e
+      status: OPEN_LANE_PARENT
+  red_test: "2026-07-21T21:51:54+09:00 ./gradlew test --tests com.seedrank.unit.me.OwnedUnitLotIntegrationTest --no-daemon: 보유 Lot API 부재로 4/4 의도된 실패"
+  focused_tests: "2026-07-21T21:53:49+09:00 OwnedUnitLot·SeedUnitPurchase·PurchaseConcurrency 위험 회귀 19/19 성공"
+  full_tests: "Fast Build stack depth 2: 로컬 전체 테스트 생략, 최종 Head CI에서 전체 회귀 검증"
+  migration: "없음: 기존 seed_unit_lots와 ideas 컬럼을 조회"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:47:35+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build coordinator: VS-034"
+    note: "금지된 VS-027 cross-stack fan-in을 격리하고 selector의 다음 안전 lane인 VS-033 parent 기반 VS-034를 선택했다."
+  - at: "2026-07-21T21:47:35+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build coordinator: VS-034"
+    note: "소유권·평가값·잠금 경계·아이디어별 합계·Cursor 비노출 Red 테스트를 먼저 작성한다."
+  - at: "2026-07-21T21:53:57+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build delivery: VS-034"
+    note: "Red 4건 확인 후 활성 Lot Cursor 조회, 내부 Point 평가값, 잠금 경계와 아이디어별 합계를 구현했다. 구매·동시성 포함 위험 회귀 19건과 OpenAPI를 검증했다."
+
+created_at: "2026-07-21T21:47:35+09:00"
+updated_at: "2026-07-21T21:53:57+09:00"
