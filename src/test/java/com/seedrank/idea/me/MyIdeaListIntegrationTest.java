@@ -179,9 +179,13 @@ class MyIdeaListIntegrationTest {
         jdbc.update("""
                 INSERT INTO ideas (
                     id, author_id, status, title, category, summary, problem,
-                    target_customer, solution, business_model, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, 'ETC', ?, '문제', NULL, NULL, NULL, ?, ?)
+                    target_customer, solution, business_model, visibility, current_unit_price,
+                    published_at, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, 'ETC', ?, '문제', NULL, NULL, NULL, ?, ?, ?, ?, ?)
                 """, id, authorId, status, title, title + " 요약",
+                "DRAFT".equals(status) ? null : "PUBLIC",
+                "DRAFT".equals(status) ? null : 10,
+                "DRAFT".equals(status) ? null : Timestamp.from(updatedAt.minusSeconds(30)),
                 Timestamp.from(updatedAt.minusSeconds(60)), Timestamp.from(updatedAt));
         return id;
     }

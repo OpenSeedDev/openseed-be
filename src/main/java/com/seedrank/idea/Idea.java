@@ -45,6 +45,16 @@ public class Idea {
     @Column(name = "business_model", length = 2000)
     private String businessModel;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private IdeaVisibility visibility;
+
+    @Column(name = "current_unit_price")
+    private Integer currentUnitPrice;
+
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -114,4 +124,30 @@ public class Idea {
     public String businessModel() { return businessModel; }
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
+    public IdeaVisibility visibility() { return visibility; }
+    public Integer currentUnitPrice() { return currentUnitPrice; }
+    public Instant publishedAt() { return publishedAt; }
+
+    public void publish(IdeaVisibility visibility, Instant now) {
+        if (status != IdeaStatus.DRAFT) {
+            throw new IllegalStateException("Idea is not a draft");
+        }
+        if (!complete()) {
+            throw new IllegalArgumentException("Idea content is incomplete");
+        }
+        this.status = IdeaStatus.PUBLISHED;
+        this.visibility = visibility;
+        this.currentUnitPrice = 10;
+        this.publishedAt = now;
+        this.updatedAt = now;
+    }
+
+    private boolean complete() {
+        return present(title) && present(category) && present(summary) && present(problem)
+                && present(targetCustomer) && present(solution) && present(businessModel);
+    }
+
+    private static boolean present(String value) {
+        return value != null && !value.isBlank();
+    }
 }

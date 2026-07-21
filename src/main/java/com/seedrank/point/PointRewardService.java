@@ -32,13 +32,22 @@ public class PointRewardService {
 
     @Transactional
     public PointRewardResult grant(UUID userId, ActivityReward reward, UUID sourceId) {
+        return grant(userId, reward, sourceId, Integer.MAX_VALUE);
+    }
+
+    @Transactional
+    public PointRewardResult grant(UUID userId, ActivityReward reward, UUID sourceId, int dailyOccurrenceLimit) {
         Objects.requireNonNull(userId, "userId");
         Objects.requireNonNull(reward, "reward");
         Objects.requireNonNull(sourceId, "sourceId");
 
+        if (dailyOccurrenceLimit < 1) {
+            throw new IllegalArgumentException("dailyOccurrenceLimit must be positive");
+        }
+
         Instant now = clock.instant();
         LocalDate policyDate = policyDate(now);
-        return grant(userId, reward, sourceId, now, policyDate);
+        return grant(userId, reward, sourceId, now, policyDate, dailyOccurrenceLimit);
     }
 
     @Transactional
@@ -48,7 +57,7 @@ public class PointRewardService {
         LocalDate policyDate = policyDate(now);
         UUID sourceId = UUID.nameUUIDFromBytes(
                 ("daily-first-access:" + userId + ":" + policyDate).getBytes(StandardCharsets.UTF_8));
-        return grant(userId, ActivityReward.DAILY_FIRST_ACCESS, sourceId, now, policyDate);
+        return grant(userId, ActivityReward.DAILY_FIRST_ACCESS, sourceId, now, policyDate, Integer.MAX_VALUE);
     }
 
     private PointRewardResult grant(
@@ -56,7 +65,8 @@ public class PointRewardService {
             ActivityReward reward,
             UUID sourceId,
             Instant now,
-            LocalDate policyDate) {
+            LocalDate policyDate,
+            int dailyOccurrenceLimit) {
         PointWallet wallet = wallets.findByUserIdForUpdate(userId)
                 .orElseThrow(() -> new IllegalStateException("Point wallet not found"));
         var duplicate = ledgers.findBySourceTypeAndSourceId(reward.sourceType(), sourceId);
@@ -66,7 +76,9 @@ public class PointRewardService {
 
         int paidToday = Math.toIntExact(ledgers.sumPaidActivityRewards(userId, policyDate));
         int dailyAllowance = Math.max(0, DAILY_ACTIVITY_CAP - paidToday);
-        int requestedPayment = Math.min(reward.amount(), dailyAllowance);
+        boolean occurrenceAvailable = ledgers.countPaidRewards(userId, policyDate, reward.sourceType())
+                < dailyOccurrenceLimit;
+        int requestedPayment = occurrenceAvailable ? Math.min(reward.amount(), dailyAllowance) : 0;
         int paidAmount = wallet.credit(requestedPayment, now);
 
         PointLedger ledger = PointLedger.activityReward(

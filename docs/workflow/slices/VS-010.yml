@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-010
+  title: "3종 공개 게시·초기가·보상"
+  dependencies: [VS-009]
+  resource_locks: [idea, wallet]
+
+status: CREATING_PR
+branch: codex/vs-010-publish
+base_commit: 58072ee9a40815477d67cd5f96dd74ef29b06745
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-009
+      pr_number: 29
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/29"
+      merge_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
+      merged_at: "2026-07-21T04:03:16Z"
+  red_test: "2026-07-21T18:01:49+09:00 ./gradlew test --tests com.seedrank.idea.publish.IdeaPublishIntegrationTest --no-daemon: 게시 API 부재로 7개 실패"
+  focused_tests: "2026-07-21T18:07:16+09:00 IdeaPublishIntegrationTest: 동시 게시 포함 8개 성공; 2026-07-21T18:06:34+09:00 아이디어·Point 집중 회귀 33개 성공"
+  full_tests: "2026-07-21T18:08:07+09:00 ./gradlew test --no-daemon: 131개 성공, 실패·오류·건너뜀 0개"
+  migration: "V20260721090200__publish_ideas.sql: 공개 범위·가격·게시 시각, 최초 버전과 타임라인 추가; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T17:59:29+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-010"
+    note: "백로그, 기획, 구현 계획과 VS-009 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T17:59:29+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-010"
+    note: "3종 공개 범위, 게시 완성 조건, 최초 버전·10P·타임라인·공개/반공개 보상 원자 처리와 테스트 범위를 확정했다."
+  - at: "2026-07-21T18:08:07+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-010"
+    note: "Red 7건 확인 후 최소 구현과 리팩터링을 완료했다. 동시 게시 포함 집중 테스트와 131개 전체 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+
+created_at: "2026-07-21T17:59:29+09:00"
+updated_at: "2026-07-21T18:08:07+09:00"
