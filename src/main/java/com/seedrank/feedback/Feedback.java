@@ -82,6 +82,23 @@ public class Feedback {
         return new Feedback(idea, author, type, content, evidenceUrl, evidenceDescription, now);
     }
 
+    public void update(Type type, String content, String evidenceUrl, String evidenceDescription, Instant now) {
+        if (type == null || now == null) throw new IllegalArgumentException("Required feedback value is missing");
+        String normalizedContent = normalizeContent(content);
+        String normalizedUrl = normalizeUrl(evidenceUrl);
+        String normalizedDescription = normalizeOptional(evidenceDescription, 1_000);
+        this.type = type;
+        this.content = normalizedContent;
+        this.evidenceUrl = normalizedUrl;
+        this.evidenceDescription = normalizedDescription;
+        this.editedAt = now;
+    }
+
+    public void delete(Instant now) {
+        if (now == null) throw new IllegalArgumentException("Deletion time is required");
+        this.deletedAt = now;
+    }
+
     private static String normalizeContent(String value) {
         if (value == null) throw new IllegalArgumentException("Feedback content is required");
         String normalized = value.strip();

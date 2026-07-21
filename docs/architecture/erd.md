@@ -17,6 +17,7 @@ erDiagram
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
     IDEAS ||--o{ FEEDBACKS : receives
+    FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
 
     USERS {
         uuid id PK
@@ -148,6 +149,17 @@ erDiagram
         timestamptz created_at
     }
 
+    FEEDBACK_REVISIONS {
+        uuid id PK
+        uuid feedback_id FK
+        varchar revision_type "EDITED | DELETED"
+        varchar feedback_type "previous type"
+        varchar content "previous normalized content"
+        varchar evidence_url "previous optional URL"
+        varchar evidence_description "previous optional description"
+        timestamptz recorded_at "audit time"
+    }
+
     SEED_UNIT_LOTS {
         uuid id PK
         uuid idea_id FK
@@ -252,4 +264,6 @@ erDiagram
 - 피드백 유형과 앞뒤 공백 제거 후 100~2,000자 의견은 필수이며 HTTP(S) 근거 URL과 1,000자 이하 근거 설명은 선택이다.
 - Feedback 생성과 `FEEDBACK_CREATED` 20P 활동 보상 원장을 하나의 트랜잭션으로 처리한다.
 - Asia/Seoul 정책 날짜의 여섯 번째 피드백부터는 Feedback은 저장하되 일일 5회 제한으로 보상 전액을 소멸 기록한다.
-- 목록·수정·삭제·이력·채택은 VS-025~027에서 확장한다.
+- 공개 가능한 피드백 목록은 삭제 행을 제외하고 채택 우선·작성 시각·ID Cursor로 조회한다.
+- 작성자만 피드백을 수정·soft delete하며 변경 전 전체 스냅샷과 감사 시각을 `feedback_revisions`에 보존한다.
+- 채택·Contribution·기여 보상은 VS-027에서 확장한다.

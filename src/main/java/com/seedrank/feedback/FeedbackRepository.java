@@ -6,10 +6,17 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.persistence.LockModeType;
+
 public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select feedback from Feedback feedback join fetch feedback.author where feedback.id = :id")
+    java.util.Optional<Feedback> findByIdForUpdate(@Param("id") UUID id);
+
     @Query("""
             select feedback from Feedback feedback
             join fetch feedback.author
