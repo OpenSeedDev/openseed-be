@@ -11,6 +11,16 @@ branch: null
 base_commit: null
 current_commit: null
 
+delivery:
+  strategy: main
+  parent_task_id: null
+  parent_pr_number: null
+  base_ref: main
+  base_head_sha: null
+  stack_root: null
+  stack_depth: 1
+  merge_order: []
+
 review:
   pr_number: null
   pr_url: null

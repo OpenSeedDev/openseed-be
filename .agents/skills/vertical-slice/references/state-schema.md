@@ -23,6 +23,9 @@ Normal delivery moves forward in the listed order, except that review and repair
 
 - `task.dependencies` and `task.resource_locks` must match the backlog.
 - `evidence.dependencies_satisfied` is set only after checking actual GitHub merges.
+- New Fast Build state files include `delivery`. A Stacked PR records its parent task and PR,
+  base ref and Head SHA, stack root, depth, and merge order. Existing version 2 files without this
+  optional mapping remain valid.
 - Red, focused, and full test evidence records command, conclusion, and time without full logs or secrets.
 - PR states require PR number and URL.
 - `AWAITING_USER_MERGE` remains valid for historical records, but new autonomous PRs normally remain `AWAITING_PR_REVIEW` in the committed state file. Live CI, unresolved threads, approval, and mergeability are read directly from GitHub.
