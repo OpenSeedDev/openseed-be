@@ -72,6 +72,42 @@ public class PointLedger {
         return new PointLedger(UUID.randomUUID(), user, now);
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public int getOriginalAmount() {
+        return originalAmount;
+    }
+
+    public int getPaidAmount() {
+        return paidAmount;
+    }
+
+    public int getExpiredAmount() {
+        return expiredAmount;
+    }
+
+    public int getBalanceAfter() {
+        return balanceAfter;
+    }
+
+    public SourceType getSourceType() {
+        return sourceType;
+    }
+
+    public UUID getSourceId() {
+        return sourceId;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
     public enum Type {
         CREDIT
     }

@@ -1,0 +1,112 @@
+schema_version: 2
+
+task:
+  id: VS-055
+  title: "공개 프로필 아이디 수정"
+  dependencies: [VS-001]
+  resource_locks: [member]
+
+status: COMPLETED_SYNCED
+branch: codex/vs-055-profile-id
+base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
+current_commit: cfcbb3d8744095aef1b451c29b660c29d4a3340e
+
+review:
+  pr_number: 27
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/27"
+  handled_comment_ids: []
+  unresolved_thread_count: 0
+  merge_approval:
+    command: /merge-approved
+    approved_by: pado0711
+    comment_id: 5030577641
+    comment_url: "https://github.com/OpenSeedDev/openseed-be/pull/27#issuecomment-5030577641"
+    approved_at: "2026-07-21T05:45:21Z"
+    head_sha: 4e6c217e2b906d136548954f980ec3908eb9f495
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-001
+      pr_number: 15
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/15"
+      merge_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
+      merged_at: "2026-07-20T10:08:38Z"
+  red_test: "2026-07-21T01:30:53+09:00 ./gradlew test --tests com.seedrank.member.profile.UpdateProfileIdIntegrationTest --no-daemon: endpoint와 OpenAPI 계약 부재로 20개 테스트 실패"
+  focused_tests: "2026-07-21T14:37:20+09:00 ./gradlew test --tests com.seedrank.member.profile.UpdateProfileIdIntegrationTest --tests com.seedrank.company.profile.CompanyProfileIntegrationTest --no-daemon: 29개 성공, 실패·오류·건너뜀 0개; 공유 예외 처리기의 양쪽 기능 계약 검증"
+  full_tests: "2026-07-21T14:38:11+09:00 ./gradlew clean test --no-daemon: 80개 성공, 실패·오류·건너뜀 0개"
+  migration: "VS-055 신규 Migration 없음. origin/main의 V20260721043400__create_company_profiles.sql을 수정 없이 통합했고 PostgreSQL Testcontainers에서 전체 Migration과 ddl-auto validate 성공; ERD의 회사 프로필 변경은 선행 Merge 그대로 보존"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29805105458"
+  ci_result: success
+  merge_commit: c53554ee98d71b20a66285fdf713c5aa5d72d697
+  synced_main_commit: 0a69a3c08a090f890ce952704c07f26d2a9e4cc2
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T01:28:55+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "autonomous dispatch VS-055"
+    note: "기획·기능 명세·백로그·교훈과 GitHub의 VS-001 Merge 증거를 확인했다."
+  - at: "2026-07-21T01:28:55+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "autonomous TDD"
+    note: "공개 프로필 아이디 수정 계약과 테스트 목록을 확정하고 승인 대기 없이 Red 테스트를 시작한다."
+  - at: "2026-07-21T01:33:50+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "autonomous delivery"
+    note: "Red, 최소 구현, 공통 프로필 정책 리팩터링, 집중·회귀·전체 테스트와 OpenAPI 계약 검증을 완료했다. DB와 ERD 구조 변경은 없다."
+  - at: "2026-07-21T01:38:44+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous PR delivery"
+    note: "PR #27을 생성했고 current_commit의 Build and Test 성공, Merge 가능, 리뷰 댓글과 미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
+  - at: "2026-07-21T13:37:32+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "merge origin/main for conflict recovery"
+    note: "GitHub에서 PR #27의 main 충돌을 확인해 보호된 auto-merge를 해제했다. origin/main 통합으로 새 코드 Head가 생성되므로 승인 댓글 5030194070은 무효이며 승인 증거를 비웠다."
+  - at: "2026-07-21T13:39:24+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery verified"
+    note: "GlobalExceptionHandler 충돌에서 프로필 아이디와 아이디어 초안 예외 처리를 모두 보존했고, 집중 27개·전체 72개 테스트를 통과했다. 새 Head 116bd80의 CI와 새로운 /merge-approved를 기다린다."
+  - at: "2026-07-21T14:35:50+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "merge origin/main for PR #28 conflict recovery"
+    note: "PR #28의 실제 Merge commit a407935 이후 PR #27이 다시 CONFLICTING임을 확인했다. 일반 merge로 VS-006을 통합하며 코드 Push 뒤 기존 승인 증거는 계속 비워 두고 auto-merge를 비활성 상태로 유지한다."
+  - at: "2026-07-21T14:38:20+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "second conflict recovery verified"
+    note: "GlobalExceptionHandler에서 VS-055와 VS-006의 예외 계약을 모두 보존했고 집중 29개·전체 80개 테스트를 통과했다. 새 코드 Head 0fcd435의 CI와 새로운 /merge-approved를 기다린다."
+  - at: "2026-07-21T14:49:11+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "/merge-approved"
+    note: "현재 코드 4e6c217 이후 pado0711이 남긴 정확한 승인 댓글 5030577641, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
+  - at: "2026-07-21T14:51:05+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "GitHub protected auto-merge"
+    note: "PR #27이 최종 Head cfcbb3d와 필수 검사 성공 상태에서 Merge 커밋 c53554e로 실제 병합됐다."
+  - at: "2026-07-21T14:55:41+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "git fetch origin && git merge --ff-only origin/main"
+    note: "로컬 main을 0a69a3c로 fast-forward하고 GitHub Merge 증거를 동기화해 VS-055와 member lock을 완료 해제했다."
+
+created_at: "2026-07-21T01:28:55+09:00"
+updated_at: "2026-07-21T14:55:41+09:00"

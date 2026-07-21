@@ -49,7 +49,7 @@ class SignupIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbcTemplate.update("DELETE FROM point_ledgers");
+        jdbcTemplate.execute("TRUNCATE TABLE point_ledgers");
         jdbcTemplate.update("DELETE FROM point_wallets");
         jdbcTemplate.update("DELETE FROM users");
     }

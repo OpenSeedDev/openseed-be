@@ -13,11 +13,11 @@ public record MyAccountResponse(
         User.Role role,
         CompanyVerificationStatus companyVerificationStatus) {
 
-    static MyAccountResponse from(User user) {
+    static MyAccountResponse from(User user, CompanyVerificationStatus companyVerificationStatus) {
         return new MyAccountResponse(
                 user.getId(),
                 user.getProfileId(),
                 user.getRole(),
-                CompanyVerificationStatus.NOT_STARTED);
+                companyVerificationStatus);
     }
 }
