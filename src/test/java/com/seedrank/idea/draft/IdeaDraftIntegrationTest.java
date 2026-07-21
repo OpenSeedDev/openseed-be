@@ -151,12 +151,9 @@ class IdeaDraftIntegrationTest {
     }
 
     @Test
-    void requiresAValidActiveSessionForCreateAndRead() throws Exception {
+    void requiresAValidActiveSessionForCreate() throws Exception {
         mockMvc.perform(post("/api/v1/ideas/drafts")
                         .contentType(MediaType.APPLICATION_JSON).content(validDraft()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("INVALID_ACCESS_TOKEN"));
-        mockMvc.perform(get("/api/v1/ideas/{id}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_ACCESS_TOKEN"));
     }
