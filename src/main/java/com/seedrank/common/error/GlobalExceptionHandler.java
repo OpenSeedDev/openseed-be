@@ -14,6 +14,9 @@ import com.seedrank.auth.signup.SignupValidationException;
 import com.seedrank.auth.login.InvalidCredentialsException;
 import com.seedrank.auth.login.InvalidRefreshTokenException;
 import com.seedrank.auth.login.InvalidAccessTokenException;
+import com.seedrank.company.profile.CompanyEmailDomainNotAllowedException;
+import com.seedrank.company.profile.CompanyProfileAlreadyExistsException;
+import com.seedrank.company.profile.CompanyProfileValidationException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,6 +88,31 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 requestId(request),
                 List.of(new ApiFieldError("profileId", exception.getMessage()))));
+    }
+
+    @ExceptionHandler(CompanyEmailDomainNotAllowedException.class)
+    ResponseEntity<ApiError> handleCompanyEmailDomainNotAllowed(
+            CompanyEmailDomainNotAllowedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "COMPANY_EMAIL_DOMAIN_NOT_ALLOWED", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(CompanyProfileAlreadyExistsException.class)
+    ResponseEntity<ApiError> handleCompanyProfileAlreadyExists(
+            CompanyProfileAlreadyExistsException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "COMPANY_PROFILE_ALREADY_EXISTS", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(CompanyProfileValidationException.class)
+    ResponseEntity<ApiError> handleCompanyProfileValidation(
+            CompanyProfileValidationException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "VALIDATION_ERROR", "입력값을 확인해 주세요.", requestId(request),
+                List.of(new ApiFieldError(exception.getField(), exception.getMessage()))));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
