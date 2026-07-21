@@ -172,14 +172,14 @@ lessons:
     slice_id: VS-030
     category: test_setup
     review_comment_id: null
-    symptom: "최신 main 통합 때마다 뒤늦게 추가된 통합 테스트의 원장 DELETE 정리가 append-only 트리거에 거부됐다. 첫 복구에서는 IdeaDraft 6건, 두 번째 복구에서는 CompanyProfile·UpdateProfileId 28건, 세 번째 복구에서는 ValidationQuestion 5건이 실패했다."
+    symptom: "최신 main 통합 때마다 뒤늦게 추가된 통합 테스트의 원장 DELETE 정리가 append-only 트리거에 거부됐다. 첫 복구에서는 IdeaDraft 6건, 두 번째 복구에서는 CompanyProfile·UpdateProfileId 28건, 세 번째 복구에서는 ValidationQuestion 5건, 네 번째 복구에서는 AiJob 5건이 실패했다."
     root_cause: "VS-030보다 뒤에 병합된 테스트들이 원장 정리에 기존 DELETE 방식을 사용해 새 DB 불변식과 호환되지 않았다."
-    fix: "IdeaDraftIntegrationTest와 후속 CompanyProfileIntegrationTest·UpdateProfileIdIntegrationTest·ValidationQuestionIntegrationTest의 원장 정리를 다른 통합 테스트와 동일한 TRUNCATE 방식으로 변경했다."
+    fix: "IdeaDraftIntegrationTest와 후속 CompanyProfileIntegrationTest·UpdateProfileIdIntegrationTest·ValidationQuestionIntegrationTest·AiJobCreationIntegrationTest의 원장 정리를 다른 통합 테스트와 동일한 TRUNCATE 방식으로 변경했다."
     regression_test: "append-only point_ledgers를 정리하는 통합 테스트의 집중 실행과 ./gradlew clean test"
     applies_to: "append-only point_ledgers를 정리하는 현재와 이후의 모든 PostgreSQL 통합 테스트"
-    recurrence_count: 3
+    recurrence_count: 4
     promoted_to: "conflict recovery focused cleanup compatibility checks and repository-wide DELETE scan"
-    evidence: "첫 main 통합에서 IdeaDraft SQLState P0001 6건, 두 번째 main 통합에서 CompanyProfile·UpdateProfileId 28건, 세 번째 VS-013 main 통합에서 ValidationQuestion 5건을 확인한 뒤 TRUNCATE 정리로 통일하고 저장소 전체 DELETE 사용처를 검사했다."
+    evidence: "첫 main 통합에서 IdeaDraft SQLState P0001 6건, 두 번째 main 통합에서 CompanyProfile·UpdateProfileId 28건, 세 번째 VS-013 main 통합에서 ValidationQuestion 5건, 네 번째 VS-018 main 통합에서 AiJob 5건을 확인한 뒤 TRUNCATE 정리로 통일하고 저장소 전체 DELETE 사용처를 검사했다."
   - id: IL-009
     fingerprint: "dependent-profile-fk-blocks-user-cleanup"
     status: resolved
@@ -214,14 +214,29 @@ lessons:
     fingerprint: "shared-global-exception-handler-merge-conflict"
     status: resolved
     occurred_at: "2026-07-21T14:38:20+09:00"
-    slice_id: VS-055
+    slice_id: "VS-055, VS-018"
     category: merge_conflict
     review_comment_id: null
-    symptom: "열린 VS-055 브랜치가 main에 먼저 병합된 VS-009와 VS-006의 GlobalExceptionHandler 확장과 두 차례 충돌해 한쪽 오류 계약이 누락될 위험이 있었다."
+    symptom: "열린 VS-055와 VS-018 브랜치가 main에 먼저 병합된 수직 슬라이스의 GlobalExceptionHandler 확장과 세 차례 충돌해 한쪽 오류 계약이 누락될 위험이 있었다."
     root_cause: "서로 독립적인 수직 슬라이스가 공용 예외 처리기의 같은 삽입 지점을 병렬로 확장했다."
-    fix: "각 main 통합에서 VS-055의 INVALID_PROFILE_ID 처리와 들어오는 슬라이스의 오류 처리기를 모두 보존해 일반 merge로 해결했다."
-    regression_test: "UpdateProfileIdIntegrationTest를 들어오는 기능의 IdeaDraftIntegrationTest 또는 CompanyProfileIntegrationTest와 함께 실행하고 전체 테스트를 재실행"
+    fix: "각 main 통합에서 기존·신규 오류 처리기를 모두 보존하고 영향 기능의 집중 테스트 조합과 전체 테스트를 재실행했다."
+    regression_test: "충돌한 오류 계약별 통합 테스트 조합과 ./gradlew clean test"
     applies_to: "GlobalExceptionHandler처럼 여러 수직 슬라이스가 공유하는 등록형 공용 파일의 충돌 복구"
-    recurrence_count: 2
-    promoted_to: "conflict recovery focused-test pair"
-    evidence: "merge 116bd80에서 집중 27개·전체 72개 성공; merge 0fcd435에서 집중 29개·전체 80개 성공"
+    recurrence_count: 3
+    promoted_to: "conflict recovery focused-test matrix and full-test gate"
+    evidence: "merge 116bd80에서 집중 27개·전체 72개 성공; merge 0fcd435에서 집중 29개·전체 80개 성공; VS-018의 origin/main 5a2d053 통합에서 집중 43개·전체 88개 성공"
+  - id: IL-012
+    fingerprint: "server-prompt-version-breaks-ai-job-request-idempotency"
+    status: resolved
+    occurred_at: "2026-07-21T13:24:41+09:00"
+    slice_id: VS-018
+    category: business_rule
+    review_comment_id: null
+    symptom: "같은 Idempotency-Key와 같은 사용자 입력을 재전송해도 서버 Prompt Version이 바뀌면 기존 Job 대신 409가 반환됐다."
+    root_cause: "중복 요청 충돌 판정에 클라이언트 요청이 아닌 서버 관리 Prompt Version까지 포함했다."
+    fix: "Prompt Version은 최초 Job의 생성 시점 스냅샷으로 보존하고, Key 재사용 충돌은 정규화된 사용자 입력 snapshot이 다를 때만 판정하도록 제한했다."
+    regression_test: "AiJobCreationIntegrationTest.sameKeyReplayReturnsOriginalJobAfterServerPromptVersionChanges"
+    applies_to: "서버 설정이나 정책 버전을 생성 시점에 저장하면서 클라이언트 재전송을 멱등하게 처리하는 모든 요청"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "2026-07-21T13:24:41+09:00 전용 테스트에서 expected 202 but was 409 Red 1건 확인"

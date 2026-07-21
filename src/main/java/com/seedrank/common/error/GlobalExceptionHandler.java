@@ -26,6 +26,8 @@ import com.seedrank.idea.archive.IdeaNotArchivableException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.idea.update.IdeaNotPublishedException;
+import com.seedrank.ai.job.IdempotencyKeyReusedException;
+import com.seedrank.ai.job.AiJobNotFoundException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
@@ -279,6 +281,28 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
                 "PURCHASE_LIMIT_EXCEEDED", "Seed Unit 구매 한도를 초과했습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdempotencyKeyReusedException.class)
+    ResponseEntity<ApiError> handleIdempotencyKeyReused(
+            IdempotencyKeyReusedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEMPOTENCY_KEY_REUSED",
+                "Idempotency-Key가 다른 요청에 이미 사용됐습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobNotFoundException.class)
+    ResponseEntity<ApiError> handleAiJobNotFound(
+            AiJobNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "AI_JOB_NOT_FOUND",
+                "AI 생성 Job을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
     }
 
     @ExceptionHandler(Exception.class)

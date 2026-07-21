@@ -1,0 +1,87 @@
+schema_version: 2
+
+task:
+  id: VS-018
+  title: "AI Job 생성·중복 방지"
+  dependencies: [VS-009]
+  resource_locks: [ai-job]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-018-ai-job
+base_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
+current_commit: 5415175079a8304cb3f8f685d0a1d8e5c2201b7f
+
+review:
+  pr_number: 38
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/38"
+  handled_comment_ids: []
+  unresolved_thread_count: 0
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-009
+      pr_number: 29
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/29"
+      merge_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
+      merged_at: "2026-07-21T04:03:16Z"
+  red_test: "초기: 2026-07-21T13:11:24+09:00 신규 테이블·API 부재로 7개 실패; 자체 검토 회귀: 2026-07-21T13:24:41+09:00 sameKeyReplayReturnsOriginalJobAfterServerPromptVersionChanges가 Prompt Version 변경 후 expected 202 but was 409로 1개 실패"
+  focused_tests: "2026-07-21T15:16:36+09:00 AI Job·Idea Draft·Company Profile·Profile ID 통합 테스트: 43 passed, 0 failures"
+  full_tests: "2026-07-21T15:17:28+09:00 ./gradlew clean test --no-daemon: 88 passed, 0 failures"
+  migration: "V20260721041200__create_ai_jobs.sql 무변경; PostgreSQL 17 Testcontainers에서 V1~V20260721043400 8개 Migration 순차 적용과 JPA ddl-auto validate 성공"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29806652970"
+  ci_result: success
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T13:08:55+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "autonomous orchestrator: VS-018"
+    note: "백로그, 기획 정책, 구현 교훈과 실제 VS-009 Merge 증거를 확인하고 기능·테스트 계획을 작성했다."
+  - at: "2026-07-21T13:08:55+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "autonomous TDD: VS-018"
+    note: "승인 대기 없이 실패 테스트부터 AI Job 생성과 사용자별 중복 방지 계약 구현을 시작했다."
+  - at: "2026-07-21T13:14:15+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "autonomous delivery: VS-018"
+    note: "Red, 최소 구현, 리팩터링, 집중 7개와 전체 58개 테스트, OpenAPI·ERD·새 Migration 갱신을 완료했다."
+  - at: "2026-07-21T13:19:25+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous PR sync: #38"
+    note: "PR #38을 생성했고 코드 커밋 cba1669의 Build and Test 성공, Merge 가능, 댓글·리뷰·미해결 review thread 0개를 확인했다. Merge Guard의 리뷰 전 차단은 의도된 상태다."
+  - at: "2026-07-21T15:13:57+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "conflict recovery: merge origin/main"
+    note: "PR #38의 GitHub CONFLICTING 상태를 확인하고 VS-009·VS-006·VS-055 및 완료 상태가 반영된 origin/main 5a2d053을 일반 merge한다. 코드 통합 이후 기존 승인은 무효이며 승인 증거는 비어 있다."
+  - at: "2026-07-21T15:18:12+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery complete: VS-018"
+    note: "implementation lesson ID 충돌은 main의 IL-009~011을 보존하고 VS-018 교훈을 IL-012로 정규화했으며, GlobalExceptionHandler는 AI Job·회사·프로필 오류 계약을 모두 보존했다. 집중 43개와 전체 88개 테스트가 성공했고 새 Head CI를 기다린다."
+
+created_at: "2026-07-21T13:08:55+09:00"
+updated_at: "2026-07-21T15:20:56+09:00"

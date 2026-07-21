@@ -12,6 +12,8 @@ erDiagram
     USERS ||--o{ IDEAS : authors
     USERS ||--o{ SEED_UNIT_LOTS : purchases
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
+    USERS ||--o{ AI_JOBS : requests
+    AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
@@ -103,6 +105,31 @@ erDiagram
         timestamptz published_at "nullable for Draft"
         timestamptz created_at
         timestamptz updated_at
+    }
+
+    AI_JOBS {
+        uuid id PK
+        uuid owner_id FK
+        varchar status "PENDING, PROCESSING, RETRY_WAIT, SUCCEEDED, FAILED"
+        jsonb input_snapshot "keyword, background"
+        varchar prompt_version
+        varchar idempotency_key "unique per owner"
+        int retry_count "0 or greater"
+        timestamptz locked_until "nullable"
+        varchar lease_owner "nullable worker id"
+        uuid lease_token "nullable fencing token"
+        timestamptz next_attempt_at "nullable backoff"
+        varchar failure_code "nullable, INVALID_RESPONSE_SCHEMA"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    AI_GENERATION_RESULTS {
+        uuid id PK
+        uuid ai_job_id FK,UK
+        jsonb raw_result "provider structured output"
+        jsonb normalized_result "problem analysis and 5 candidates"
+        timestamptz created_at
     }
 
     VALIDATION_QUESTIONS {
@@ -218,6 +245,28 @@ erDiagram
 - Draft 작성자는 내부 User UUID로 연결하며, 작성자만 Draft 상세를 조회한다.
 - 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
 - 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
+
+## VS-018 제약
+
+- 로그인 사용자의 사업화 키워드와 문제의식, 서버 Prompt Version을 생성 시점의 JSON 스냅샷으로 저장한다.
+- Job은 `PENDING`, retry count 0으로 생성하며 Worker 선점과 상태 전이는 후속 슬라이스에서 구현한다.
+- `(owner_id, idempotency_key)` 고유 제약으로 순차·동시 재전송을 한 Job으로 수렴시킨다.
+- 같은 사용자의 같은 Key·같은 입력은 기존 Job을 반환하고, 다른 입력에 Key를 재사용하면 거부한다.
+
+## VS-019 제약
+
+- Worker는 실행 가능한 Job을 생성 시각 순으로 `FOR UPDATE SKIP LOCKED` 선점해 같은 Job의 중복 처리를 막는다.
+- 선점 시 `PROCESSING` 상태, Worker ID, 매번 새로 발급한 fencing token과 2분 Lease를 저장한다.
+- Lease가 만료된 Job은 새 token으로 재선점하며 이전 token은 상태를 변경할 수 없다.
+- Timeout·429·5xx는 `RETRY_WAIT`로 전환하고 30초부터 최대 15분까지 지수 Backoff한 `next_attempt_at` 이후 다시 선점한다.
+
+## VS-020 제약
+
+- AI Provider 응답은 문제 분석과 제목·카테고리·요약·문제·고객·해결책·수익 모델을 모두 갖춘 후보 정확히 5개여야 한다.
+- 후보 제목은 공백과 대소문자를 정규화한 기준으로 서로 달라야 하며 필드 길이는 Idea Draft 계약을 따른다.
+- 유효한 원본·정규화 JSON은 Job당 하나의 `ai_generation_results`에 저장하고 Job을 `SUCCEEDED`로 종료한다.
+- Schema 오류는 Timeout·429·5xx 재시도와 구분해 `FAILED / INVALID_RESPONSE_SCHEMA`로 기록한다.
+- 성공·실패 완료는 활성 Lease fencing token으로 보호하고 결과만 저장하며 Idea를 자동 생성하거나 게시하지 않는다.
 
 ## VS-013 제약
 

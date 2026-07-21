@@ -1,0 +1,89 @@
+schema_version: 2
+
+task:
+  id: VS-019
+  title: "Worker Lease와 Backoff"
+  dependencies: [VS-018]
+  resource_locks: [ai-job]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-019-worker-lease
+base_commit: 3b0f158942975bb786ea31d5c63fdc1fa842c520
+current_commit: 71e557e586f12f1ddfdae9f13fdc254ec00152db
+
+delivery:
+  strategy: stacked_pr
+  parent_task_id: VS-018
+  parent_pr_number: 38
+  base_ref: codex/vs-018-ai-job
+  base_head_sha: 3b0f158942975bb786ea31d5c63fdc1fa842c520
+  stack_root: VS-018
+  stack_depth: 2
+  merge_order: [VS-018, VS-019]
+
+review:
+  pr_number: 58
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/58"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: false
+  dependency_prs:
+    - task_id: VS-018
+      pr_number: 38
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/38"
+      state: OPEN
+      branch: codex/vs-018-ai-job
+      head_sha: 3b0f158942975bb786ea31d5c63fdc1fa842c520
+      merge_commit: null
+  red_test: "2026-07-21T21:21:10+09:00 ./gradlew test --tests com.seedrank.ai.job.AiJobWorkerIntegrationTest --no-daemon: Worker Service·Claim·Failure·Lease 계약 부재로 compileTestJava 15건 실패"
+  focused_tests: "2026-07-21T21:23:37+09:00 AiJobWorkerIntegrationTest·AiJobCreationIntegrationTest 변경 영역 위험 회귀: 15개 성공, 실패·오류 0개"
+  full_tests: "Fast Build checkpoint=false: 로컬 전체 테스트 생략, 최종 Head CI에서 전체 회귀 검증"
+  migration: "V20260721122145__add_ai_job_worker_lease.sql: PROCESSING·RETRY_WAIT, lease owner/token, next_attempt_at, 상태 일관성 CHECK와 claim 인덱스 추가; PostgreSQL ddl-auto validate 및 집중 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:19:10+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build worker: VS-019"
+    note: "고정 Selector 결과와 parent PR #38의 OPEN Head 3b0f158을 확인하고 Stacked 전달 계획을 작성했다."
+  - at: "2026-07-21T21:19:10+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build TDD: VS-019"
+    note: "SKIP LOCKED 선점, Lease fencing·복구, Timeout·429·5xx 지수 Backoff 테스트부터 구현을 시작했다."
+  - at: "2026-07-21T21:24:05+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build delivery: VS-019"
+    note: "Red compile 15건 확인 후 Worker Lease·fencing·SKIP LOCKED·Backoff를 구현했다. AI Job 변경 영역 위험 회귀 15개를 통과했고 checkpoint=false 정책에 따라 전체 테스트는 최종 Head CI에 위임한다."
+  - at: "2026-07-21T21:25:30+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-019"
+    note: "구현 커밋 71e557e를 Push하고 VS-018 branch를 base로 Draft PR #58을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
+
+created_at: "2026-07-21T21:19:10+09:00"
+updated_at: "2026-07-21T21:25:30+09:00"
