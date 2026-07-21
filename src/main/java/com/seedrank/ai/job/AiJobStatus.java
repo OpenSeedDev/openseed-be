@@ -1,5 +1,7 @@
 package com.seedrank.ai.job;
 
 enum AiJobStatus {
-    PENDING
+    PENDING,
+    PROCESSING,
+    RETRY_WAIT
 }

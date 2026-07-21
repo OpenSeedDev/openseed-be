@@ -5,13 +5,31 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.persistence.LockModeType;
+
 interface AiJobRepository extends JpaRepository<AiJob, UUID> {
 
     Optional<AiJob> findByOwnerIdAndIdempotencyKey(UUID ownerId, String idempotencyKey);
+
+    @Query(value = """
+            SELECT * FROM ai_jobs
+            WHERE status = 'PENDING'
+               OR (status = 'RETRY_WAIT' AND next_attempt_at <= :now)
+               OR (status = 'PROCESSING' AND locked_until <= :now)
+            ORDER BY created_at, id
+            FOR UPDATE SKIP LOCKED
+            LIMIT 1
+            """, nativeQuery = true)
+    Optional<AiJob> findNextClaimableForUpdate(@Param("now") Instant now);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select job from AiJob job where job.id=:jobId")
+    Optional<AiJob> findByIdForUpdate(@Param("jobId") UUID jobId);
 
     @Modifying
     @Query(value = """

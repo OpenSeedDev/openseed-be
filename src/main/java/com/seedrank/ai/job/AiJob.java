@@ -43,6 +43,15 @@ class AiJob {
     @Column(name = "locked_until")
     private Instant lockedUntil;
 
+    @Column(name = "lease_owner", length = 100)
+    private String leaseOwner;
+
+    @Column(name = "lease_token")
+    private UUID leaseToken;
+
+    @Column(name = "next_attempt_at")
+    private Instant nextAttemptAt;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -54,4 +63,31 @@ class AiJob {
 
     UUID id() { return id; }
     String inputSnapshot() { return inputSnapshot; }
+    String promptVersion() { return promptVersion; }
+    int retryCount() { return retryCount; }
+    Instant lockedUntil() { return lockedUntil; }
+
+    AiJobClaim claim(String workerId, Instant now, Instant leaseExpiresAt) {
+        status = AiJobStatus.PROCESSING;
+        leaseOwner = workerId;
+        leaseToken = UUID.randomUUID();
+        lockedUntil = leaseExpiresAt;
+        nextAttemptAt = null;
+        updatedAt = now;
+        return new AiJobClaim(id, inputSnapshot, promptVersion, retryCount, leaseToken, lockedUntil);
+    }
+
+    void scheduleRetry(UUID claimedToken, Instant retryAt, Instant now) {
+        if (status != AiJobStatus.PROCESSING || leaseToken == null || !leaseToken.equals(claimedToken)
+                || lockedUntil == null || !lockedUntil.isAfter(now)) {
+            throw new StaleAiJobLeaseException();
+        }
+        status = AiJobStatus.RETRY_WAIT;
+        retryCount++;
+        leaseOwner = null;
+        leaseToken = null;
+        lockedUntil = null;
+        nextAttemptAt = retryAt;
+        updatedAt = now;
+    }
 }

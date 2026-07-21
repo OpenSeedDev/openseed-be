@@ -102,6 +102,9 @@ erDiagram
         varchar idempotency_key "unique per owner"
         int retry_count "0 or greater"
         timestamptz locked_until "nullable"
+        varchar lease_owner "nullable worker id"
+        uuid lease_token "nullable fencing token"
+        timestamptz next_attempt_at "nullable backoff"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -159,6 +162,13 @@ erDiagram
 - Job은 `PENDING`, retry count 0으로 생성하며 Worker 선점과 상태 전이는 후속 슬라이스에서 구현한다.
 - `(owner_id, idempotency_key)` 고유 제약으로 순차·동시 재전송을 한 Job으로 수렴시킨다.
 - 같은 사용자의 같은 Key·같은 입력은 기존 Job을 반환하고, 다른 입력에 Key를 재사용하면 거부한다.
+
+## VS-019 제약
+
+- Worker는 실행 가능한 Job을 생성 시각 순으로 `FOR UPDATE SKIP LOCKED` 선점해 같은 Job의 중복 처리를 막는다.
+- 선점 시 `PROCESSING` 상태, Worker ID, 매번 새로 발급한 fencing token과 2분 Lease를 저장한다.
+- Lease가 만료된 Job은 새 token으로 재선점하며 이전 token은 상태를 변경할 수 없다.
+- Timeout·429·5xx는 `RETRY_WAIT`로 전환하고 30초부터 최대 15분까지 지수 Backoff한 `next_attempt_at` 이후 다시 선점한다.
 
 ## VS-013 제약
 
