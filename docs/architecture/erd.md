@@ -10,9 +10,11 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
+    USERS ||--o{ FEEDBACKS : writes
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
+    IDEAS ||--o{ FEEDBACKS : receives
 
     USERS {
         uuid id PK
@@ -129,6 +131,20 @@ erDiagram
         uuid actor_id FK
         timestamptz created_at
     }
+
+    FEEDBACKS {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        varchar feedback_type "PROBLEM_EMPATHY | TARGET_CUSTOMER | SOLUTION | BUSINESS_MODEL | COMPETITION | OTHER"
+        varchar content "normalized, 100..2000"
+        varchar evidence_url "optional http/https"
+        varchar evidence_description "optional, max 1000"
+        timestamptz accepted_at "nullable until VS-027"
+        timestamptz edited_at "nullable until VS-026"
+        timestamptz deleted_at "nullable until VS-026"
+        timestamptz created_at
+    }
 ```
 
 ## VS-001 제약
@@ -206,3 +222,11 @@ erDiagram
 - 매칭형은 Guest·User·Company에 요약과 공통 게시 정보만 반환하고 작성자에게만 전체 내용을 반환한다.
 - 공개 범위상 숨겨진 필드는 `null` 값으로 직렬화하지 않고 JSON 응답 키 자체를 제외한다.
 - Draft와 향후 비게시 상태는 작성자에게만 반환하며 다른 조회자에게는 존재 여부를 숨긴다.
+
+## VS-024 제약
+
+- 활성 로그인 사용자는 `PUBLIC`, `SEMI_PUBLIC`, `MATCHING`으로 게시된 아이디어에 구조화 피드백을 등록할 수 있다.
+- 피드백 유형과 앞뒤 공백 제거 후 100~2,000자 의견은 필수이며 HTTP(S) 근거 URL과 1,000자 이하 근거 설명은 선택이다.
+- Feedback 생성과 `FEEDBACK_CREATED` 20P 활동 보상 원장을 하나의 트랜잭션으로 처리한다.
+- Asia/Seoul 정책 날짜의 여섯 번째 피드백부터는 Feedback은 저장하되 일일 5회 제한으로 보상 전액을 소멸 기록한다.
+- 목록·수정·삭제·이력·채택은 VS-025~027에서 확장한다.
