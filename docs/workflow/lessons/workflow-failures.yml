@@ -28,3 +28,31 @@ failures:
     recurrence_count: 1
     promoted_to: null
     evidence: "초기 ModuleNotFoundError 후 공식 generate_openai_yaml.py 성공 및 quick_validate.py: Skill is valid"
+  - id: WF-003
+    fingerprint: "manually-copied-feature-commit-sha-mismatch"
+    status: resolved
+    occurred_at: "2026-07-21T10:33:00+09:00"
+    slice_id: VS-030
+    stage: creating_pr
+    command: "git rev-parse HEAD; state evidence update"
+    symptom: "상태 파일의 current_commit에 터미널의 축약 SHA를 수기로 확장해 실제 구현 커밋과 다른 값을 기록했다."
+    root_cause: "git rev-parse로 출력된 전체 SHA를 기계적으로 전달하지 않고 축약 SHA를 사람이 추정해 입력했다."
+    resolution: "실제 구현 커밋 f5808225018178704f9aa3c19a6128ab0fc003bb를 다시 조회해 상태 증거를 수정했다."
+    prevention: "current_commit 갱신 전후 `git rev-parse <commit>` 결과와 상태 값을 직접 비교하고 상태 검증에 커밋 존재 확인을 함께 수행한다."
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "git rev-parse HEAD 직전 구현 커밋 결과와 VS-030.yml current_commit 비교"
+  - id: WF-004
+    fingerprint: "runtime-state-push-retriggers-full-ci-and-invalidates-approval"
+    status: resolved
+    occurred_at: "2026-07-21T16:00:00+09:00"
+    slice_id: "VS-006, VS-009, VS-018, VS-030, VS-055"
+    stage: "pr_reconciliation"
+    command: "GitHub PR commit history and Backend CI run history audit"
+    symptom: "CI·리뷰·충돌 복구·승인 관찰 결과를 상태 파일에 기록할 때마다 새 Head가 만들어져 전체 CI가 다시 실행되고 기존 승인이 낡아졌다. 최근 기능 PR은 각각 Backend CI를 6~9회 실행했다."
+    root_cause: "변하지 않는 구현 코드와 GitHub 런타임 관찰 상태를 같은 PR 브랜치에 저장했고, Backend CI가 변경 경로와 무관하게 ./gradlew clean test를 실행했다."
+    resolution: "GitHub를 런타임 최종 기준으로 사용해 관찰 전용 Push와 작업별 완료 상태 PR을 중단하고, 변경 경로별 CI와 최종 Head CI 회수 방식으로 전환했다."
+    prevention: "Merge Guard는 committed task readiness만 검사하고 GitHub required checks와 auto-merge가 live gate를 담당한다. synchronize 이벤트는 기존 auto-merge를 해제하며 경량 변경은 Java 전체 테스트를 건너뛴다."
+    recurrence_count: 5
+    promoted_to: "implemented: path-scoped Backend CI, live GitHub merge gate, agent and Skill rules"
+    evidence: "PR #27 10 commits/Backend CI 8 runs, PR #28 11 commits/9 runs, PR #30 11 commits/7 runs, PR #38 9 commits/6 runs; Backend CI median 74 seconds"

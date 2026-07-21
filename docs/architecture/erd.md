@@ -99,6 +99,7 @@ erDiagram
 - 가입 시 User, PointWallet, PointLedger를 같은 트랜잭션에 저장한다.
 - 가입 원장은 `300 = paidAmount(300) + expiredAmount(0)`을 만족한다.
 - PointLedger는 append-only 데이터로 취급한다.
+- `point_ledgers`의 UPDATE·DELETE는 데이터베이스 trigger가 거부하며 정정이 필요하면 새 원장 행을 추가한다.
 - 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
 - Refresh Token은 family ID와 이전 세션 ID로 회전 계보를 보존하며 재사용 탐지 시 패밀리를 폐기한다.
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.

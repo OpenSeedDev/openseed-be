@@ -21,9 +21,9 @@ Perform work in this order:
 
 1. Reconcile task PRs, merged PRs, CI results, comments, reviews, and unresolved threads.
 2. Process actionable review feedback for open PRs before starting more work.
-3. Detect exact `/merge-approved` comments by the configured approver and record their evidence.
+3. Detect exact `/merge-approved` comments by the configured approver against the live PR head; do not push an approval-evidence-only commit.
 4. Enable or complete merge only when the approval, checks, resolved threads, dependency, and conflict gates pass.
-5. Sync merged work and release dependency and resource locks.
+5. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
 6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit.
 7. Dispatch each selected task to a separate worktree and agent context.
 8. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
@@ -40,13 +40,13 @@ Do not select a task when any dependency is not actually merged, another active 
 6. Write tests first and run them to capture an intentional Red result.
 7. Implement the smallest production change that makes focused tests pass.
 8. Refactor while tests remain green.
-9. Run `./gradlew clean test`.
+9. Run focused tests locally. Also run `./gradlew test` once for migrations, authentication/authorization, visibility, Point/Unit accounting, concurrency, or shared error/configuration changes; otherwise use final-head CI as the full regression run.
 10. Update OpenAPI, ERD, and a new Flyway migration when applicable.
 11. Inspect the diff and scan for secrets and unrelated changes.
 12. Validate the task state and backlog.
-13. Commit, push, create a PR, and record its URL and number.
-14. Wait for CI. Repair deterministic failures up to three attempts.
-15. Set `AWAITING_PR_REVIEW` and push the state update when CI succeeds.
+13. Commit and push, create a draft PR, record its URL and number, set `AWAITING_PR_REVIEW`, then make one final state commit and mark the PR ready.
+14. Return after the final push. Do not wait synchronously for CI; the next coordinator tick reconciles it and repairs deterministic failures up to three attempts.
+15. Do not push CI, review-count, approval, merge, or completion evidence when no implementation or review-fix content changed.
 
 The PR body must include the user outcome, acceptance criteria, Red/Green/full-test evidence, API and DB changes, dependency evidence, known limitations, and the automatic-review policy.
 
@@ -55,7 +55,7 @@ The PR body must include the user outcome, acceptance criteria, Red/Green/full-t
 For every open task PR, collect general comments, submitted reviews, inline comments, unresolved threads, and CI results.
 
 - Identify comments by stable GitHub IDs and never process the same revision twice.
-- For an actionable defect, add or adjust a regression test first, implement the correction, run focused and full tests, update documents, commit, push, and reply with evidence.
+- For an actionable defect, add or adjust a regression test first, implement the correction, run focused tests, update documents, commit, push, and reply with evidence. Run local full tests only for the high-risk categories in Deliver One Task; final-head CI supplies the normal full regression run.
 - Record implementation mistakes under `docs/workflow/lessons/implementation-lessons.yml`.
 - If feedback is ambiguous, contradictory, expands product scope, or requires new authority, mark only that task `BLOCKED` and ask on the PR.
 - Never treat `/merge-approved` as a request to ignore unresolved review feedback.
@@ -63,7 +63,7 @@ For every open task PR, collect general comments, submitted reviews, inline comm
 
 ## Reach Merge Readiness
 
-Set `AWAITING_USER_MERGE` only when all conditions hold:
+Treat the live PR as `AWAITING_USER_MERGE` only when all conditions hold:
 
 - focused and full tests passed;
 - required CI succeeded for the current head commit;
@@ -73,9 +73,9 @@ Set `AWAITING_USER_MERGE` only when all conditions hold:
 - the configured approver posted an exact `/merge-approved` comment on this PR;
 - the PR is mergeable and has no conflict.
 
-Record the comment ID, URL, author, timestamp, and approved head SHA. Approval becomes stale after a later code push; require a new `/merge-approved` comment for the new head.
+Read the comment ID, URL, author, timestamp, and approved head SHA from GitHub at decision time. Do not commit this observation to the PR branch. A later push disables auto-merge and requires a new `/merge-approved` comment for the new head.
 
-The repository Merge Guard and GitHub branch protection are final authority. Never bypass them or force-merge.
+The repository Merge Guard validates static task readiness; GitHub required checks, thread resolution, strict up-to-date policy, and protected auto-merge validate live readiness. Never bypass them or force-merge.
 
 ## Recover Failures
 
@@ -97,6 +97,7 @@ ruby .agents/skills/vertical-slice/scripts/validate_backlog.rb docs/workflow/bac
 ruby .agents/skills/vertical-slice/scripts/validate_state.rb docs/workflow/slices/TASK-ID.yml
 ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
 ruby .agents/skills/vertical-slice/scripts/validate_backlog_test.rb
+ruby .agents/skills/vertical-slice/scripts/select_backend_test_scope_test.rb
 ```
 
 Do not advance, commit, or merge a task when its required validation fails.
