@@ -80,7 +80,7 @@ erDiagram
     IDEAS {
         uuid id PK
         uuid author_id FK
-        varchar status "DRAFT"
+        varchar status "DRAFT | PUBLISHED | ARCHIVED"
         varchar title "1..100"
         varchar category "1..50"
         varchar summary "max 200, nullable"
