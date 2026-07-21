@@ -108,7 +108,7 @@ erDiagram
     IDEA_VERSIONS {
         uuid id PK
         uuid idea_id FK
-        int version_number "unique per idea"
+        int version_number "unique per idea, append-only"
         varchar title
         varchar category
         varchar summary
@@ -206,3 +206,11 @@ erDiagram
 - 매칭형은 Guest·User·Company에 요약과 공통 게시 정보만 반환하고 작성자에게만 전체 내용을 반환한다.
 - 공개 범위상 숨겨진 필드는 `null` 값으로 직렬화하지 않고 JSON 응답 키 자체를 제외한다.
 - Draft와 향후 비게시 상태는 작성자에게만 반환하며 다른 조회자에게는 존재 여부를 숨긴다.
+
+## VS-012 제약
+
+- 게시된 아이디어의 작성자만 제목·카테고리·요약·문제·대상 고객·해결책·수익 모델을 수정할 수 있다.
+- 공개 범위·상태·가격·게시 시각은 내용 수정 API로 변경하지 않는다.
+- 아이디어 행 잠금 뒤 최신 내용과 `updated_at`을 변경하고 다음 버전 번호의 전체 내용·현재 공개 범위·검증 질문·수정자·동일 시각 스냅샷을 한 트랜잭션으로 저장한다.
+- `idea_versions`는 DB trigger가 UPDATE·DELETE를 거부하는 append-only 이력이다.
+- 사용자 API에는 버전 목록·비교·복원 경로를 제공하지 않고 최신 내용과 `updatedAt`만 노출한다.
