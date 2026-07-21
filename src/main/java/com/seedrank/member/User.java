@@ -66,6 +66,11 @@ public class User {
         return profileId;
     }
 
+    public void updateProfileId(String profileId, Instant now) {
+        this.profileId = profileId;
+        this.updatedAt = now;
+    }
+
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
 
@@ -75,6 +80,10 @@ public class User {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 
     public enum Role {
