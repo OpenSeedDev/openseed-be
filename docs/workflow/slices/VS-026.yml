@@ -6,10 +6,10 @@ task:
   dependencies: [VS-024]
   resource_locks: [feedback]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-026-feedback-history
 base_commit: ad30c0ce09c5cc99d9446311fc6e30cd8bc87a60
-current_commit: null
+current_commit: b1bacef1081a5e9dec375285110e4b266f727023
 
 delivery:
   strategy: stacked_pr
@@ -22,8 +22,8 @@ delivery:
   merge_order: [VS-024, VS-025, VS-026]
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 61
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/61"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -81,6 +81,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-026"
     note: "Red 7건 후 작성자 전용 수정·삭제, 행 잠금, 이전 스냅샷과 soft delete를 구현했다. 피드백 생성·목록·관리 위험 회귀 22개와 OpenAPI·ERD·새 UTC Migration을 검증했고 checkpoint=false라 전체 테스트는 생략한다."
+  - at: "2026-07-21T21:40:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-026"
+    note: "구현 커밋 b1bacef를 Push하고 VS-025 PR #59를 base로 Draft PR #61을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:28:00+09:00"
-updated_at: "2026-07-21T21:38:00+09:00"
+updated_at: "2026-07-21T21:40:00+09:00"
