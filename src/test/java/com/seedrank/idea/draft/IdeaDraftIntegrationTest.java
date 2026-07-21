@@ -82,7 +82,8 @@ class IdeaDraftIntegrationTest {
         String ideaId = body.get("id").asText();
         assertThat(body.fieldNames()).toIterable().containsExactlyInAnyOrder(
                 "id", "status", "title", "category", "summary", "problem",
-                "targetCustomer", "solution", "businessModel", "createdAt", "updatedAt");
+                "targetCustomer", "solution", "businessModel", "validationQuestions", "createdAt", "updatedAt");
+        assertThat(body.get("validationQuestions").isEmpty()).isTrue();
         assertThat(body.toString()).doesNotContain(
                 "author@example.com", "accessToken", "sessionId", "visibility", "aiJob");
 
