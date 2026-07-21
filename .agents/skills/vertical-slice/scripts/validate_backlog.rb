@@ -13,19 +13,20 @@ module Backlog
     raise "schema_version must be 1" unless data["schema_version"] == 1
     settings = data["settings"]
     raise "settings must be a mapping" unless settings.is_a?(Hash)
-    required_settings = %w[repository base_branch approver merge_command max_parallel_workers review_poll_minutes max_recovery_attempts delivery_mode dependency_strategy review_strategy max_stack_depth full_test_checkpoint_size fast_build_exit]
+    required_settings = %w[repository base_branch approver merge_command max_parallel_workers review_poll_minutes max_recovery_attempts delivery_mode dependency_strategy review_strategy max_stack_depth full_test_checkpoint_size fast_build_exit global_stack_branch]
     required_settings.each { |key| raise "missing settings.#{key}" unless settings.key?(key) }
     raise "merge_command must be /merge-approved" unless settings["merge_command"] == "/merge-approved"
     raise "max_parallel_workers must be 1..3" unless settings["max_parallel_workers"].is_a?(Integer) && settings["max_parallel_workers"].between?(1, 3)
     raise "max_recovery_attempts must be 3" unless settings["max_recovery_attempts"] == 3
     raise "delivery_mode must be safe_merge or fast_build" unless %w[safe_merge fast_build].include?(settings["delivery_mode"])
-    raise "dependency_strategy must be merged_only or stacked_pr" unless %w[merged_only stacked_pr].include?(settings["dependency_strategy"])
+    raise "dependency_strategy must be merged_only, stacked_pr, or global_stacked_pr" unless %w[merged_only stacked_pr global_stacked_pr].include?(settings["dependency_strategy"])
     raise "review_strategy must be immediate or deferred" unless %w[immediate deferred].include?(settings["review_strategy"])
-    raise "max_stack_depth must be 1..8" unless settings["max_stack_depth"].is_a?(Integer) && settings["max_stack_depth"].between?(1, 8)
+    raise "max_stack_depth must be 1..64" unless settings["max_stack_depth"].is_a?(Integer) && settings["max_stack_depth"].between?(1, 64)
     raise "full_test_checkpoint_size must be 1..8" unless settings["full_test_checkpoint_size"].is_a?(Integer) && settings["full_test_checkpoint_size"].between?(1, 8)
     raise "fast_build_exit must be all_vs_tasks_have_pr" unless settings["fast_build_exit"] == "all_vs_tasks_have_pr"
+    raise "global_stack_branch must start with codex/" unless settings["global_stack_branch"].is_a?(String) && settings["global_stack_branch"].start_with?("codex/")
     if settings["delivery_mode"] == "fast_build"
-      raise "fast_build requires stacked_pr" unless settings["dependency_strategy"] == "stacked_pr"
+      raise "fast_build requires a stacked strategy" unless %w[stacked_pr global_stacked_pr].include?(settings["dependency_strategy"])
       raise "fast_build requires deferred reviews" unless settings["review_strategy"] == "deferred"
     end
 
@@ -95,7 +96,24 @@ module Backlog
       next unless (task["resource_locks"] & (held_locks + selected_locks)).empty?
 
       selected = task.dup
-      if task_fast_build
+      if task_fast_build && data.dig("settings", "dependency_strategy") == "global_stacked_pr"
+        global_candidates = open.select { |item| item.fetch("stack_root", item.fetch("id")) == "VS-GLOBAL" }
+        parent = global_candidates.max_by do |item|
+          [item.fetch("stack_depth", 1), order_by_id.fetch(item.fetch("id"), -1)]
+        end
+        stack_depth = parent ? parent.fetch("stack_depth", 1) + 1 : 1
+        next if stack_depth > data.dig("settings", "max_stack_depth")
+
+        selected["delivery"] = {
+          "strategy" => "global_stacked_pr",
+          "base_ref" => parent ? parent.fetch("head_ref") : data.dig("settings", "global_stack_branch"),
+          "parent_id" => parent&.fetch("id", nil),
+          "parent_pr" => parent&.fetch("pr_number", nil),
+          "stack_root" => "VS-GLOBAL",
+          "stack_depth" => stack_depth,
+          "full_test_checkpoint" => (stack_depth % data.dig("settings", "full_test_checkpoint_size")).zero?
+        }
+      elsif task_fast_build
         lane_candidates = open.select do |item|
           item_task = task_by_id[item.fetch("id")]
           item_locks = item.fetch("resource_locks", item_task&.fetch("resource_locks", []))

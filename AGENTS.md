@@ -18,11 +18,13 @@
 - PR 리뷰의 실행 가능한 지적은 회귀 테스트와 함께 자동 반영하고 같은 PR에 Push한다.
 - 질문이 필요한 리뷰는 해당 PR만 `BLOCKED`로 두며 독립 PR 처리를 중단하지 않는다.
 - 일반 모드에서는 선행 작업이 GitHub에서 실제 Merge된 뒤에만 후속 작업을 시작한다.
-- 단, `backlog.yml`의 `delivery_mode: fast_build` 동안에는 열린 선행 구현 PR을 base로
-  Stacked PR을 만들 수 있다. 상세 규칙은 Skill의 Fast Build Policy를 따른다.
+- 단, `backlog.yml`의 `delivery_mode: fast_build` 동안에는 기존 열린 VS Stack을 통합한
+  전역 기준 브랜치와 직전 전역 PR을 base로 Stacked PR을 만들 수 있다.
+  상세 규칙은 Skill의 Fast Build Policy를 따른다.
 - 한 tick에는 백로그 작업 하나만 선택·구현하고 PR을 만든 뒤 종료한다.
 - Fast Build Coordinator는 구현 Worker를 병렬 생성하지 않으며 선택된 한 작업을 직접 수행한다.
-- 동일한 `resource_locks`를 가진 작업은 동시에 실행하지 않는다.
+- 한 번에 하나만 구현하므로 resource lock은 동시 실행 차단보다 작업 영향 범위와
+  전역 Stack 통합 검증 범위를 나타낸다.
 - 하나의 PR에는 하나의 백로그 작업만 포함한다.
 - 자동화는 PR을 임의로 병합하지 않는다. `pado0711`의 정확한 `/merge-approved` 댓글과 필수 검사를 모두 확인해야 한다.
 - GitHub의 PR·CI·리뷰·Merge 상태를 런타임 최종 기준으로 사용하고, 관찰 결과만 기록하려는 상태 전용 Push를 하지 않는다.
@@ -53,8 +55,8 @@
 
 - `main`에 직접 개발하지 않는다.
 - 기능 브랜치는 `codex/vs-NNN-short-name`, 운영 브랜치는 `codex/ops-NN-short-name` 형식을 사용한다.
-- 일반 작업은 최신 `origin/main`, Fast Build Stacked 작업은 선택된 parent PR branch에서
-  독립 worktree로 시작한다.
+- 일반 작업은 최신 `origin/main`, Fast Build 첫 전역 작업은 통합 기준 브랜치,
+  이후 작업은 직전 전역 PR branch에서 독립 worktree로 시작한다.
 - 커밋·Push·PR 생성은 자동으로 수행한다.
 - PR 생성 후 CI, 리뷰 댓글, 인라인 대화, 의존성, 충돌 상태를 주기적으로 확인한다.
 - CI 완료를 같은 Coordinator tick에서 기다리지 않고 다음 tick에서 동기화한다.

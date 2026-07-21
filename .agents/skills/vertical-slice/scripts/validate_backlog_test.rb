@@ -15,7 +15,8 @@ class BacklogTest < Minitest::Test
         "review_poll_minutes" => 5, "max_recovery_attempts" => 3,
         "delivery_mode" => "safe_merge", "dependency_strategy" => "merged_only",
         "review_strategy" => "immediate", "max_stack_depth" => 4,
-        "full_test_checkpoint_size" => 4, "fast_build_exit" => "all_vs_tasks_have_pr"
+        "full_test_checkpoint_size" => 4, "fast_build_exit" => "all_vs_tasks_have_pr",
+        "global_stack_branch" => "codex/vs-fast-build-trunk"
       },
       "initial_merged" => ["SETUP-01"],
       "tasks" => [
@@ -107,6 +108,61 @@ class BacklogTest < Minitest::Test
     open = [{ "id" => "VS-001" }, { "id" => "VS-002" }, { "id" => "VS-003" }]
 
     assert Backlog.fast_build_complete?(load_data, merged: [], open: open)
+  end
+
+  def test_global_stack_allows_a_cross_root_dependency_on_the_integration_trunk
+    @data["settings"].merge!(
+      "delivery_mode" => "fast_build",
+      "dependency_strategy" => "global_stacked_pr",
+      "review_strategy" => "deferred",
+      "max_parallel_workers" => 1,
+      "max_stack_depth" => 64
+    )
+    @data["tasks"] << {
+      "id" => "VS-004", "order" => 5, "title" => "fan in",
+      "depends_on" => ["VS-001", "VS-002"], "resource_locks" => ["member", "wallet"]
+    }
+    open = [
+      { "id" => "VS-001", "head_ref" => "codex/vs-001", "stack_root" => "VS-001" },
+      { "id" => "VS-002", "head_ref" => "codex/vs-002", "stack_root" => "VS-002" }
+    ]
+
+    selected = Backlog.ready(load_data, merged: ["VS-003"], active: [], open: open).first
+
+    assert_equal "VS-004", selected["id"]
+    assert_equal "global_stacked_pr", selected.dig("delivery", "strategy")
+    assert_equal "codex/vs-fast-build-trunk", selected.dig("delivery", "base_ref")
+    assert_equal "VS-GLOBAL", selected.dig("delivery", "stack_root")
+    assert_equal 1, selected.dig("delivery", "stack_depth")
+  end
+
+  def test_global_stack_uses_the_latest_global_pr_and_marks_a_full_test_checkpoint
+    @data["settings"].merge!(
+      "delivery_mode" => "fast_build",
+      "dependency_strategy" => "global_stacked_pr",
+      "review_strategy" => "deferred",
+      "max_parallel_workers" => 1,
+      "max_stack_depth" => 64
+    )
+    open = [
+      {
+        "id" => "VS-001", "head_ref" => "codex/vs-001",
+        "stack_root" => "VS-001", "stack_depth" => 1
+      },
+      {
+        "id" => "VS-002", "head_ref" => "codex/vs-002-global",
+        "pr_number" => 102, "stack_root" => "VS-GLOBAL", "stack_depth" => 3
+      }
+    ]
+
+    selected = Backlog.ready(load_data, merged: [], active: [], open: open).first
+
+    assert_equal "VS-003", selected["id"]
+    assert_equal "codex/vs-002-global", selected.dig("delivery", "base_ref")
+    assert_equal "VS-002", selected.dig("delivery", "parent_id")
+    assert_equal 102, selected.dig("delivery", "parent_pr")
+    assert_equal 4, selected.dig("delivery", "stack_depth")
+    assert selected.dig("delivery", "full_test_checkpoint")
   end
 
   def test_fast_build_rejects_cross_stack_lock_fan_in

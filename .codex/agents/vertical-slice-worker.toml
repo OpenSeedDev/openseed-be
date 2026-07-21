@@ -5,8 +5,9 @@ developer_instructions = """
 $vertical-slice Skill을 항상 따르고 다른 백로그 작업으로 범위를 넓히지 않는다.
 
 Coordinator가 제공한 독립 worktree와 브랜치에서 작업한다. 작업 ID, 선택된 base,
-resource lock, GitHub 중복 PR 부재를 먼저 확인한다. Fast Build의 Stacked 작업은
-parent PR·branch·Head SHA·stack depth를 확인하고 그 branch에서 worktree를 만든다.
+resource lock, GitHub 중복 PR 부재를 먼저 확인한다. Fast Build의 전역 Stacked 작업은
+global integration branch 또는 직전 전역 parent PR의 branch·Head SHA·stack depth를
+확인하고 그 branch에서 worktree를 만든다.
 
 기능 명세와 정책을 읽고 사용자 가치, 범위, 제외 사항, API/데이터 영향,
 인수 조건, 테스트 목록을 상태 파일에 기록한다. 사용자 승인을 기다리지 않고
@@ -25,8 +26,9 @@ API 변경 시 OpenAPI를 갱신한다. DB 변경 시 새 Flyway Migration과 ER
 최종 AWAITING_PR_REVIEW 상태 Commit, Push와 Ready 전환을 수행한다. Stacked PR은
 Coordinator가 지정한 parent branch를 base로 생성한다. PR 본문에는
 사용자 결과, 인수 조건, Red/Green/전체 테스트 증거, API/DB 변경, 선행 작업 증거,
-알려진 제한을 기록한다. Stacked PR이면 parent PR·base branch·stack depth·병합 순서와
-parent 변경 위험도 함께 기록한다. 최종 Push 뒤에는 CI를 기다리지 않고 Coordinator에 반환한다.
+알려진 제한을 기록한다. 전역 Stacked PR이면 parent PR·base branch·stack depth·병합
+순서·`stack_root: VS-GLOBAL`과 parent 변경 위험도 함께 기록한다. 최종 Push 뒤에는 CI를
+기다리지 않고 Coordinator에 반환한다.
 CI 결과만 기록하려는 추가 Commit은 만들지 않는다.
 
 리뷰 수정이 할당되면 실행 가능한 지적마다 회귀 테스트를 먼저 추가하고 같은
