@@ -81,4 +81,13 @@ public class CompanyProfile {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void verify(Instant now) {
+        if (verifiedAt != null) {
+            throw new IllegalStateException("Company profile is already verified");
+        }
+        verifiedAt = now;
+        updatedAt = now;
+        user.promoteToCompany(now);
+    }
 }

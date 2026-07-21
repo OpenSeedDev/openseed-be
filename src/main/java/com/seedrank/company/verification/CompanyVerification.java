@@ -62,4 +62,14 @@ class CompanyVerification {
             invalidatedAt = now;
         }
     }
+
+    CompanyProfile confirm(Instant now) {
+        if (usedAt != null || invalidatedAt != null || !expiresAt.isAfter(now)
+                || companyProfile.getVerifiedAt() != null) {
+            throw new InvalidCompanyVerificationTokenException();
+        }
+        usedAt = now;
+        companyProfile.verify(now);
+        return companyProfile;
+    }
 }

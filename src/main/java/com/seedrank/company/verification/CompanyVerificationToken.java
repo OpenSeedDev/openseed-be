@@ -21,7 +21,7 @@ class CompanyVerificationToken {
         return new IssuedToken(raw, hash(raw));
     }
 
-    private String hash(String raw) {
+    String hash(String raw) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(raw.getBytes(StandardCharsets.UTF_8));
