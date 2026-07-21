@@ -6,10 +6,10 @@ task:
   dependencies: [VS-024]
   resource_locks: [feedback]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-025-feedback-list
 base_commit: e9fcef4380fc8b0b5a92f1078e660b5b92292813
-current_commit: null
+current_commit: 0ae3b450b8dbeb32c82511b1823c5d2f34040695
 
 delivery:
   strategy: stacked_pr
@@ -22,8 +22,8 @@ delivery:
   merge_order: [VS-024, VS-025]
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 59
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/59"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -77,6 +77,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-025"
     note: "Red 5건 후 최소 구현과 리팩터링을 완료하고 피드백 목록·등록 위험 회귀 테스트 15개와 OpenAPI 계약을 검증했다. checkpoint=false라 로컬 전체 테스트는 생략한다."
+  - at: "2026-07-21T21:26:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-025"
+    note: "구현 커밋 0ae3b45를 Push하고 VS-024 PR #53을 base로 Draft PR #59를 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:19:38+09:00"
-updated_at: "2026-07-21T21:23:14+09:00"
+updated_at: "2026-07-21T21:26:00+09:00"
