@@ -6,15 +6,15 @@ task:
   dependencies: [VS-030]
   resource_locks: [wallet, auth]
 
-status: APPLYING_REVIEW_CHANGES
+status: AWAITING_PR_REVIEW
 branch: codex/vs-056-daily-first-access
 base_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
-current_commit: c563a64900f982079020402d2ed312319a83017f
+current_commit: 8ee51ff36e6130659ad97ab2c02266daaba0f7fa
 
 review:
   pr_number: 47
   pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/47"
-  handled_comment_ids: []
+  handled_comment_ids: [3620679633]
   unresolved_thread_count: null
   merge_approval:
     command: /merge-approved
@@ -32,9 +32,9 @@ evidence:
       pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/30"
       merge_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
       merged_at: "2026-07-21T06:28:10Z"
-  red_test: "2026-07-21T17:30:32+09:00 ./gradlew test --tests com.seedrank.auth.login.DailyFirstAccessRewardIntegrationTest --no-daemon: 6개 중 일일 지급 기능 부재로 5개 실패, 자격 증명 실패 시 미지급 1개 성공"
-  focused_tests: "2026-07-21T17:35:32+09:00 DailyFirstAccessRewardIntegrationTest와 PointWalletQueryIntegrationTest: 14개 성공, 실패 0개"
-  full_tests: "2026-07-21T17:37:14+09:00 ./gradlew test --no-daemon: 117개 성공, 실패·오류·건너뜀 0개"
+  red_test: "2026-07-21T17:52:16+09:00 리뷰 회귀 Red: DailyFirstAccessRewardIntegrationTest의 30P 계약으로 변경 후 7개 중 기존 100P 구현 때문에 5개 실패, 미지급·롤백 2개 성공"
+  focused_tests: "2026-07-21T17:53:19+09:00 최신 main 통합 후 DailyFirstAccessRewardIntegrationTest와 PointWalletQueryIntegrationTest: 14개 성공, 실패 0개"
+  full_tests: "2026-07-21T17:54:10+09:00 최신 main 통합 후 ./gradlew test --no-daemon: 123개 성공, 실패·오류·건너뜀 0개"
   migration: "V20260721083033__add_daily_first_access_point_reward.sql: 적용된 Migration 수정 없이 DAILY_FIRST_ACCESS 원장 출처 허용; PostgreSQL ddl-auto validate와 전체 테스트 성공"
   ci_url: null
   ci_result: null
@@ -77,6 +77,11 @@ history:
     to: APPLYING_REVIEW_CHANGES
     command: "PR #47 review comment 3620679633"
     note: "첫 접속 보상을 100P에서 30P로 변경하라는 리뷰를 반영하기 위해 회귀 테스트를 먼저 변경했고 7개 중 정책 관련 5개 Red를 확인했다."
+  - at: "2026-07-21T17:54:23+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "PR #47 review fix and origin/main merge"
+    note: "30P 정책으로 구현·백로그·계획·ERD·지갑 조회 계약을 일치시키고 PR #46 merge 41ae040을 일반 merge로 통합했다. 집중 14개와 전체 123개 테스트가 통과했다."
 
 created_at: "2026-07-21T17:28:39+09:00"
-updated_at: "2026-07-21T17:52:16+09:00"
+updated_at: "2026-07-21T17:54:23+09:00"
