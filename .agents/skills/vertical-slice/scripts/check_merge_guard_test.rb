@@ -21,31 +21,37 @@ class VerticalSliceMergeGuardTest < Minitest::Test
   end
 
   def test_blocks_before_merge_ready_status
-    write_state(status: "AWAITING_PR_REVIEW")
+    write_state(status: "CREATING_PR")
     passed, message = check("codex/vs-055-profile-id")
     refute passed
-    assert_includes message, "status must be AWAITING_USER_MERGE"
+    assert_includes message, "status must be AWAITING_PR_REVIEW or AWAITING_USER_MERGE"
   end
 
-  def test_passes_with_current_user_approval_and_all_evidence
-    write_state(status: "AWAITING_USER_MERGE")
+  def test_passes_at_review_ready_without_runtime_evidence_commit
+    write_state(
+      status: "AWAITING_PR_REVIEW",
+      ci_result: nil,
+      approval_sha: nil,
+      approved_by: nil,
+      unresolved: nil
+    )
     passed, message = check("codex/vs-055-profile-id")
     assert passed
     assert_equal "PASS: VS-055 is ready for protected merge", message
   end
 
-  def test_blocks_stale_approval_after_code_push
-    write_state(status: "AWAITING_USER_MERGE", approval_sha: "old")
+  def test_blocks_unsatisfied_dependencies
+    write_state(status: "AWAITING_PR_REVIEW", dependencies_satisfied: false)
     passed, message = check("codex/vs-055-profile-id")
     refute passed
-    assert_includes message, "merge approval is stale"
+    assert_includes message, "dependencies are not satisfied"
   end
 
-  def test_blocks_unresolved_threads
-    write_state(status: "AWAITING_USER_MERGE", unresolved: 1)
+  def test_blocks_active_failure
+    write_state(status: "AWAITING_PR_REVIEW", failure_active: true)
     passed, message = check("codex/vs-055-profile-id")
     refute passed
-    assert_includes message, "unresolved review threads remain"
+    assert_includes message, "an active workflow failure remains"
   end
 
   def test_supports_ops_task_branches
@@ -60,7 +66,17 @@ class VerticalSliceMergeGuardTest < Minitest::Test
     VerticalSliceMergeGuard.check(head_ref: head_ref, repo_root: @repo_root, validate_schema: false)
   end
 
-  def write_state(status:, id: "VS-055", branch: "codex/vs-055-profile-id", approval_sha: "abc123", unresolved: 0)
+  def write_state(
+    status:,
+    id: "VS-055",
+    branch: "codex/vs-055-profile-id",
+    approval_sha: "abc123",
+    approved_by: "pado0711",
+    unresolved: 0,
+    ci_result: "success",
+    dependencies_satisfied: true,
+    failure_active: false
+  )
     directory = File.join(@repo_root, "docs", "workflow", "slices")
     FileUtils.mkdir_p(directory)
     state = {
@@ -71,10 +87,10 @@ class VerticalSliceMergeGuardTest < Minitest::Test
       "current_commit" => "abc123",
       "review" => {
         "unresolved_thread_count" => unresolved,
-        "merge_approval" => { "approved_by" => "pado0711", "head_sha" => approval_sha }
+        "merge_approval" => { "approved_by" => approved_by, "head_sha" => approval_sha }
       },
-      "evidence" => { "dependencies_satisfied" => true, "ci_result" => "success" },
-      "failure" => { "active" => false }
+      "evidence" => { "dependencies_satisfied" => dependencies_satisfied, "ci_result" => ci_result },
+      "failure" => { "active" => failure_active }
     }
     File.write(File.join(directory, "#{id}.yml"), state.to_yaml)
   end
