@@ -25,9 +25,11 @@ Normal delivery moves forward in the listed order, except that review and repair
 - `evidence.dependencies_satisfied` is set only after checking actual GitHub merges.
 - Red, focused, and full test evidence records command, conclusion, and time without full logs or secrets.
 - PR states require PR number and URL.
-- `AWAITING_USER_MERGE` requires successful CI for `current_commit`, zero unresolved threads, inactive failure, and `/merge-approved` evidence bound to that same commit.
+- `AWAITING_USER_MERGE` remains valid for historical records, but new autonomous PRs normally remain `AWAITING_PR_REVIEW` in the committed state file. Live CI, unresolved threads, approval, and mergeability are read directly from GitHub.
 - Any later code push clears all `review.merge_approval` fields except `command`.
 - Merge and synchronization states require their corresponding commit evidence.
+
+Do not commit a transition only to mirror CI, review-count, approval, Merge, or synchronization observations. Those commits change the PR head, rerun CI, and make approval evidence stale. An actual GitHub Merge is sufficient to release locks; completion-state documentation can be batched later.
 
 ## History
 
