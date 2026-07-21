@@ -8,6 +8,12 @@ settings:
   max_parallel_workers: 3
   review_poll_minutes: 5
   max_recovery_attempts: 3
+  delivery_mode: fast_build
+  dependency_strategy: stacked_pr
+  review_strategy: deferred
+  max_stack_depth: 4
+  full_test_checkpoint_size: 4
+  fast_build_exit: all_vs_tasks_have_pr
 
 initial_merged:
   - SETUP-01

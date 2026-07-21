@@ -14,25 +14,32 @@ description: Autonomously deliver SeedRank backend backlog tasks as dependency-a
 5. Never infer a merged dependency from a local state value alone.
 
 Read [references/autonomous-policy.md](references/autonomous-policy.md) before orchestrating more than one task or handling reviews. Read [references/state-schema.md](references/state-schema.md) before creating or changing a state file.
+When `settings.delivery_mode` is `fast_build`, read
+[references/fast-build-policy.md](references/fast-build-policy.md) before selecting or delivering work.
 
 ## Run an Orchestrator Tick
 
 Perform work in this order:
 
 1. Reconcile task PRs, merged PRs, CI results, comments, reviews, and unresolved threads.
-2. Process actionable review feedback for open PRs before starting more work.
+2. Process actionable review feedback for open PRs before starting more work. In Fast Build's
+   Build stage, defer this step unless the user explicitly requested a review tick.
 3. Detect exact `/merge-approved` comments by the configured approver against the live PR head; do not push an approval-evidence-only commit.
 4. Enable or complete merge only when the approval, checks, resolved threads, dependency, and conflict gates pass.
 5. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
-6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit.
+6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit. Fast Build
+   passes open implementation PRs separately so stacked successors can be selected.
 7. Dispatch each selected task to a separate worktree and agent context.
 8. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
 
-Do not select a task when any dependency is not actually merged, another active task holds one of its locks, or an open PR already represents it.
+In normal mode, do not select a task when any dependency is not actually merged, another active task
+holds one of its locks, or an open PR already represents it. Fast Build uses the stricter lane and
+stack rules in its policy instead of requiring every implementation dependency to be merged.
 
 ## Deliver One Task
 
-1. Create a clean worktree from the latest `origin/main` and a correctly named branch.
+1. Create a clean worktree from the selected base and a correctly named branch. The selected base is
+   latest `origin/main` in normal mode and the designated parent PR branch for a Fast Build stack.
 2. Create the task state from `assets/slice-state.yml`; record dependency evidence and status `PLANNING`.
 3. Read the feature specification, backlog row, applicable policies, and lessons.
 4. Write a compact task plan containing user value, scope, exclusions, API/data impact, acceptance criteria, and test list.
@@ -40,7 +47,10 @@ Do not select a task when any dependency is not actually merged, another active 
 6. Write tests first and run them to capture an intentional Red result.
 7. Implement the smallest production change that makes focused tests pass.
 8. Refactor while tests remain green.
-9. Run focused tests locally. Also run `./gradlew test` once for migrations, authentication/authorization, visibility, Point/Unit accounting, concurrency, or shared error/configuration changes; otherwise use final-head CI as the full regression run.
+9. Run focused tests locally. In normal mode, also run `./gradlew test` once for migrations,
+   authentication/authorization, visibility, Point/Unit accounting, concurrency, or shared
+   error/configuration changes. In Fast Build, run the related risk suite and reserve the local full
+   suite for stack checkpoints, shared build/config changes, and final review stabilization.
 10. Update OpenAPI, ERD, and a new Flyway migration when applicable.
 11. Inspect the diff and scan for secrets and unrelated changes.
 12. Validate the task state and backlog.
@@ -48,7 +58,7 @@ Do not select a task when any dependency is not actually merged, another active 
 14. Return after the final push. Do not wait synchronously for CI; the next coordinator tick reconciles it and repairs deterministic failures up to three attempts.
 15. Do not push CI, review-count, approval, merge, or completion evidence when no implementation or review-fix content changed.
 
-The PR body must include the user outcome, acceptance criteria, Red/Green/full-test evidence, API and DB changes, dependency evidence, known limitations, and the automatic-review policy.
+The PR body must include the user outcome, acceptance criteria, Red/Green/full-test evidence, API and DB changes, dependency evidence, known limitations, and the automatic-review policy. A Stacked PR must also include its parent PR, base branch, stack depth, merge order, and parent-change risk.
 
 ## Process Reviews
 
