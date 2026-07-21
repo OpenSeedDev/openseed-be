@@ -35,9 +35,9 @@ public class AccessTokenAuthenticator {
                 || !user.getId().equals(claims.userId()) || user.getStatus() != User.Status.ACTIVE) {
             throw new InvalidAccessTokenException();
         }
-        return new Principal(user.getId(), session.id());
+        return new Principal(user.getId(), session.id(), user.getRole());
     }
 
-    public record Principal(UUID userId, UUID sessionId) {
+    public record Principal(UUID userId, UUID sessionId, User.Role role) {
     }
 }

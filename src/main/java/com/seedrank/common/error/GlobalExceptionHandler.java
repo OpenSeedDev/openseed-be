@@ -20,6 +20,7 @@ import com.seedrank.company.profile.CompanyProfileAlreadyExistsException;
 import com.seedrank.company.profile.CompanyProfileValidationException;
 import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
+import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
@@ -143,6 +144,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
                 "COMPANY_ALREADY_VERIFIED", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(InvalidCompanyVerificationTokenException.class)
+    ResponseEntity<ApiError> handleInvalidCompanyVerificationToken(
+            InvalidCompanyVerificationTokenException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiError.of(
+                "INVALID_COMPANY_VERIFICATION_TOKEN", exception.getMessage(), requestId(request), List.of()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
