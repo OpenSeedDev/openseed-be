@@ -38,6 +38,12 @@ class BacklogTest < Minitest::Test
     assert_equal ["VS-002"], Backlog.ready(data, merged: [], active: active).map { |task| task["id"] }
   end
 
+  def test_selects_exactly_one_task_when_single_task_mode_is_configured
+    @data["settings"]["max_parallel_workers"] = 1
+
+    assert_equal ["VS-001"], Backlog.ready(load_data, merged: [], active: []).map { |task| task["id"] }
+  end
+
   def test_unlocks_dependency_only_after_merge
     data = load_data
     assert_includes Backlog.ready(data, merged: ["VS-001"], active: []).map { |task| task["id"] }, "VS-003"

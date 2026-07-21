@@ -10,7 +10,9 @@
 
 ## Concurrency
 
-- Use one coordinator and at most `settings.max_parallel_workers` task workers.
+- Use one coordinator and at most `settings.max_parallel_workers` active implementation tasks.
+- With `max_parallel_workers: 1`, the Coordinator delivers the selected task directly and does not
+  start concurrent implementation workers.
 - Give each worker a dedicated Git worktree, branch, state file, and PR.
 - Do not edit one task worktree from another worker.
 - Do not dispatch two tasks sharing any `resource_locks` value.

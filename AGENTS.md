@@ -20,7 +20,8 @@
 - 일반 모드에서는 선행 작업이 GitHub에서 실제 Merge된 뒤에만 후속 작업을 시작한다.
 - 단, `backlog.yml`의 `delivery_mode: fast_build` 동안에는 열린 선행 구현 PR을 base로
   Stacked PR을 만들 수 있다. 상세 규칙은 Skill의 Fast Build Policy를 따른다.
-- 동시에 최대 3개 작업자를 사용하고, 작업별 Git worktree와 브랜치를 분리한다.
+- 한 tick에는 백로그 작업 하나만 선택·구현하고 PR을 만든 뒤 종료한다.
+- Fast Build Coordinator는 구현 Worker를 병렬 생성하지 않으며 선택된 한 작업을 직접 수행한다.
 - 동일한 `resource_locks`를 가진 작업은 동시에 실행하지 않는다.
 - 하나의 PR에는 하나의 백로그 작업만 포함한다.
 - 자동화는 PR을 임의로 병합하지 않는다. `pado0711`의 정확한 `/merge-approved` 댓글과 필수 검사를 모두 확인해야 한다.
