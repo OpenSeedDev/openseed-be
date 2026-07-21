@@ -6,6 +6,7 @@
 - GitHub PR and merge state defines whether work is queued, active, awaiting review, or merged.
 - `docs/workflow/slices/TASK-ID.yml` records auditable evidence for one implementation PR.
 - A state file cannot declare a dependency merged unless GitHub confirmed it before branch creation.
+- CI, reviews, approval comments, mergeability, and Merge state are live GitHub facts. Do not create a commit solely to mirror those facts.
 
 ## Concurrency
 
@@ -31,14 +32,14 @@ Do not create speculative dependent PRs. A future task may be planned, but its b
 - Poll open task PRs at the configured interval.
 - Review processing has priority over starting new tasks.
 - Treat a review as processed only after its comment ID and resulting commit are recorded.
-- Rebase or merge `main` into an open branch only when needed to resolve an actual dependency or conflict; rerun all tests afterward.
+- Rebase or merge `main` into an open branch only when needed to resolve an actual dependency or conflict. Run focused tests and use final-head CI for the full regression run; also run local full tests for high-risk changes.
 - Approval is bound to the PR head SHA. Any code-changing push invalidates earlier approval.
 
 ## Merge Gate
 
 Only the configured approver can authorize a merge by posting a comment whose trimmed body is exactly `/merge-approved`.
 
-Before enabling merge, verify:
+Before enabling merge, verify from GitHub:
 
 - the approval comment was created for the current head SHA;
 - all review threads are resolved;
@@ -47,7 +48,15 @@ Before enabling merge, verify:
 - the PR is mergeable;
 - no active failure is recorded.
 
+Do not write these observations back to the open PR branch. A `synchronize` event disables an existing auto-merge request so a later push always requires a fresh approval comment.
+
 GitHub branch protection must remain enabled. Do not use administrator bypass, force push, or direct push to `main`.
+
+## Merge Synchronization
+
+- An actual GitHub Merge immediately satisfies downstream dependency checks and releases resource locks.
+- Do not create or wait for a per-task completion-state PR.
+- Historical state maintenance may be batched separately and must never block Ready task selection.
 
 ## Failure Isolation
 

@@ -24,7 +24,9 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Test merge guard
-        run: ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
+        run: |
+          ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
+          ruby .agents/skills/vertical-slice/scripts/select_backend_test_scope_test.rb
 
       - name: Validate autonomous backlog
         run: |
