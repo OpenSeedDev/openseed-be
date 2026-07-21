@@ -9,7 +9,7 @@ task:
 status: AWAITING_PR_REVIEW
 branch: codex/vs-032-unit-purchase
 base_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
-current_commit: 538b3e5c79b12fc593a17a04246dba5f6ae4ed9e
+current_commit: 538b3e5f055c2c7e5dbe5bf22ebcd28b6e67fcbd
 
 review:
   pr_number: 50
