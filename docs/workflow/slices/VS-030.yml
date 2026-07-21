@@ -6,10 +6,10 @@ task:
   dependencies: [VS-001]
   resource_locks: [wallet]
 
-status: AWAITING_PR_REVIEW
+status: AWAITING_USER_MERGE
 branch: codex/vs-030-wallet-ledger
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: 5409dafa0f545f29b5a13ce6459ae11fd1ef5911
+current_commit: 3df256b1a14115293bc4d404ee41e5cdf3e654d2
 
 review:
   pr_number: 30
@@ -18,11 +18,11 @@ review:
   unresolved_thread_count: 0
   merge_approval:
     command: /merge-approved
-    approved_by: null
-    comment_id: null
-    comment_url: null
-    approved_at: null
-    head_sha: null
+    approved_by: pado0711
+    comment_id: 5030798190
+    comment_url: "https://github.com/OpenSeedDev/openseed-be/pull/30#issuecomment-5030798190"
+    approved_at: "2026-07-21T06:21:47Z"
+    head_sha: 3df256b1a14115293bc4d404ee41e5cdf3e654d2
 
 evidence:
   dependencies_satisfied: true
@@ -36,7 +36,7 @@ evidence:
   focused_tests: "2026-07-21T15:05:16+09:00 최신 main 재통합 후 PointWalletQueryIntegrationTest, IdeaDraftIntegrationTest, CompanyProfileIntegrationTest, UpdateProfileIdIntegrationTest: 42개 성공, 실패 0개"
   full_tests: "2026-07-21T15:07:23+09:00 ./gradlew clean test --no-daemon: 87개 성공, 실패·오류·건너뜀 0개 (신규 main 테스트의 append-only 정리 회귀 28건 수정 후 Green)"
   migration: "V20260721012400__protect_point_ledgers_append_only.sql 적용: PostgreSQL 17 Testcontainers에서 총 8개 Migration과 ddl-auto validate 성공, UPDATE·DELETE 거부 검증"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29806141486"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29806234644"
   ci_result: success
   merge_commit: null
   synced_main_commit: null
@@ -92,6 +92,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "conflict recovery: VS-030 second main sync"
     note: "main의 VS-006·VS-055 기능과 상태를 모두 보존하고 교훈 ID 충돌을 해소했다. 신규 main 테스트의 append-only 원장 정리를 TRUNCATE로 맞춘 뒤 집중 42개와 전체 87개 테스트가 성공했으며 새 Head CI를 대기한다."
+  - at: "2026-07-21T15:26:02+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "/merge-approved"
+    note: "현재 Head 3df256b 이후 pado0711이 남긴 정확한 승인 댓글 5030798190, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
 
 created_at: "2026-07-21T10:21:04+09:00"
-updated_at: "2026-07-21T15:10:30+09:00"
+updated_at: "2026-07-21T15:26:02+09:00"
