@@ -18,6 +18,7 @@ import com.seedrank.company.profile.CompanyEmailDomainNotAllowedException;
 import com.seedrank.company.profile.CompanyProfileAlreadyExistsException;
 import com.seedrank.company.profile.CompanyProfileValidationException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -76,6 +77,17 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 requestId(request),
                 List.of(new ApiFieldError(exception.getField(), exception.getMessage()))));
+    }
+
+    @ExceptionHandler(ProfileIdValidationException.class)
+    ResponseEntity<ApiError> handleProfileIdValidation(
+            ProfileIdValidationException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "INVALID_PROFILE_ID",
+                exception.getMessage(),
+                requestId(request),
+                List.of(new ApiFieldError("profileId", exception.getMessage()))));
     }
 
     @ExceptionHandler(CompanyEmailDomainNotAllowedException.class)
