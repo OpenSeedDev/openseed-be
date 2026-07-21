@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-033
+  title: "구매 동시성 보호"
+  dependencies: [VS-032]
+  resource_locks: [unit, wallet]
+
+status: CREATING_PR
+branch: codex/vs-033-purchase-concurrency
+base_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-032
+      pr_number: 50
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/50"
+      merge_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
+      merged_at: "2026-07-21T11:05:09Z"
+  red_test: "2026-07-21T20:29:39+09:00 ./gradlew test --tests com.seedrank.unit.purchase.SeedUnitPurchaseConcurrencyIntegrationTest --no-daemon: 멱등 키 저장·필수 헤더·지갑 직렬화 부재로 6개 모두 실패"
+  focused_tests: "2026-07-21T20:32:41+09:00 SeedUnitPurchaseConcurrencyIntegrationTest·SeedUnitPurchaseIntegrationTest: 멱등 재전송·동시 구매·잔액·한도·기존 구매 회귀 15개 성공"
+  full_tests: "2026-07-21T20:33:49+09:00 ./gradlew test --no-daemon: 153개 성공, 실패·오류 0개"
+  migration: "V20260721113000__protect_seed_unit_purchase_concurrency.sql: 기존 Lot 안전 backfill, purchase_request_key NOT NULL 및 사용자별 UNIQUE 추가"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T20:27:32+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-033"
+    note: "백로그·기능 명세와 VS-032 PR #50의 실제 Merge를 확인했다."
+  - at: "2026-07-21T20:27:32+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-033"
+    note: "필수 멱등 키, 사용자 지갑 잠금, 중복 차감·음수 잔액·한도 초과 방지 테스트 범위를 확정했다."
+  - at: "2026-07-21T20:34:15+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-033"
+    note: "Red 6건 확인 후 지갑 선잠금과 사용자별 멱등 키를 구현했다. 집중 15개·전체 153개 테스트와 OpenAPI·ERD·새 Migration을 검증했다."
+
+created_at: "2026-07-21T20:27:32+09:00"
+updated_at: "2026-07-21T20:34:15+09:00"
