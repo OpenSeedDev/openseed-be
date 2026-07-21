@@ -6,16 +6,16 @@ task:
   dependencies: [VS-030]
   resource_locks: [wallet, feedback]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-031-point-policy
 base_commit: d53deba70e770098ba2710c5e9ce7b0095970ede
-current_commit: null
+current_commit: 8a17e89bc5a98df0de9cfab3a463ae99a6b76678
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 43
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/43"
   handled_comment_ids: []
-  unresolved_thread_count: null
+  unresolved_thread_count: 0
   merge_approval:
     command: /merge-approved
     approved_by: null
@@ -36,8 +36,8 @@ evidence:
   focused_tests: "2026-07-21T15:38:59+09:00 ./gradlew test --tests com.seedrank.point.PointRewardServiceIntegrationTest --no-daemon: 8개 성공, 실패 0개"
   full_tests: "2026-07-21T15:40:34+09:00 ./gradlew clean test --no-daemon: 94개 성공, 실패·오류·건너뜀 0개"
   migration: "V20260721063541__add_activity_point_reward_policy.sql: 기존 Migration 수정 없이 policy_date, 활동 출처 CHECK, source 멱등 UNIQUE, 일일 집계 partial index 추가; PostgreSQL 17에서 총 9개 Migration과 ddl-auto validate 성공"
-  ci_url: null
-  ci_result: null
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29807901900"
+  ci_result: success
   merge_commit: null
   synced_main_commit: null
 
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-031"
     note: "Red 후 최소 구현과 리팩터링을 완료하고 집중 8개·전체 94개 테스트, ERD와 새 UTC Migration 갱신을 완료했다."
+  - at: "2026-07-21T15:44:48+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-031"
+    note: "PR #43을 생성했고 구현 Head 8a17e89의 Build and Test 성공, Merge 가능, 댓글·리뷰·미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
 
 created_at: "2026-07-21T15:33:18+09:00"
-updated_at: "2026-07-21T15:40:48+09:00"
+updated_at: "2026-07-21T15:44:48+09:00"
