@@ -240,3 +240,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "2026-07-21T13:24:41+09:00 전용 테스트에서 expected 202 but was 409 Red 1건 확인"
+  - id: IL-015
+    fingerprint: "global-stack-migration-version-and-append-only-cleanup-collision"
+    status: resolved
+    occurred_at: "2026-07-21T22:54:20+09:00"
+    slice_id: "VS-012, VS-024, VS-028, VS-029, VS-033, VS-034"
+    category: stack_integration
+    review_comment_id: null
+    symptom: "서로 독립적으로 성공한 Stack을 합치자 Flyway 버전 V20260721105500이 중복됐고, 아이디어 버전 append-only trigger가 다른 Stack 테스트 29건의 DELETE 정리를 거부했다."
+    root_cause: "독립 PR의 Migration 버전과 테스트 fixture가 전역 조합에서 공유되는 DB 불변식까지 고려하지 못했다."
+    fix: "아이디어 버전 보호 Migration을 V20260721105501로 이동하고, 후속 Stack 테스트의 idea_versions 정리를 TRUNCATE 방식으로 통일했다."
+    regression_test: "Feedback·Unit·Messaging·IdeaLike 집중 회귀와 ./gradlew clean test 245건"
+    applies_to: "독립 Stack 통합 시 Flyway 버전, append-only 테이블과 공용 테스트 fixture"
+    recurrence_count: 1
+    promoted_to: "전역 Stack 초기 통합의 Migration 버전 중복 검사와 전체 테스트 gate"
+    evidence: "첫 전체 테스트 Flyway 중복으로 236건 연쇄 실패, 두 번째 전체 테스트 정리 DELETE로 29건 실패, 집중 회귀와 최종 전체 245건 성공"

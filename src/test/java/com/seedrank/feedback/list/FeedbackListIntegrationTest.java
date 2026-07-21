@@ -40,7 +40,7 @@ class FeedbackListIntegrationTest {
     void clean() {
         jdbc.update("DELETE FROM feedbacks");
         jdbc.update("DELETE FROM idea_timeline_events");
-        jdbc.update("DELETE FROM idea_versions");
+        jdbc.execute("TRUNCATE TABLE idea_versions");
         jdbc.update("DELETE FROM validation_questions");
         jdbc.update("DELETE FROM ideas");
         jdbc.update("DELETE FROM auth_sessions");
