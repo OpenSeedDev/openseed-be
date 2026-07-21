@@ -70,6 +70,10 @@ public class CompanyProfile {
         return companyDomain;
     }
 
+    public String getCompanyEmail() {
+        return companyEmail;
+    }
+
     public Instant getVerifiedAt() {
         return verifiedAt;
     }
