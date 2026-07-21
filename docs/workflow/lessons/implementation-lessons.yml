@@ -90,3 +90,33 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "VS-004 집중 테스트에서 활성 family 세션 expected 0 but was 1 확인 후 스칼라 선조회 방식으로 11개 집중 테스트 성공"
+  - id: IL-007
+    fingerprint: "new-foreign-key-test-data-leaks-into-legacy-cleanup"
+    status: resolved
+    occurred_at: "2026-07-21T01:34:31+09:00"
+    slice_id: VS-009
+    category: test_setup
+    review_comment_id: null
+    symptom: "IdeaDraftIntegrationTest가 남긴 ideas 행 때문에 이후 기존 테스트가 users 정리 시 외래 키 위반으로 7건 실패했다."
+    root_cause: "새 자식 테이블을 추가하면서 새 테스트가 클래스 종료 후 데이터를 정리하지 않아 기존 테스트 fixture의 부모 우선 정리와 충돌했다."
+    fix: "IdeaDraftIntegrationTest가 각 테스트 후 ideas 행을 정리하도록 teardown을 추가했다."
+    regression_test: "./gradlew clean test 전체 테스트에서 IdeaDraftIntegrationTest 이후 기존 회원·인증 테스트 통과"
+    applies_to: "기존 루트 엔티티를 참조하는 새 테이블과 PostgreSQL 통합 테스트"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "첫 전체 테스트 49개 중 MyAccountIntegrationTest 7개 FK 실패 후 teardown 추가"
+  - id: IL-008
+    fingerprint: "public-domain-factory-allows-arbitrary-idea-draft-time"
+    status: resolved
+    occurred_at: "2026-07-21T12:03:00+09:00"
+    slice_id: VS-009
+    category: pr_review
+    review_comment_id: 3619109381
+    symptom: "공개 Idea.draft 팩토리가 Instant를 직접 받아 호출자가 주입 Clock 대신 임의 시각이나 혼합 시간원을 전달할 수 있었다."
+    root_cause: "서비스는 주입 Clock을 올바르게 사용했지만 도메인 생성 계약이 시간원 선택 책임을 모든 호출자에게 공개했다."
+    fix: "Idea.draft를 패키지 내부로 제한하고 주입 Clock을 소유하는 IdeaDraftFactory가 Clock을 한 번 읽어 생성·수정 시각에 함께 적용하도록 했다."
+    regression_test: "IdeaTimeSourceContractTest.applicationCallersCannotSupplyAnArbitraryDraftTimestamp 및 draftFactoryReadsTheInjectedClockOnceForBothTimestamps"
+    applies_to: "애플리케이션 Clock으로 생성·수정 시각을 함께 설정하는 Idea 생성 경로"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "PR #29 인라인 댓글 3619109381, 계약 테스트 Red 1건과 집중 8개·전체 51개 Green"

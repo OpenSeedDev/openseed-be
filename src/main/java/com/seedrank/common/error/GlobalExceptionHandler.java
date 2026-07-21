@@ -14,6 +14,7 @@ import com.seedrank.auth.signup.SignupValidationException;
 import com.seedrank.auth.login.InvalidCredentialsException;
 import com.seedrank.auth.login.InvalidRefreshTokenException;
 import com.seedrank.auth.login.InvalidAccessTokenException;
+import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -86,6 +87,17 @@ public class GlobalExceptionHandler {
                 "입력값을 확인해 주세요.",
                 requestId(request),
                 fieldErrors));
+    }
+
+    @ExceptionHandler(IdeaDraftNotFoundException.class)
+    ResponseEntity<ApiError> handleIdeaDraftNotFound(
+            IdeaDraftNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "IDEA_NOT_FOUND",
+                "아이디어를 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
     }
 
     @ExceptionHandler(Exception.class)
