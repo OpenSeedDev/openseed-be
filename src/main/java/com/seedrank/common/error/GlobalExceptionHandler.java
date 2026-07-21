@@ -1,8 +1,6 @@
 package com.seedrank.common.error;
 
 import java.util.List;
-import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.http.HttpServletRequest;
+import com.seedrank.ops.http.RequestIdFilter;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -98,7 +97,7 @@ public class GlobalExceptionHandler {
     }
 
     private String requestId(HttpServletRequest request) {
-        String supplied = request.getHeader("X-Request-Id");
-        return supplied == null || supplied.isBlank() ? UUID.randomUUID().toString() : supplied;
+        Object requestId = request.getAttribute(RequestIdFilter.REQUEST_ATTRIBUTE);
+        return requestId instanceof String value ? value : "unavailable";
     }
 }
