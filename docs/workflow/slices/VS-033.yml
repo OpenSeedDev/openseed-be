@@ -6,14 +6,14 @@ task:
   dependencies: [VS-032]
   resource_locks: [unit, wallet]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-033-purchase-concurrency
 base_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
-current_commit: null
+current_commit: decc491ac34b377e8e099d3499855a0e64033d8e
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 55
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/55"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-033"
     note: "Red 6건 확인 후 지갑 선잠금과 사용자별 멱등 키를 구현했다. 집중 15개·전체 153개 테스트와 OpenAPI·ERD·새 Migration을 검증했다."
+  - at: "2026-07-21T20:35:40+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-033"
+    note: "구현 커밋 decc491을 Push하고 Draft PR #55를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
 
 created_at: "2026-07-21T20:27:32+09:00"
-updated_at: "2026-07-21T20:34:15+09:00"
+updated_at: "2026-07-21T20:35:40+09:00"
