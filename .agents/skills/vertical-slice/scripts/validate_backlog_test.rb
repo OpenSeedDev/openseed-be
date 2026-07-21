@@ -109,6 +109,33 @@ class BacklogTest < Minitest::Test
     assert Backlog.fast_build_complete?(load_data, merged: [], open: open)
   end
 
+  def test_fast_build_rejects_cross_stack_lock_fan_in
+    @data["settings"].merge!(
+      "delivery_mode" => "fast_build",
+      "dependency_strategy" => "stacked_pr",
+      "review_strategy" => "deferred",
+      "max_parallel_workers" => 1
+    )
+    @data["tasks"] << {
+      "id" => "VS-004", "order" => 5, "title" => "fan in",
+      "depends_on" => ["VS-001"], "resource_locks" => ["member", "wallet"]
+    }
+    open = [
+      {
+        "id" => "VS-001", "resource_locks" => ["member"],
+        "head_ref" => "codex/vs-001", "stack_root" => "VS-001", "stack_depth" => 1
+      },
+      {
+        "id" => "VS-002", "resource_locks" => ["wallet"],
+        "head_ref" => "codex/vs-002", "stack_root" => "VS-002", "stack_depth" => 1
+      }
+    ]
+
+    selected_ids = Backlog.ready(load_data, merged: ["VS-003"], active: [], open: open).map { |task| task["id"] }
+
+    refute_includes selected_ids, "VS-004"
+  end
+
   def test_rejects_dependency_cycle
     @data["tasks"][0]["depends_on"] = ["VS-003"]
     error = assert_raises(RuntimeError) { load_data }
