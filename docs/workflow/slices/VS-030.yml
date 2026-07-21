@@ -9,7 +9,7 @@ task:
 status: CREATING_PR
 branch: codex/vs-030-wallet-ledger
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
+current_commit: f580822075b45aa668cc64feec71ea0a922a6f9a
 
 review:
   pr_number: null
