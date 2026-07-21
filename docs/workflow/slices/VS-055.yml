@@ -6,10 +6,10 @@ task:
   dependencies: [VS-001]
   resource_locks: [member]
 
-status: AWAITING_USER_MERGE
+status: COMPLETED_SYNCED
 branch: codex/vs-055-profile-id
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: 4e6c217e2b906d136548954f980ec3908eb9f495
+current_commit: cfcbb3d8744095aef1b451c29b660c29d4a3340e
 
 review:
   pr_number: 27
@@ -36,10 +36,10 @@ evidence:
   focused_tests: "2026-07-21T14:37:20+09:00 ./gradlew test --tests com.seedrank.member.profile.UpdateProfileIdIntegrationTest --tests com.seedrank.company.profile.CompanyProfileIntegrationTest --no-daemon: 29개 성공, 실패·오류·건너뜀 0개; 공유 예외 처리기의 양쪽 기능 계약 검증"
   full_tests: "2026-07-21T14:38:11+09:00 ./gradlew clean test --no-daemon: 80개 성공, 실패·오류·건너뜀 0개"
   migration: "VS-055 신규 Migration 없음. origin/main의 V20260721043400__create_company_profiles.sql을 수정 없이 통합했고 PostgreSQL Testcontainers에서 전체 Migration과 ddl-auto validate 성공; ERD의 회사 프로필 변경은 선행 Merge 그대로 보존"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29804766998"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29805105458"
   ci_result: success
-  merge_commit: null
-  synced_main_commit: null
+  merge_commit: c53554ee98d71b20a66285fdf713c5aa5d72d697
+  synced_main_commit: 0a69a3c08a090f890ce952704c07f26d2a9e4cc2
 
 failure:
   active: false
@@ -97,6 +97,16 @@ history:
     to: AWAITING_USER_MERGE
     command: "/merge-approved"
     note: "현재 코드 4e6c217 이후 pado0711이 남긴 정확한 승인 댓글 5030577641, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
+  - at: "2026-07-21T14:51:05+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "GitHub protected auto-merge"
+    note: "PR #27이 최종 Head cfcbb3d와 필수 검사 성공 상태에서 Merge 커밋 c53554e로 실제 병합됐다."
+  - at: "2026-07-21T14:55:41+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "git fetch origin && git merge --ff-only origin/main"
+    note: "로컬 main을 0a69a3c로 fast-forward하고 GitHub Merge 증거를 동기화해 VS-055와 member lock을 완료 해제했다."
 
 created_at: "2026-07-21T01:28:55+09:00"
-updated_at: "2026-07-21T14:49:11+09:00"
+updated_at: "2026-07-21T14:55:41+09:00"
