@@ -1,7 +1,7 @@
 package com.seedrank.point;
 
 public enum ActivityReward {
-    DAILY_FIRST_ACCESS(100, PointLedger.SourceType.DAILY_FIRST_ACCESS),
+    DAILY_FIRST_ACCESS(30, PointLedger.SourceType.DAILY_FIRST_ACCESS),
     IDEA_PUBLISHED(50, PointLedger.SourceType.IDEA_PUBLISHED),
     FEEDBACK_CREATED(20, PointLedger.SourceType.FEEDBACK_CREATED),
     FEEDBACK_ACCEPTED(100, PointLedger.SourceType.FEEDBACK_ACCEPTED);

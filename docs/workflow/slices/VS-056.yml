@@ -2,11 +2,11 @@ schema_version: 2
 
 task:
   id: VS-056
-  title: "일일 첫 접속 100P"
+  title: "일일 첫 접속 30P"
   dependencies: [VS-030]
   resource_locks: [wallet, auth]
 
-status: AWAITING_PR_REVIEW
+status: APPLYING_REVIEW_CHANGES
 branch: codex/vs-056-daily-first-access
 base_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
 current_commit: c563a64900f982079020402d2ed312319a83017f
@@ -72,6 +72,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "vertical-slice PR delivery: VS-056"
     note: "구현 커밋 c563a64를 Push하고 Draft PR #47을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+  - at: "2026-07-21T17:52:16+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "PR #47 review comment 3620679633"
+    note: "첫 접속 보상을 100P에서 30P로 변경하라는 리뷰를 반영하기 위해 회귀 테스트를 먼저 변경했고 7개 중 정책 관련 5개 Red를 확인했다."
 
 created_at: "2026-07-21T17:28:39+09:00"
-updated_at: "2026-07-21T17:38:57+09:00"
+updated_at: "2026-07-21T17:52:16+09:00"

@@ -58,7 +58,7 @@ class PointWalletQueryIntegrationTest {
 
         mockMvc.perform(authenticatedGet("/api/v1/me/wallet", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(400))
+                .andExpect(jsonPath("$.balance").value(330))
                 .andExpect(jsonPath("$.pendingRecoveryBalance").value(0))
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty());
     }
@@ -72,10 +72,10 @@ class PointWalletQueryIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(2))
                 .andExpect(jsonPath("$.items[0].type").value("CREDIT"))
-                .andExpect(jsonPath("$.items[0].originalAmount").value(100))
-                .andExpect(jsonPath("$.items[0].paidAmount").value(100))
+                .andExpect(jsonPath("$.items[0].originalAmount").value(30))
+                .andExpect(jsonPath("$.items[0].paidAmount").value(30))
                 .andExpect(jsonPath("$.items[0].expiredAmount").value(0))
-                .andExpect(jsonPath("$.items[0].balanceAfter").value(400))
+                .andExpect(jsonPath("$.items[0].balanceAfter").value(330))
                 .andExpect(jsonPath("$.items[0].sourceType").value("DAILY_FIRST_ACCESS"))
                 .andExpect(jsonPath("$.items[0].createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.items[1].originalAmount").value(300))
@@ -142,7 +142,7 @@ class PointWalletQueryIntegrationTest {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(authenticatedGet("/api/v1/me/wallet", firstToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(400));
+                .andExpect(jsonPath("$.balance").value(330));
         mockMvc.perform(authenticatedGet("/api/v1/me/point-ledgers", firstToken))
                 .andExpect(jsonPath("$.items.length()").value(2));
     }

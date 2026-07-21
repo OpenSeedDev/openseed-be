@@ -63,18 +63,18 @@ class DailyFirstAccessRewardIntegrationTest {
     }
 
     @Test
-    void firstSuccessfulLoginOfPolicyDateRewardsOneHundredPoints() throws Exception {
+    void firstSuccessfulLoginOfPolicyDateRewardsThirtyPoints() throws Exception {
         signup();
 
         mockMvc.perform(login("password123")).andExpect(status().isOk());
 
-        assertThat(balance()).isEqualTo(400);
+        assertThat(balance()).isEqualTo(330);
         assertThat(jdbc.queryForMap("""
                 SELECT original_amount, paid_amount, expired_amount, policy_date
                 FROM point_ledgers WHERE source_type='DAILY_FIRST_ACCESS'
                 """))
-                .containsEntry("original_amount", 100)
-                .containsEntry("paid_amount", 100)
+                .containsEntry("original_amount", 30)
+                .containsEntry("paid_amount", 30)
                 .containsEntry("expired_amount", 0)
                 .containsEntry("policy_date", java.sql.Date.valueOf("2026-01-01"));
     }
@@ -86,7 +86,7 @@ class DailyFirstAccessRewardIntegrationTest {
         mockMvc.perform(login("password123")).andExpect(status().isOk());
         mockMvc.perform(login("password123")).andExpect(status().isOk());
 
-        assertThat(balance()).isEqualTo(400);
+        assertThat(balance()).isEqualTo(330);
         assertThat(dailyRewardCount()).isOne();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_sessions", Integer.class)).isEqualTo(2);
     }
@@ -100,7 +100,7 @@ class DailyFirstAccessRewardIntegrationTest {
         clock.set(Instant.parse("2026-01-01T15:00:00Z"));
         mockMvc.perform(login("password123")).andExpect(status().isOk());
 
-        assertThat(balance()).isEqualTo(500);
+        assertThat(balance()).isEqualTo(360);
         assertThat(jdbc.queryForList("""
                 SELECT policy_date FROM point_ledgers
                 WHERE source_type='DAILY_FIRST_ACCESS' ORDER BY policy_date
@@ -125,6 +125,8 @@ class DailyFirstAccessRewardIntegrationTest {
         rewards.grant(userId, ActivityReward.FEEDBACK_ACCEPTED, UUID.randomUUID());
         rewards.grant(userId, ActivityReward.FEEDBACK_ACCEPTED, UUID.randomUUID());
         rewards.grant(userId, ActivityReward.IDEA_PUBLISHED, UUID.randomUUID());
+        rewards.grant(userId, ActivityReward.FEEDBACK_CREATED, UUID.randomUUID());
+        rewards.grant(userId, ActivityReward.FEEDBACK_CREATED, UUID.randomUUID());
 
         mockMvc.perform(login("password123")).andExpect(status().isOk());
 
@@ -133,9 +135,9 @@ class DailyFirstAccessRewardIntegrationTest {
                 SELECT original_amount, paid_amount, expired_amount
                 FROM point_ledgers WHERE source_type='DAILY_FIRST_ACCESS'
                 """))
-                .containsEntry("original_amount", 100)
-                .containsEntry("paid_amount", 50)
-                .containsEntry("expired_amount", 50);
+                .containsEntry("original_amount", 30)
+                .containsEntry("paid_amount", 10)
+                .containsEntry("expired_amount", 20);
     }
 
     @Test
@@ -152,7 +154,7 @@ class DailyFirstAccessRewardIntegrationTest {
 
             assertThat(java.util.List.of(first.get(), second.get())).containsOnly(200);
         }
-        assertThat(balance()).isEqualTo(400);
+        assertThat(balance()).isEqualTo(330);
         assertThat(dailyRewardCount()).isOne();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_sessions", Integer.class)).isEqualTo(2);
     }
