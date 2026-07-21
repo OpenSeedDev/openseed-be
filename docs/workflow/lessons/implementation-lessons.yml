@@ -150,3 +150,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "리뷰 댓글 3619484742; 테스트 추가 직후 기존 saveAndFlush 예외 변환 구현에서 집중 8개 성공"
+  - id: IL-011
+    fingerprint: "shared-global-exception-handler-merge-conflict"
+    status: resolved
+    occurred_at: "2026-07-21T14:38:20+09:00"
+    slice_id: VS-055
+    category: merge_conflict
+    review_comment_id: null
+    symptom: "열린 VS-055 브랜치가 main에 먼저 병합된 VS-009와 VS-006의 GlobalExceptionHandler 확장과 두 차례 충돌해 한쪽 오류 계약이 누락될 위험이 있었다."
+    root_cause: "서로 독립적인 수직 슬라이스가 공용 예외 처리기의 같은 삽입 지점을 병렬로 확장했다."
+    fix: "각 main 통합에서 VS-055의 INVALID_PROFILE_ID 처리와 들어오는 슬라이스의 오류 처리기를 모두 보존해 일반 merge로 해결했다."
+    regression_test: "UpdateProfileIdIntegrationTest를 들어오는 기능의 IdeaDraftIntegrationTest 또는 CompanyProfileIntegrationTest와 함께 실행하고 전체 테스트를 재실행"
+    applies_to: "GlobalExceptionHandler처럼 여러 수직 슬라이스가 공유하는 등록형 공용 파일의 충돌 복구"
+    recurrence_count: 2
+    promoted_to: "conflict recovery focused-test pair"
+    evidence: "merge 116bd80에서 집중 27개·전체 72개 성공; merge 0fcd435에서 집중 29개·전체 80개 성공"
