@@ -97,14 +97,14 @@ lessons:
     slice_id: VS-009
     category: test_setup
     review_comment_id: null
-    symptom: "IdeaDraftIntegrationTest가 남긴 ideas 행 때문에 이후 기존 테스트가 users 정리 시 외래 키 위반으로 7건 실패했다."
+    symptom: "IdeaDraftIntegrationTest와 이후 ValidationQuestionIntegrationTest가 남긴 ideas 행 때문에 기존 테스트가 users 정리 시 외래 키 위반으로 각각 7건 실패했다."
     root_cause: "새 자식 테이블을 추가하면서 새 테스트가 클래스 종료 후 데이터를 정리하지 않아 기존 테스트 fixture의 부모 우선 정리와 충돌했다."
-    fix: "IdeaDraftIntegrationTest가 각 테스트 후 ideas 행을 정리하도록 teardown을 추가했다."
-    regression_test: "./gradlew clean test 전체 테스트에서 IdeaDraftIntegrationTest 이후 기존 회원·인증 테스트 통과"
+    fix: "아이디어를 생성하는 각 통합 테스트가 @AfterEach에서 validation_questions와 ideas 행을 자식 우선으로 정리하도록 teardown을 추가했다."
+    regression_test: "./gradlew clean test 전체 테스트에서 IdeaDraftIntegrationTest와 ValidationQuestionIntegrationTest 이후 기존 회원·인증 테스트 통과"
     applies_to: "기존 루트 엔티티를 참조하는 새 테이블과 PostgreSQL 통합 테스트"
-    recurrence_count: 1
-    promoted_to: null
-    evidence: "첫 전체 테스트 49개 중 MyAccountIntegrationTest 7개 FK 실패 후 teardown 추가"
+    recurrence_count: 2
+    promoted_to: "regression: 아이디어 통합 테스트의 자식 우선 @AfterEach teardown"
+    evidence: "VS-009 첫 전체 테스트 49개 및 VS-013 첫 전체 테스트 56개에서 MyAccountIntegrationTest 7개 FK 실패 후 teardown 추가"
   - id: IL-008
     fingerprint: "public-domain-factory-allows-arbitrary-idea-draft-time"
     status: resolved
@@ -157,14 +157,14 @@ lessons:
     slice_id: VS-030
     category: test_setup
     review_comment_id: null
-    symptom: "최신 main 통합 때마다 뒤늦게 추가된 통합 테스트의 원장 DELETE 정리가 append-only 트리거에 거부됐다. 첫 복구에서는 IdeaDraft 6건, 두 번째 복구에서는 CompanyProfile·UpdateProfileId 28건이 실패했다."
+    symptom: "최신 main 통합 때마다 뒤늦게 추가된 통합 테스트의 원장 DELETE 정리가 append-only 트리거에 거부됐다. 첫 복구에서는 IdeaDraft 6건, 두 번째 복구에서는 CompanyProfile·UpdateProfileId 28건, 세 번째 복구에서는 ValidationQuestion 5건이 실패했다."
     root_cause: "VS-030보다 뒤에 병합된 테스트들이 원장 정리에 기존 DELETE 방식을 사용해 새 DB 불변식과 호환되지 않았다."
-    fix: "IdeaDraftIntegrationTest와 후속 CompanyProfileIntegrationTest·UpdateProfileIdIntegrationTest의 원장 정리를 다른 통합 테스트와 동일한 TRUNCATE 방식으로 변경했다."
+    fix: "IdeaDraftIntegrationTest와 후속 CompanyProfileIntegrationTest·UpdateProfileIdIntegrationTest·ValidationQuestionIntegrationTest의 원장 정리를 다른 통합 테스트와 동일한 TRUNCATE 방식으로 변경했다."
     regression_test: "append-only point_ledgers를 정리하는 통합 테스트의 집중 실행과 ./gradlew clean test"
     applies_to: "append-only point_ledgers를 정리하는 현재와 이후의 모든 PostgreSQL 통합 테스트"
-    recurrence_count: 2
-    promoted_to: "conflict recovery focused cleanup compatibility checks"
-    evidence: "첫 main 통합에서 IdeaDraft SQLState P0001 6건, 두 번째 main 통합에서 CompanyProfile·UpdateProfileId 28건 확인 후 TRUNCATE 정리로 통일"
+    recurrence_count: 3
+    promoted_to: "conflict recovery focused cleanup compatibility checks and repository-wide DELETE scan"
+    evidence: "첫 main 통합에서 IdeaDraft SQLState P0001 6건, 두 번째 main 통합에서 CompanyProfile·UpdateProfileId 28건, 세 번째 VS-013 main 통합에서 ValidationQuestion 5건을 확인한 뒤 TRUNCATE 정리로 통일하고 저장소 전체 DELETE 사용처를 검사했다."
   - id: IL-009
     fingerprint: "dependent-profile-fk-blocks-user-cleanup"
     status: resolved
