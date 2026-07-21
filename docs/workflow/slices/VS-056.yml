@@ -6,14 +6,14 @@ task:
   dependencies: [VS-030]
   resource_locks: [wallet, auth]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-056-daily-first-access
 base_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
-current_commit: null
+current_commit: c563a64900f982079020402d2ed312319a83017f
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 47
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/47"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-056"
     note: "Red 5건 확인 후 최소 구현과 리팩터링을 완료했다. 기존 지갑 조회 테스트의 로그인 후 기대값을 새 정책에 맞춰 갱신하고 집중 14개·전체 117개 테스트, ERD와 새 UTC Migration을 검증했다."
+  - at: "2026-07-21T17:38:57+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-056"
+    note: "구현 커밋 c563a64를 Push하고 Draft PR #47을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
 
 created_at: "2026-07-21T17:28:39+09:00"
-updated_at: "2026-07-21T17:37:52+09:00"
+updated_at: "2026-07-21T17:38:57+09:00"
