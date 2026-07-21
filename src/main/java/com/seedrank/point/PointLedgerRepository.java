@@ -1,7 +1,9 @@
 package com.seedrank.point;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PointLedgerRepository extends JpaRepository<PointLedger, UUID> {
+
+    Optional<PointLedger> findBySourceTypeAndSourceId(
+            PointLedger.SourceType sourceType,
+            UUID sourceId);
+
+    @Query("""
+            select coalesce(sum(ledger.paidAmount), 0) from PointLedger ledger
+            where ledger.user.id = :userId and ledger.policyDate = :policyDate
+            """)
+    long sumPaidActivityRewards(
+            @Param("userId") UUID userId,
+            @Param("policyDate") LocalDate policyDate);
 
     @Query("""
             select ledger from PointLedger ledger

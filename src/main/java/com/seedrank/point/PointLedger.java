@@ -1,6 +1,7 @@
 package com.seedrank.point;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import com.seedrank.member.User;
@@ -52,6 +53,9 @@ public class PointLedger {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "policy_date")
+    private LocalDate policyDate;
+
     protected PointLedger() {
     }
 
@@ -70,6 +74,30 @@ public class PointLedger {
 
     public static PointLedger signupBonus(User user, Instant now) {
         return new PointLedger(UUID.randomUUID(), user, now);
+    }
+
+    static PointLedger activityReward(
+            User user,
+            SourceType sourceType,
+            UUID sourceId,
+            int originalAmount,
+            int paidAmount,
+            int balanceAfter,
+            LocalDate policyDate,
+            Instant now) {
+        PointLedger ledger = new PointLedger();
+        ledger.id = UUID.randomUUID();
+        ledger.user = user;
+        ledger.type = Type.CREDIT;
+        ledger.originalAmount = originalAmount;
+        ledger.paidAmount = paidAmount;
+        ledger.expiredAmount = originalAmount - paidAmount;
+        ledger.balanceAfter = balanceAfter;
+        ledger.sourceType = sourceType;
+        ledger.sourceId = sourceId;
+        ledger.createdAt = now;
+        ledger.policyDate = policyDate;
+        return ledger;
     }
 
     public UUID getId() {
@@ -108,11 +136,18 @@ public class PointLedger {
         return createdAt;
     }
 
+    public LocalDate getPolicyDate() {
+        return policyDate;
+    }
+
     public enum Type {
         CREDIT
     }
 
     public enum SourceType {
-        SIGNUP_BONUS
+        SIGNUP_BONUS,
+        IDEA_PUBLISHED,
+        FEEDBACK_CREATED,
+        FEEDBACK_ACCEPTED
     }
 }
