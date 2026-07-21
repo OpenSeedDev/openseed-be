@@ -6,7 +6,7 @@ task:
   dependencies: [VS-009]
   resource_locks: [ai-job]
 
-status: AWAITING_PR_REVIEW
+status: APPLYING_REVIEW_CHANGES
 branch: codex/vs-018-ai-job
 base_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
 current_commit: b22d6c285a6463f26ef79dfd54fbb32cf6a62c00
@@ -72,6 +72,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "autonomous PR sync: #38"
     note: "PR #38을 생성했고 코드 커밋 cba1669의 Build and Test 성공, Merge 가능, 댓글·리뷰·미해결 review thread 0개를 확인했다. Merge Guard의 리뷰 전 차단은 의도된 상태다."
+  - at: "2026-07-21T15:13:57+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "conflict recovery: merge origin/main"
+    note: "PR #38의 GitHub CONFLICTING 상태를 확인하고 VS-009·VS-006·VS-055 및 완료 상태가 반영된 origin/main 5a2d053을 일반 merge한다. 코드 통합 이후 기존 승인은 무효이며 승인 증거는 비어 있다."
 
 created_at: "2026-07-21T13:08:55+09:00"
-updated_at: "2026-07-21T13:28:05+09:00"
+updated_at: "2026-07-21T15:13:57+09:00"
