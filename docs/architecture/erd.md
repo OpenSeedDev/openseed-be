@@ -8,6 +8,7 @@ erDiagram
     USERS ||--o{ POINT_LEDGERS : receives
     USERS ||--o{ AUTH_SESSIONS : authenticates
     USERS ||--o{ IDEAS : authors
+    USERS ||--o{ AI_JOBS : requests
 
     USERS {
         uuid id PK
@@ -67,6 +68,19 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    AI_JOBS {
+        uuid id PK
+        uuid owner_id FK
+        varchar status "PENDING"
+        jsonb input_snapshot "keyword, background"
+        varchar prompt_version
+        varchar idempotency_key "unique per owner"
+        int retry_count "0 or greater"
+        timestamptz locked_until "nullable"
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
 ## VS-001 제약
@@ -88,3 +102,10 @@ erDiagram
 - Draft 작성자는 내부 User UUID로 연결하며, 작성자만 Draft 상세를 조회한다.
 - 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
 - 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
+
+## VS-018 제약
+
+- 로그인 사용자의 사업화 키워드와 문제의식, 서버 Prompt Version을 생성 시점의 JSON 스냅샷으로 저장한다.
+- Job은 `PENDING`, retry count 0으로 생성하며 Worker 선점과 상태 전이는 후속 슬라이스에서 구현한다.
+- `(owner_id, idempotency_key)` 고유 제약으로 순차·동시 재전송을 한 Job으로 수렴시킨다.
+- 같은 사용자의 같은 Key·같은 입력은 기존 Job을 반환하고, 다른 입력에 Key를 재사용하면 거부한다.

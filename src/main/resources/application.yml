@@ -18,3 +18,5 @@ app:
   auth:
     jwt-secret: ${JWT_SECRET}
     cookie-secure: ${AUTH_COOKIE_SECURE:true}
+  ai:
+    prompt-version: ${AI_IDEA_PROMPT_VERSION:idea-candidates-v1}

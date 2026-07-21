@@ -15,6 +15,7 @@ import com.seedrank.auth.login.InvalidCredentialsException;
 import com.seedrank.auth.login.InvalidRefreshTokenException;
 import com.seedrank.auth.login.InvalidAccessTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.ai.job.IdempotencyKeyReusedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -96,6 +97,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND",
                 "아이디어를 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(IdempotencyKeyReusedException.class)
+    ResponseEntity<ApiError> handleIdempotencyKeyReused(
+            IdempotencyKeyReusedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEMPOTENCY_KEY_REUSED",
+                "Idempotency-Key가 다른 요청에 이미 사용됐습니다.",
                 requestId(request),
                 List.of()));
     }
