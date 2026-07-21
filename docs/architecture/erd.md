@@ -7,6 +7,7 @@ erDiagram
     USERS ||--|| POINT_WALLETS : owns
     USERS ||--o{ POINT_LEDGERS : receives
     USERS ||--o{ AUTH_SESSIONS : authenticates
+    USERS ||--o{ IDEAS : authors
 
     USERS {
         uuid id PK
@@ -51,6 +52,21 @@ erDiagram
         uuid rotated_from_id FK
         varchar revocation_reason "ROTATED, REUSE_DETECTED, USER_SUSPENDED, LOGOUT, LOGOUT_ALL"
     }
+
+    IDEAS {
+        uuid id PK
+        uuid author_id FK
+        varchar status "DRAFT"
+        varchar title "1..100"
+        varchar category "1..50"
+        varchar summary "max 200, nullable"
+        varchar problem "1..2000"
+        varchar target_customer "max 1000, nullable"
+        varchar solution "max 2000, nullable"
+        varchar business_model "max 2000, nullable"
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
 ## VS-001 제약
@@ -66,3 +82,10 @@ erDiagram
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.
 - 현재 로그아웃은 세션 family를 `LOGOUT`으로, 전체 로그아웃은 사용자의 모든 활성 세션을 `LOGOUT_ALL`로 폐기한다.
 - 로그인·갱신·로그아웃의 세션 변경은 사용자 행 잠금 후 수행해 동시 요청을 직렬화한다.
+
+## VS-009 제약
+
+- 로그인 사용자는 AI 없이 Idea를 `DRAFT` 상태로 생성한다.
+- Draft 작성자는 내부 User UUID로 연결하며, 작성자만 Draft 상세를 조회한다.
+- 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
+- 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
