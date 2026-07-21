@@ -8,6 +8,7 @@ erDiagram
     USERS ||--o{ POINT_LEDGERS : receives
     USERS ||--o{ AUTH_SESSIONS : authenticates
     USERS ||--o| COMPANY_PROFILES : registers
+    COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
 
@@ -66,6 +67,16 @@ erDiagram
         timestamptz updated_at
     }
 
+    COMPANY_VERIFICATIONS {
+        uuid id PK
+        uuid company_profile_id FK
+        varchar token_hash UK "SHA-256 lower hex, raw token excluded"
+        timestamptz expires_at
+        timestamptz used_at "null until VS-008"
+        timestamptz invalidated_at "set by resend"
+        timestamptz created_at
+    }
+
     IDEAS {
         uuid id PK
         uuid author_id FK
@@ -111,6 +122,15 @@ erDiagram
 - 회사 이메일은 API 응답과 일반 로그에 노출하지 않는다.
 - `verified_at`은 VS-008 인증 완료 전까지 null이며, 프로필이 존재하면 내 계정의 회사 인증 상태는 `PENDING`이다.
 - 인증 토큰과 메일 발송 데이터는 VS-007, 인증 완료와 Company 역할은 VS-008에서 추가한다.
+
+## VS-007 제약
+
+- 회사 인증 토큰은 URL-safe 256-bit 난수이며 원문은 메일 링크에만 전달하고 DB에는 SHA-256 해시만 저장한다.
+- 인증은 기본 30분 뒤 만료되며 만료 시간은 애플리케이션 설정으로 변경할 수 있다.
+- 회사 프로필별 미사용·미무효화 인증은 하나만 존재하며 재발송 시 기존 인증을 무효화한다.
+- 메일은 요청 트랜잭션이 커밋된 뒤 별도 Executor에서 SMTP Provider로 발송한다.
+- 회사 프로필 삭제 시 종속 인증 레코드도 함께 삭제된다.
+- `used_at` 소비와 Company 권한 부여는 VS-008에서 구현한다.
 
 ## VS-009 제약
 
