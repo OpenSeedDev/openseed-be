@@ -6,10 +6,10 @@ task:
   dependencies: [VS-010]
   resource_locks: [idea]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-028-idea-like
 base_commit: 4e229ac9cff80441284531a46721eb71ae851f20
-current_commit: null
+current_commit: bbb2d0723adf999e99af88538421dab79c816b4c
 
 delivery:
   strategy: stacked_pr
@@ -22,8 +22,8 @@ delivery:
   merge_order: [VS-012, VS-016, VS-017, VS-028]
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 64
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/64"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -82,6 +82,11 @@ history:
     to: CREATING_PR
     command: "fast-build checkpoint delivery: VS-028"
     note: "Red 7건 후 아이디어 행 잠금과 unique 제약 기반 멱등 좋아요, 상세 likeCount·liked를 구현했다. 위험 회귀 23개와 depth 4 checkpoint 전체 162개, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-21T21:55:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build checkpoint stacked PR delivery: VS-028"
+    note: "구현 커밋 bbb2d07을 Push하고 VS-017 PR #60을 base로 Draft PR #64를 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:45:00+09:00"
-updated_at: "2026-07-21T21:53:00+09:00"
+updated_at: "2026-07-21T21:55:00+09:00"
