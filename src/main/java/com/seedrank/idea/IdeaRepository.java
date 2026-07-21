@@ -16,6 +16,8 @@ import jakarta.persistence.LockModeType;
 public interface IdeaRepository extends JpaRepository<Idea, UUID> {
     Optional<Idea> findByIdAndAuthorId(UUID id, UUID authorId);
 
+    Optional<Idea> findByIdAndStatus(UUID id, IdeaStatus status);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select idea from Idea idea where idea.id = :id and idea.authorId = :authorId")
     Optional<Idea> findByIdAndAuthorIdForUpdate(@Param("id") UUID id, @Param("authorId") UUID authorId);

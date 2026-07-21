@@ -25,6 +25,8 @@ import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.member.profile.ProfileIdValidationException;
+import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
+import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
 import com.seedrank.unit.purchase.InsufficientPointException;
 import com.seedrank.unit.purchase.PurchaseLimitExceededException;
 import com.seedrank.unit.purchase.SelfUnitPurchaseException;
@@ -209,6 +211,22 @@ public class GlobalExceptionHandler {
                 "아이디어를 찾을 수 없습니다.",
                 requestId(request),
                 List.of()));
+    }
+
+    @ExceptionHandler(VerifiedCompanyRequiredException.class)
+    ResponseEntity<ApiError> handleVerifiedCompanyRequired(
+            VerifiedCompanyRequiredException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of(
+                "VERIFIED_COMPANY_REQUIRED", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(MessageThreadIdeaNotFoundException.class)
+    ResponseEntity<ApiError> handleMessageThreadIdeaNotFound(
+            MessageThreadIdeaNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
     }
 
     @ExceptionHandler(UnitPurchaseIdeaNotFoundException.class)
