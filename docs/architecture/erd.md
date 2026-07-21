@@ -39,8 +39,9 @@ erDiagram
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS"
+        varchar source_type "SIGNUP_BONUS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED"
         uuid source_id
+        date policy_date "nullable for signup, Asia/Seoul"
         timestamptz created_at
     }
 
@@ -108,6 +109,13 @@ erDiagram
 - 가입 원장은 `300 = paidAmount(300) + expiredAmount(0)`을 만족한다.
 - PointLedger는 append-only 데이터로 취급한다.
 - `point_ledgers`의 UPDATE·DELETE는 데이터베이스 trigger가 거부하며 정정이 필요하면 새 원장 행을 추가한다.
+
+## VS-031 제약
+
+- 가입 보너스를 제외한 활동 보상은 Asia/Seoul 정책 날짜별 실제 지급 합계가 300P를 넘지 않는다.
+- 지갑 잔액은 2,000P를 넘지 않으며 일일 한도나 지갑 상한 초과분은 원장에 `expired_amount`로 남기고 회수 대기 잔액으로 전환하지 않는다.
+- 활동 보상은 `source_type`, `source_id` 조합당 한 번만 처리하며 사용자 지갑 행 잠금으로 같은 사용자의 동시 보상을 직렬화한다.
+- 가입 보너스의 `policy_date`는 null이고 활동 보상은 Asia/Seoul 기준 날짜를 반드시 기록한다.
 - 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
 - Refresh Token은 family ID와 이전 세션 ID로 회전 계보를 보존하며 재사용 탐지 시 패밀리를 폐기한다.
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.
