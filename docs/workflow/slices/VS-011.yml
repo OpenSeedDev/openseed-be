@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-011
+  title: "공개 범위 필드 누출 Matrix"
+  dependencies: [VS-010]
+  resource_locks: [idea, security]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-011-visibility-matrix
+base_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+current_commit: b7de6ebdf3076047d4e2c21beb4ee0c1dbc28aba
+
+review:
+  pr_number: 49
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/49"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+  red_test: "2026-07-21T19:17:38+09:00 ./gradlew test --tests com.seedrank.idea.detail.IdeaDetailVisibilityIntegrationTest --no-daemon: 공개 상세 API 부재와 필드 Matrix 미적용으로 6개 실패"
+  focused_tests: "2026-07-21T19:21:08+09:00 IdeaDetailVisibilityIntegrationTest 6개와 IdeaDraftIntegrationTest 6개 성공"
+  full_tests: "2026-07-21T19:22:07+09:00 ./gradlew test --no-daemon: 138개 성공, 실패·오류·건너뜀 0개"
+  migration: "불필요: 기존 ideas·validation_questions 스키마를 읽는 응답 정책 변경"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T19:14:47+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-011"
+    note: "기획·기능 명세·백로그와 PR #48의 실제 Merge 증거를 확인하고 역할·공개 범위 필드 Matrix를 확정했다."
+  - at: "2026-07-21T19:14:47+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-011"
+    note: "비공개 필드를 JSON에서 완전히 생략하고 Draft 소유권과 선택적 인증을 보존하는 테스트 우선 구현을 시작했다."
+  - at: "2026-07-21T19:22:07+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-011"
+    note: "Red 6건 확인 후 공개 범위 Matrix 최소 구현과 리팩터링을 완료했다. 집중 테스트 12개, 고위험 전체 테스트 138개, OpenAPI·ERD·상태 검증이 통과했다."
+  - at: "2026-07-21T19:24:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-011"
+    note: "구현 커밋 b7de6eb을 Push하고 Draft PR #49를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-21T19:14:47+09:00"
+updated_at: "2026-07-21T19:24:00+09:00"
