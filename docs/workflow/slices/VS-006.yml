@@ -1,0 +1,133 @@
+schema_version: 2
+
+task:
+  id: VS-006
+  title: "회사 프로필과 도메인 검증"
+  dependencies: [VS-001]
+  resource_locks: [company]
+
+status: COMPLETED_SYNCED
+branch: codex/vs-006-company-profile
+base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
+current_commit: caf1094f543d568a1443a7fd24227d2c1b6a5c71
+
+review:
+  pr_number: 28
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/28"
+  handled_comment_ids:
+    - 3619484742
+  handled_comments:
+    - comment_id: 3619484742
+      thread_id: PRRT_kwDOTWkifc6SdgcH
+      result_commit: 24fdfb08fc35667ad402d331a7fe77f14a1b30d9
+      reply_comment_id: 3619520571
+      reply_url: "https://github.com/OpenSeedDev/openseed-be/pull/28#discussion_r3619520571"
+      regression_test: "CompanyProfileIntegrationTest.mapsConcurrentUniqueConstraintConflictsToCompanyProfileAlreadyExists"
+      red_conclusion: passed_existing_implementation
+      red_note: "테스트 추가 직후 기존 saveAndFlush 예외 변환 구현에서 성공해 지적된 500 응답은 재현되지 않았고 동시성 회귀 검증 누락만 확인됐다."
+  unresolved_thread_count: 0
+  merge_approval:
+    command: /merge-approved
+    approved_by: pado0711
+    comment_id: 5030454042
+    comment_url: "https://github.com/OpenSeedDev/openseed-be/pull/28#issuecomment-5030454042"
+    approved_at: "2026-07-21T05:23:55Z"
+    head_sha: 792d448ad886bf2b8ea5e74eb787fa908d935724
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - id: VS-001
+      pr_number: 15
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/15"
+      merge_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
+  red_test:
+    command: "./gradlew test --tests com.seedrank.company.profile.CompanyProfileIntegrationTest --no-daemon"
+    conclusion: failed_as_expected
+    at: "2026-07-21T01:31:27+09:00"
+    summary: "7개 테스트가 company_profiles Migration과 회사 프로필 API 부재로 실패"
+  focused_tests:
+    command: "./gradlew test --tests com.seedrank.company.profile.CompanyProfileIntegrationTest --no-daemon"
+    conclusion: success
+    at: "2026-07-21T13:47:30+09:00"
+    summary: "동일 사용자·동일 회사 이메일 동시성 회귀 검증을 포함해 8개 성공, 실패 0개"
+  full_tests:
+    command: "./gradlew clean test --no-daemon"
+    conclusion: success
+    at: "2026-07-21T13:48:42+09:00"
+    summary: "전체 59개 성공, 실패 0개"
+  migration: "V20260721043400__create_company_profiles.sql 적용 및 PostgreSQL ddl-auto validate 성공"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29803989092"
+  ci_result: success
+  merge_commit: a40793533cff7e72510202f03439985e46c50485
+  synced_main_commit: a40793533cff7e72510202f03439985e46c50485
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T01:30:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "autonomous orchestrator"
+    note: "기획·기능 명세·백로그·교훈과 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T01:30:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "autonomous orchestrator"
+    note: "회사 프로필과 무료 도메인 검증 범위를 확정하고 VS-007 메일 및 VS-008 인증 완료를 제외했다."
+  - at: "2026-07-21T01:35:35+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "autonomous orchestrator"
+    note: "Red, 최소 구현, 리팩터링, 집중·전체 테스트, OpenAPI·ERD·Migration 갱신을 완료했다."
+  - at: "2026-07-21T01:38:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous orchestrator"
+    note: "구현 커밋을 Push하고 PR #28을 생성했다."
+  - at: "2026-07-21T13:36:30+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "git merge origin/main"
+    note: "GitHub에서 PR #28의 main 충돌을 확인해 최신 origin/main 통합을 시작했다. 현재 코드 이후 승인 댓글은 없어 승인 증거를 비운 상태로 유지했다."
+  - at: "2026-07-21T13:40:00+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery complete"
+    note: "ERD·구현 교훈·공통 예외 처리 충돌을 양쪽 기능을 보존해 해결하고 중복 Flyway 버전을 새 UTC 버전으로 조정했다. 회사 프로필 집중 7개와 전체 58개 테스트가 성공했으며 새 Head CI를 대기한다."
+  - at: "2026-07-21T13:45:30+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "autonomous review fix: comment 3619484742"
+    note: "동일 사용자·동일 회사 이메일 동시 등록의 DB unique 경합이 500이 될 수 있다는 thread PRRT_kwDOTWkifc6SdgcH를 수집하고 PostgreSQL 동시성 회귀 테스트부터 추가했다. 기존 saveAndFlush 예외 변환으로 테스트가 즉시 성공해 운영 결함은 재현되지 않았다."
+  - at: "2026-07-21T13:52:30+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "autonomous review fix complete: comment 3619484742"
+    note: "동시 등록 회귀 테스트, 집중 8개·전체 59개, validator 4종과 Build and Test를 통과했다. 처리 증거 답글 3619520571을 남기고 thread PRRT_kwDOTWkifc6SdgcH를 resolve했으며 코드 Push 이후 승인 증거는 비어 있다."
+  - at: "2026-07-21T14:25:44+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "/merge-approved"
+    note: "현재 코드 792d448 이후 pado0711이 남긴 정확한 승인 댓글 5030454042, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
+  - at: "2026-07-21T14:35:38+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "GitHub protected auto-merge"
+    note: "PR #28이 최종 Head caf1094와 필수 검사 성공 상태에서 Merge 커밋 a407935로 실제 병합됐다."
+  - at: "2026-07-21T14:35:38+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "git fetch origin && git merge --ff-only origin/main"
+    note: "로컬 main을 a407935로 fast-forward하고 GitHub Merge 증거를 동기화해 VS-006과 company lock을 완료 해제했다."
+
+created_at: "2026-07-21T01:30:00+09:00"
+updated_at: "2026-07-21T14:35:38+09:00"
