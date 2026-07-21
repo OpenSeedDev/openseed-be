@@ -9,7 +9,7 @@ task:
 status: AWAITING_PR_REVIEW
 branch: codex/vs-030-wallet-ledger
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: f5808225018178704f9aa3c19a6128ab0fc003bb
+current_commit: aa6a648ebd80b2accfada6da51c85840277c0526
 
 review:
   pr_number: 30
@@ -33,11 +33,11 @@ evidence:
       merge_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
       merged_at: "2026-07-20T10:08:38Z"
   red_test: "2026-07-21T10:23:37+09:00 PointWalletQueryIntegrationTest: 조회 API와 OpenAPI, Append-only DB 제약 부재로 7개 실패; Instant Fixture 타입을 명시한 뒤 기능 Red를 확정"
-  focused_tests: "2026-07-21T10:30:50+09:00 PointWalletQueryIntegrationTest: 7개 성공, 실패 0개"
-  full_tests: "2026-07-21T10:32:16+09:00 ./gradlew clean test --no-daemon: 50개 성공, 실패·오류 0개"
+  focused_tests: "2026-07-21T13:49:27+09:00 main 통합 후 PointWalletQueryIntegrationTest와 IdeaDraftIntegrationTest: 13개 성공, 실패 0개"
+  full_tests: "2026-07-21T13:49:56+09:00 ./gradlew clean test --no-daemon: 58개 성공, 실패·오류·건너뜀 0개 (첫 통합 실행의 append-only 정리 회귀 6건 수정 후 Green)"
   migration: "V20260721012400__protect_point_ledgers_append_only.sql 적용: PostgreSQL 17 Testcontainers에서 6개 Migration과 ddl-auto validate 성공, UPDATE·DELETE 거부 검증"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29793476327"
-  ci_result: success
+  ci_url: null
+  ci_result: pending
   merge_commit: null
   synced_main_commit: null
 
@@ -72,6 +72,16 @@ history:
     to: AWAITING_PR_REVIEW
     command: "autonomous PR delivery: VS-030"
     note: "PR #30을 생성했고 Build and Test 성공, Merge 가능, 댓글·리뷰·미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
+  - at: "2026-07-21T13:47:08+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "conflict recovery: merge origin/main"
+    note: "GitHub에서 PR #30의 main 충돌을 확인해 승인 증거를 비운 채 최신 origin/main 통합과 회귀 검증을 시작했다."
+  - at: "2026-07-21T13:51:24+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery: VS-030"
+    note: "origin/main 병합 충돌을 해결하고 append-only 원장과 VS-009 테스트 정리의 회귀를 수정했다. 집중 13개와 전체 58개 테스트, workflow validator 4종 및 diff·secret 검사를 통과했으며 현재 코드 SHA의 CI를 기다린다."
 
 created_at: "2026-07-21T10:21:04+09:00"
-updated_at: "2026-07-21T10:35:44+09:00"
+updated_at: "2026-07-21T13:51:24+09:00"
