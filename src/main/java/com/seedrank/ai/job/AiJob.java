@@ -65,6 +65,7 @@ class AiJob {
     }
 
     UUID id() { return id; }
+    UUID ownerId() { return ownerId; }
     AiJobStatus status() { return status; }
     String failureCode() { return failureCode; }
     Instant createdAt() { return createdAt; }

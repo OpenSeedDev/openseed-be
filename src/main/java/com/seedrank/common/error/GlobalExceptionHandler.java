@@ -29,6 +29,8 @@ import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.idea.update.IdeaNotPublishedException;
 import com.seedrank.ai.job.IdempotencyKeyReusedException;
 import com.seedrank.ai.job.AiJobNotFoundException;
+import com.seedrank.ai.job.AiJobAlreadySelectedException;
+import com.seedrank.ai.job.AiJobNotSelectableException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
@@ -331,6 +333,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "AI_JOB_NOT_FOUND",
                 "AI 생성 Job을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobNotSelectableException.class)
+    ResponseEntity<ApiError> handleAiJobNotSelectable(
+            AiJobNotSelectableException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "AI_JOB_NOT_SELECTABLE",
+                "완료된 AI 후보 결과만 Draft로 선택할 수 있습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobAlreadySelectedException.class)
+    ResponseEntity<ApiError> handleAiJobAlreadySelected(
+            AiJobAlreadySelectedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "AI_JOB_ALREADY_SELECTED",
+                "이 AI Job에서는 이미 Draft가 생성됐습니다.",
                 requestId(request),
                 List.of()));
     }

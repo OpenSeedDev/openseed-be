@@ -35,4 +35,29 @@ public class IdeaDraftFactory {
                 businessModel,
                 now);
     }
+
+    public Idea createFromAi(
+            UUID authorId,
+            UUID sourceAiJobId,
+            int sourceAiCandidateNumber,
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel) {
+        return Idea.draftFromAi(
+                authorId,
+                sourceAiJobId,
+                sourceAiCandidateNumber,
+                title,
+                category,
+                summary,
+                problem,
+                targetCustomer,
+                solution,
+                businessModel,
+                clock.instant());
+    }
 }

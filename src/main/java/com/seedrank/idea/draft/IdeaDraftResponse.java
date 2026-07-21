@@ -23,7 +23,7 @@ public record IdeaDraftResponse(
         Instant createdAt,
         Instant updatedAt) {
 
-    static IdeaDraftResponse from(Idea idea, List<ValidationQuestion> questions) {
+    public static IdeaDraftResponse from(Idea idea, List<ValidationQuestion> questions) {
         return new IdeaDraftResponse(
                 idea.id(), idea.status(), idea.title(), idea.category(), idea.summary(), idea.problem(),
                 idea.targetCustomer(), idea.solution(), idea.businessModel(),
