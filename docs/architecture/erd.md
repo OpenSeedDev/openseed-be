@@ -13,6 +13,8 @@ erDiagram
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
+    USERS ||--o{ IDEA_LIKES : likes
+    IDEAS ||--o{ IDEA_LIKES : receives
 
     USERS {
         uuid id PK
@@ -129,6 +131,13 @@ erDiagram
         uuid actor_id FK
         timestamptz created_at
     }
+
+    IDEA_LIKES {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        timestamptz created_at
+    }
 ```
 
 ## VS-001 제약
@@ -214,3 +223,10 @@ erDiagram
 - 아이디어 행 잠금 뒤 최신 내용과 `updated_at`을 변경하고 다음 버전 번호의 전체 내용·현재 공개 범위·검증 질문·수정자·동일 시각 스냅샷을 한 트랜잭션으로 저장한다.
 - `idea_versions`는 DB trigger가 UPDATE·DELETE를 거부하는 append-only 이력이다.
 - 사용자 API에는 버전 목록·비교·복원 경로를 제공하지 않고 최신 내용과 `updatedAt`만 노출한다.
+
+## VS-028 제약
+
+- 활성 로그인 사용자는 세 공개 범위의 게시 아이디어에 좋아요를 등록·취소할 수 있다.
+- `idea_likes`의 아이디어·사용자 조합은 유일하며 반복·동시 등록과 취소를 멱등하게 처리한다.
+- 좋아요 변경은 아이디어 행 잠금 뒤 처리해 보관 전환과 경합해도 비게시 아이디어에 새 좋아요가 남지 않는다.
+- 아이디어 상세는 기존 공개 범위 필드 정책을 유지하면서 현재 좋아요 수와 조회자의 좋아요 상태를 반환한다.
