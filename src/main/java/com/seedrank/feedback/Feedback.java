@@ -116,6 +116,7 @@ public class Feedback {
     public UUID id() { return id; }
     public UUID ideaId() { return idea.id(); }
     public UUID authorId() { return author.getId(); }
+    public String authorProfileId() { return author.getProfileId(); }
     public Type type() { return type; }
     public String content() { return content; }
     public String evidenceUrl() { return evidenceUrl; }
