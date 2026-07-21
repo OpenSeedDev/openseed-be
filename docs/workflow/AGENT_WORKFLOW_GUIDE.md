@@ -52,7 +52,7 @@ flowchart LR
 | 작업 상태 | 작업별 상태와 검증 증거 | `docs/workflow/slices/TASK-ID.yml` |
 | GitHub Actions | 빌드·테스트, Merge Guard, 보호된 auto-merge | `.github/workflows/` |
 
-에이전트 정의와 중첩 위임 설정은 적용되었지만, 이 문서를 작성하는 시점에는 `openseed` Automation을 새 Coordinator 호출 방식으로 아직 전환하지 않았다. 전환 전까지 기존 Automation이 기존 지시문으로 동작한다.
+에이전트 정의와 중첩 위임 설정이 적용되었으며, `openseed` Automation도 2026-07-21에 새 Coordinator 호출 방식으로 전환되었다. Automation은 5분마다 활성 thread를 깨우고 Coordinator에게 한 번의 orchestrator tick을 위임한다.
 
 ## 구성 요소별 책임
 
@@ -343,9 +343,9 @@ flowchart TD
 
 Coordinator는 변화가 없을 때 파일을 수정하지 않는다. 새 PR, 리뷰 반영, Merge, `BLOCKED` 또는 사용자 결정 필요가 있을 때만 간결한 알림을 남긴다.
 
-## Automation 연결 후 최종 구조
+## 현재 Automation 호출 구조
 
-Automation 전환이 끝나면 실제 호출 구조는 다음과 같다.
+현재 실제 호출 구조는 다음과 같다.
 
 ```text
 openseed Automation
