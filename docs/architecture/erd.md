@@ -13,6 +13,9 @@ erDiagram
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
+    IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
+    IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
+    IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
 
     USERS {
         uuid id PK
@@ -129,6 +132,29 @@ erDiagram
         uuid actor_id FK
         timestamptz created_at
     }
+
+    IDEA_VIEW_EVENTS {
+        uuid id PK
+        uuid idea_id FK
+        uuid viewer_user_id FK "nullable for Guest"
+        char guest_session_hash "nullable for User, SHA-256"
+        char viewer_key_hash "dedupe key, SHA-256"
+        timestamptz bucket_hour "UTC hour"
+        timestamptz created_at
+    }
+
+    IDEA_METRIC_CURRENT {
+        uuid idea_id PK,FK
+        bigint view_count
+        timestamptz updated_at
+    }
+
+    IDEA_METRIC_HOURLY {
+        uuid idea_id PK,FK
+        timestamptz bucket_hour PK "UTC hour"
+        bigint view_delta
+        timestamptz updated_at
+    }
 ```
 
 ## VS-001 제약
@@ -206,3 +232,11 @@ erDiagram
 - 매칭형은 Guest·User·Company에 요약과 공통 게시 정보만 반환하고 작성자에게만 전체 내용을 반환한다.
 - 공개 범위상 숨겨진 필드는 `null` 값으로 직렬화하지 않고 JSON 응답 키 자체를 제외한다.
 - Draft와 향후 비게시 상태는 작성자에게만 반환하며 다른 조회자에게는 존재 여부를 숨긴다.
+
+## VS-029 제약
+
+- 성공한 게시 아이디어 상세 조회만 집계하고 Draft·401·404 응답은 집계하지 않는다.
+- 로그인 사용자는 사용자 ID, Guest는 원문을 저장하지 않는 서버 세션 ID 해시를 조회자 키로 사용한다.
+- 같은 아이디어·조회자·UTC 시간 버킷의 이벤트는 unique 제약으로 한 번만 인정한다.
+- 새 이벤트와 현재 누계·시간별 증가량은 하나의 트랜잭션에서 원자적으로 upsert한다.
+- 상세 응답은 공개 범위와 무관한 공통 공개 지표 `viewCount`를 포함한다.

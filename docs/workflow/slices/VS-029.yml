@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-029
+  title: "조회 지표"
+  dependencies: [VS-011]
+  resource_locks: [metrics]
+
+status: CREATING_PR
+branch: codex/vs-029-metrics
+base_commit: 482c811d2307a2224f63a6b55b95bab208ce88c2
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-011
+      pr_number: 49
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/49"
+      merge_commit: 482c811d2307a2224f63a6b55b95bab208ce88c2
+      merged_at: "2026-07-21T10:49:14Z"
+  red_test: "2026-07-21T20:03:08+09:00 ./gradlew test --tests com.seedrank.idea.metrics.IdeaViewMetricsIntegrationTest --no-daemon: 지표 테이블·집계 구현 부재로 7개 실패"
+  focused_tests: "2026-07-21T20:04:58+09:00 IdeaViewMetricsIntegrationTest 7개와 IdeaDetailVisibilityIntegrationTest 6개 성공"
+  full_tests: "2026-07-21T20:06:02+09:00 ./gradlew test --no-daemon: 145개 성공, 실패·오류 0개"
+  migration: "V20260721110034__add_idea_view_metrics.sql: 원본 조회 이벤트·현재 누계·UTC 시간별 증가량과 중복 제거 unique 제약; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T20:01:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-029"
+    note: "백로그, 기획, 상세 명세, 구현 lessons와 VS-011 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T20:01:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-029"
+    note: "사용자·Guest 세션별 UTC 시간 중복 제거와 현재·시간별 조회 지표의 동시성·원자성 테스트 범위를 확정했다."
+  - at: "2026-07-21T20:06:02+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-029"
+    note: "Red 7건 확인 후 최소 구현과 리팩터링을 완료했다. 동시 중복·고유 조회와 시간 버킷 포함 집중 13개 및 전체 145개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+
+created_at: "2026-07-21T20:01:00+09:00"
+updated_at: "2026-07-21T20:06:02+09:00"
