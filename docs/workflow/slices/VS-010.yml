@@ -9,12 +9,12 @@ task:
 status: AWAITING_PR_REVIEW
 branch: codex/vs-010-publish
 base_commit: 58072ee9a40815477d67cd5f96dd74ef29b06745
-current_commit: 17152e75d03051440a44d6da7416e699a5e24e6d
+current_commit: 811cf439e8f19f4f356ac7bf53004ab39e1d0163
 
 review:
   pr_number: 48
   pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
-  handled_comment_ids: []
+  handled_comment_ids: [3621204581]
   unresolved_thread_count: null
   merge_approval:
     command: /merge-approved
@@ -33,7 +33,7 @@ evidence:
       merge_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
       merged_at: "2026-07-21T04:03:16Z"
   red_test: "2026-07-21T18:01:49+09:00 ./gradlew test --tests com.seedrank.idea.publish.IdeaPublishIntegrationTest --no-daemon: 게시 API 부재로 7개 실패"
-  focused_tests: "2026-07-21T18:07:16+09:00 IdeaPublishIntegrationTest: 동시 게시 포함 8개 성공; 2026-07-21T18:06:34+09:00 아이디어·Point 집중 회귀 33개 성공"
+  focused_tests: "2026-07-21T19:09:59+09:00 리뷰 회귀 IdeaVersionFactoryContractTest 1개와 IdeaPublishIntegrationTest 8개 성공"
   full_tests: "2026-07-21T18:08:07+09:00 ./gradlew test --no-daemon: 131개 성공, 실패·오류·건너뜀 0개"
   migration: "V20260721090200__publish_ideas.sql: 공개 범위·가격·게시 시각, 최초 버전과 타임라인 추가; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
   ci_url: null
@@ -72,6 +72,16 @@ history:
     to: AWAITING_PR_REVIEW
     command: "vertical-slice PR delivery: VS-010"
     note: "구현 커밋 17152e7을 Push하고 Draft PR #48을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+  - at: "2026-07-21T19:09:40+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "PR #48 review comment 3621204581"
+    note: "최초 버전 팩터리의 모호한 first 이름을 방지하는 계약 테스트를 먼저 추가했고 1건 Red를 확인했다."
+  - at: "2026-07-21T19:10:00+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "PR #48 review fix"
+    note: "팩터리를 initialSnapshot으로 변경하고 호출부·구현 lesson을 정렬했다. 회귀 계약 테스트와 게시 집중 테스트 9건이 통과했다."
 
 created_at: "2026-07-21T17:59:29+09:00"
-updated_at: "2026-07-21T18:09:00+09:00"
+updated_at: "2026-07-21T19:10:00+09:00"
