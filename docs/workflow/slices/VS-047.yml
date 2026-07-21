@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-047
+  title: "기업 문의 Thread"
+  dependencies: [VS-008, VS-010]
+  resource_locks: [messaging]
+
+status: CREATING_PR
+branch: codex/vs-047-company-inquiry
+base_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-008
+      pr_number: 45
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/45"
+      merge_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
+      merged_at: "2026-07-21T08:25:05Z"
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+  red_test: "2026-07-21T19:27:26+09:00 ./gradlew test --tests com.seedrank.messaging.thread.MessageThreadIntegrationTest --no-daemon: message_threads 테이블과 API 부재로 7개 실패"
+  focused_tests: "2026-07-21T19:28:51+09:00 ./gradlew test --tests com.seedrank.messaging.thread.MessageThreadIntegrationTest --no-daemon: 7개 성공"
+  full_tests: "2026-07-21T19:29:54+09:00 ./gradlew test --no-daemon: 139개 성공, 실패·오류·건너뜀 0개"
+  migration: "V20260721102800__create_message_threads.sql: 아이디어·회사 프로필·작성자 고유 문의 스레드와 조회 인덱스 추가; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T19:25:28+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-047"
+    note: "백로그, 기획, 구현 계획과 VS-008·VS-010 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T19:25:28+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-047"
+    note: "인증 Company, 세 공개 범위, 고유 Thread와 순차·동시 멱등성, 안전한 응답 범위를 확정했다."
+  - at: "2026-07-21T19:29:54+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-047"
+    note: "Red 7건 확인 후 최소 구현과 리팩터링을 완료했다. 순차·동시 멱등성을 포함한 집중 7개와 전체 139개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+
+created_at: "2026-07-21T19:25:28+09:00"
+updated_at: "2026-07-21T19:29:54+09:00"

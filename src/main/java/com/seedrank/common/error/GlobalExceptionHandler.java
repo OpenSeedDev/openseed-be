@@ -25,6 +25,8 @@ import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.member.profile.ProfileIdValidationException;
+import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
+import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -204,6 +206,22 @@ public class GlobalExceptionHandler {
                 "아이디어를 찾을 수 없습니다.",
                 requestId(request),
                 List.of()));
+    }
+
+    @ExceptionHandler(VerifiedCompanyRequiredException.class)
+    ResponseEntity<ApiError> handleVerifiedCompanyRequired(
+            VerifiedCompanyRequiredException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of(
+                "VERIFIED_COMPANY_REQUIRED", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(MessageThreadIdeaNotFoundException.class)
+    ResponseEntity<ApiError> handleMessageThreadIdeaNotFound(
+            MessageThreadIdeaNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
     }
 
     @ExceptionHandler(Exception.class)

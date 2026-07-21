@@ -13,6 +13,9 @@ erDiagram
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
+    IDEAS ||--o{ MESSAGE_THREADS : receives
+    COMPANY_PROFILES ||--o{ MESSAGE_THREADS : starts
+    USERS ||--o{ MESSAGE_THREADS : receives
 
     USERS {
         uuid id PK
@@ -129,6 +132,15 @@ erDiagram
         uuid actor_id FK
         timestamptz created_at
     }
+
+    MESSAGE_THREADS {
+        uuid id PK
+        uuid idea_id FK
+        uuid company_profile_id FK
+        uuid author_id FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
 ## VS-001 제약
@@ -198,3 +210,11 @@ erDiagram
 - 아이디어 행을 잠가 중복·동시 게시에서도 최초 버전·타임라인·보상 출처가 한 번만 생성되게 한다.
 - 공개형·반공개형 게시 보상은 50P이며 Asia/Seoul 하루 두 번까지 지급한다. 이후 게시 시도는 게시를 허용하되 전액 소멸 원장을 남긴다.
 - 매칭형 게시에는 게시 보상을 지급하거나 원장을 생성하지 않는다.
+
+## VS-047 제약
+
+- 회사 이메일 인증을 완료한 `COMPANY`만 게시된 아이디어에 문의 스레드를 시작한다.
+- `PUBLIC`, `SEMI_PUBLIC`, `MATCHING` 세 공개 범위에 동일한 문의 시작 권한을 적용한다.
+- `(idea_id, company_profile_id, author_id)` 유일 제약과 회사 프로필 행 잠금으로 순차·동시 생성 요청을 멱등 처리한다.
+- 스레드 생성 응답은 ID·아이디어 ID·생성 시각만 제공하며 회사 이메일이나 아이디어 상세를 노출하지 않는다.
+- 메시지, 읽음 상태, 상세 열람 요청은 후속 슬라이스 범위다.
