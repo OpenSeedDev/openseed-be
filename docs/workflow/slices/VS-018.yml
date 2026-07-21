@@ -6,10 +6,10 @@ task:
   dependencies: [VS-009]
   resource_locks: [ai-job]
 
-status: APPLYING_REVIEW_CHANGES
+status: AWAITING_PR_REVIEW
 branch: codex/vs-018-ai-job
 base_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
-current_commit: b22d6c285a6463f26ef79dfd54fbb32cf6a62c00
+current_commit: 5415175079a8304cb3f8f685d0a1d8e5c2201b7f
 
 review:
   pr_number: 38
@@ -33,11 +33,11 @@ evidence:
       merge_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
       merged_at: "2026-07-21T04:03:16Z"
   red_test: "초기: 2026-07-21T13:11:24+09:00 신규 테이블·API 부재로 7개 실패; 자체 검토 회귀: 2026-07-21T13:24:41+09:00 sameKeyReplayReturnsOriginalJobAfterServerPromptVersionChanges가 Prompt Version 변경 후 expected 202 but was 409로 1개 실패"
-  focused_tests: "2026-07-21T13:25:19+09:00 ./gradlew test --tests com.seedrank.ai.job.AiJobCreationIntegrationTest --no-daemon: Prompt Version 변경 회귀와 실제 최초 동시 생성 6요청 포함 8 passed, 0 failures"
-  full_tests: "2026-07-21T13:25:48+09:00 ./gradlew clean test --no-daemon: 59 passed, 0 failures"
-  migration: "V20260721041200__create_ai_jobs.sql: PostgreSQL 17 Testcontainers에서 기존 Migration 이후 적용, JPA ddl-auto validate 성공"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29801268435"
-  ci_result: success
+  focused_tests: "2026-07-21T15:16:36+09:00 AI Job·Idea Draft·Company Profile·Profile ID 통합 테스트: 43 passed, 0 failures"
+  full_tests: "2026-07-21T15:17:28+09:00 ./gradlew clean test --no-daemon: 88 passed, 0 failures"
+  migration: "V20260721041200__create_ai_jobs.sql 무변경; PostgreSQL 17 Testcontainers에서 V1~V20260721043400 8개 Migration 순차 적용과 JPA ddl-auto validate 성공"
+  ci_url: null
+  ci_result: pending
   merge_commit: null
   synced_main_commit: null
 
@@ -77,6 +77,11 @@ history:
     to: APPLYING_REVIEW_CHANGES
     command: "conflict recovery: merge origin/main"
     note: "PR #38의 GitHub CONFLICTING 상태를 확인하고 VS-009·VS-006·VS-055 및 완료 상태가 반영된 origin/main 5a2d053을 일반 merge한다. 코드 통합 이후 기존 승인은 무효이며 승인 증거는 비어 있다."
+  - at: "2026-07-21T15:18:12+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery complete: VS-018"
+    note: "implementation lesson ID 충돌은 main의 IL-009~011을 보존하고 VS-018 교훈을 IL-012로 정규화했으며, GlobalExceptionHandler는 AI Job·회사·프로필 오류 계약을 모두 보존했다. 집중 43개와 전체 88개 테스트가 성공했고 새 Head CI를 기다린다."
 
 created_at: "2026-07-21T13:08:55+09:00"
-updated_at: "2026-07-21T15:13:57+09:00"
+updated_at: "2026-07-21T15:18:12+09:00"
