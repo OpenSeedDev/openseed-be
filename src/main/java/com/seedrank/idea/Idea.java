@@ -142,6 +142,36 @@ public class Idea {
         this.updatedAt = now;
     }
 
+    public void updatePublishedContent(
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel,
+            Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.title = required(title);
+        this.category = required(category);
+        this.summary = required(summary);
+        this.problem = required(problem);
+        this.targetCustomer = required(targetCustomer);
+        this.solution = required(solution);
+        this.businessModel = required(businessModel);
+        this.updatedAt = now;
+    }
+
+    public void archive(Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.status = IdeaStatus.ARCHIVED;
+        this.updatedAt = now;
+    }
+
     private boolean complete() {
         return present(title) && present(category) && present(summary) && present(problem)
                 && present(targetCustomer) && present(solution) && present(businessModel);

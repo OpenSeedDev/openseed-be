@@ -1,0 +1,92 @@
+schema_version: 2
+
+task:
+  id: VS-028
+  title: "멱등 좋아요 등록·취소"
+  dependencies: [VS-010]
+  resource_locks: [idea]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-028-idea-like
+base_commit: 4e229ac9cff80441284531a46721eb71ae851f20
+current_commit: bbb2d0723adf999e99af88538421dab79c816b4c
+
+delivery:
+  strategy: stacked_pr
+  parent_task_id: VS-017
+  parent_pr_number: 60
+  base_ref: codex/vs-017-timeline
+  base_head_sha: 4e229ac9cff80441284531a46721eb71ae851f20
+  stack_root: VS-012
+  stack_depth: 4
+  merge_order: [VS-012, VS-016, VS-017, VS-028]
+
+review:
+  pr_number: 64
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/64"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      state: MERGED
+    - task_id: VS-017
+      pr_number: 60
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/60"
+      head_commit: 4e229ac9cff80441284531a46721eb71ae851f20
+      state: OPEN
+  red_test: "2026-07-21T21:49:20+09:00 ./gradlew test --tests com.seedrank.idea.like.IdeaLikeIntegrationTest --no-daemon: 좋아요 API·테이블·상세 지표 부재로 7개 실패"
+  focused_tests: "2026-07-21T21:51:24+09:00 IdeaLike 7개·Detail 공개 범위 6개·Archive 5개·Timeline 5개, 총 23개 멱등·동시성·공개 범위 위험 회귀 성공"
+  full_tests: "2026-07-21T21:52:34+09:00 ./gradlew test --no-daemon: depth 4 checkpoint 전체 162개 성공, 실패·오류 0개"
+  migration: "V20260721124500__create_idea_likes.sql: idea_likes와 아이디어·사용자 unique 제약, 사용자 이력 인덱스 및 FK cascade 추가"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:45:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build worker: VS-028"
+    note: "Selector가 확정한 VS-017 PR #60 Head 기반 depth 4 checkpoint 스택과 REACT-01 멱등 정책을 확인했다."
+  - at: "2026-07-21T21:45:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build worker: VS-028"
+    note: "반복·동시 등록/취소, 세 공개 범위, 상세 지표와 인증·게시 상태 위험 회귀 범위를 확정했다."
+  - at: "2026-07-21T21:53:00+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build checkpoint delivery: VS-028"
+    note: "Red 7건 후 아이디어 행 잠금과 unique 제약 기반 멱등 좋아요, 상세 likeCount·liked를 구현했다. 위험 회귀 23개와 depth 4 checkpoint 전체 162개, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-21T21:55:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build checkpoint stacked PR delivery: VS-028"
+    note: "구현 커밋 bbb2d07을 Push하고 VS-017 PR #60을 base로 Draft PR #64를 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
+
+created_at: "2026-07-21T21:45:00+09:00"
+updated_at: "2026-07-21T21:55:00+09:00"

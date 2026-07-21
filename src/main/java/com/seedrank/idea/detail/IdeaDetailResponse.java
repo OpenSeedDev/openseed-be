@@ -25,29 +25,34 @@ public record IdeaDetailResponse(
         List<ValidationQuestionResponse> validationQuestions,
         IdeaVisibility visibility,
         Integer currentUnitPrice,
+        long likeCount,
+        boolean liked,
         Instant publishedAt,
         Instant createdAt,
         Instant updatedAt) {
 
-    static IdeaDetailResponse full(Idea idea, List<ValidationQuestion> questions) {
+    static IdeaDetailResponse full(Idea idea, List<ValidationQuestion> questions, long likeCount, boolean liked) {
         return new IdeaDetailResponse(
                 idea.id(), idea.status(), idea.title(), idea.category(), idea.summary(), idea.problem(),
                 idea.targetCustomer(), idea.solution(), idea.businessModel(),
                 questions.stream().map(ValidationQuestionResponse::from).toList(),
-                idea.visibility(), idea.currentUnitPrice(), idea.publishedAt(), idea.createdAt(), idea.updatedAt());
+                idea.visibility(), idea.currentUnitPrice(), likeCount, liked,
+                idea.publishedAt(), idea.createdAt(), idea.updatedAt());
     }
 
-    static IdeaDetailResponse semiPublicGuest(Idea idea) {
+    static IdeaDetailResponse semiPublicGuest(Idea idea, long likeCount, boolean liked) {
         return new IdeaDetailResponse(
                 idea.id(), idea.status(), idea.title(), idea.category(), idea.summary(), idea.problem(),
                 null, null, null, null,
-                idea.visibility(), idea.currentUnitPrice(), idea.publishedAt(), idea.createdAt(), idea.updatedAt());
+                idea.visibility(), idea.currentUnitPrice(), likeCount, liked,
+                idea.publishedAt(), idea.createdAt(), idea.updatedAt());
     }
 
-    static IdeaDetailResponse summaryOnly(Idea idea) {
+    static IdeaDetailResponse summaryOnly(Idea idea, long likeCount, boolean liked) {
         return new IdeaDetailResponse(
                 idea.id(), idea.status(), idea.title(), idea.category(), idea.summary(),
                 null, null, null, null, null,
-                idea.visibility(), idea.currentUnitPrice(), idea.publishedAt(), idea.createdAt(), idea.updatedAt());
+                idea.visibility(), idea.currentUnitPrice(), likeCount, liked,
+                idea.publishedAt(), idea.createdAt(), idea.updatedAt());
     }
 }

@@ -1,0 +1,82 @@
+schema_version: 2
+
+task:
+  id: VS-016
+  title: "아이디어 보관"
+  dependencies: [VS-010]
+  resource_locks: [idea]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-016-archive
+base_commit: 180bbee85b2f1efaf322606b86a904afc8ea8007
+current_commit: bf7996cd1bcd1abf37f0dd9740ff306b45539250
+
+review:
+  pr_number: 57
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/57"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+    - task_id: VS-012
+      pr_number: 52
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/52"
+      head_sha: 180bbee85b2f1efaf322606b86a904afc8ea8007
+      status: OPEN_STACK_PARENT
+  red_test: "2026-07-21T21:20:42+09:00 ./gradlew test --tests com.seedrank.idea.archive.IdeaArchiveIntegrationTest --no-daemon: 보관 API 부재로 5/5 의도된 실패"
+  focused_tests: "2026-07-21T21:22:08+09:00 IdeaArchiveIntegrationTest, IdeaDetailVisibilityIntegrationTest, MyIdeaListIntegrationTest, IdeaUpdateIntegrationTest 위험 회귀 24/24 성공"
+  full_tests: "Fast Build stack depth 2: 로컬 전체 테스트 생략, 최종 Head CI에서 전체 회귀 검증"
+  migration: "없음: 기존 ARCHIVED 상태와 DB 제약을 사용"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:18:23+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build coordinator: VS-016"
+    note: "Selector가 VS-012 PR #52를 parent로 지정한 depth 2 stack과 아이디어 보관 범위를 확인했다."
+  - at: "2026-07-21T21:18:23+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build coordinator: VS-016"
+    note: "작성자 보관, 공개 차단, 상태 오류와 동시 요청의 Red 테스트를 먼저 작성한다."
+  - at: "2026-07-21T21:22:29+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build delivery: VS-016"
+    note: "Red 5건 확인 후 작성자 보관과 공개 차단을 구현했다. 집중·위험 회귀 24건, OpenAPI 계약과 상태 검증을 완료했다."
+  - at: "2026-07-21T21:23:40+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-016"
+    note: "구현 커밋 bf7996c을 Push하고 VS-012 PR #52를 base로 Draft PR #57을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
+
+created_at: "2026-07-21T21:18:23+09:00"
+updated_at: "2026-07-21T21:23:40+09:00"

@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "idea_timeline_events")
-class IdeaTimelineEvent {
+public class IdeaTimelineEvent {
     @Id private UUID id;
     @Column(name = "idea_id", nullable = false) private UUID ideaId;
     @Enumerated(EnumType.STRING) @Column(name = "event_type", nullable = false, length = 30) private Type eventType;
@@ -21,15 +21,29 @@ class IdeaTimelineEvent {
 
     protected IdeaTimelineEvent() {}
 
-    static IdeaTimelineEvent published(UUID ideaId, UUID actorId, Instant now) {
+    public static IdeaTimelineEvent published(UUID ideaId, UUID actorId, Instant now) {
+        return event(ideaId, actorId, Type.PUBLISHED, now);
+    }
+
+    public static IdeaTimelineEvent updated(UUID ideaId, UUID actorId, Instant now) {
+        return event(ideaId, actorId, Type.UPDATED, now);
+    }
+
+    private static IdeaTimelineEvent event(UUID ideaId, UUID actorId, Type type, Instant now) {
         IdeaTimelineEvent event = new IdeaTimelineEvent();
         event.id = UUID.randomUUID();
         event.ideaId = ideaId;
-        event.eventType = Type.PUBLISHED;
+        event.eventType = type;
         event.actorId = actorId;
         event.createdAt = now;
         return event;
     }
 
-    enum Type { PUBLISHED }
+    public UUID id() { return id; }
+    public UUID ideaId() { return ideaId; }
+    public Type eventType() { return eventType; }
+    public UUID actorId() { return actorId; }
+    public Instant createdAt() { return createdAt; }
+
+    public enum Type { PUBLISHED, UPDATED }
 }

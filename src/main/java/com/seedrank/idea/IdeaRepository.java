@@ -14,6 +14,10 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 public interface IdeaRepository extends JpaRepository<Idea, UUID> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select idea from Idea idea where idea.id = :id")
+    Optional<Idea> findByIdForUpdate(@Param("id") UUID id);
+
     Optional<Idea> findByIdAndAuthorId(UUID id, UUID authorId);
 
     Optional<Idea> findByIdAndStatus(UUID id, IdeaStatus status);
