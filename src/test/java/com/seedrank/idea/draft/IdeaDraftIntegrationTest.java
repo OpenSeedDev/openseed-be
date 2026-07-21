@@ -45,7 +45,7 @@ class IdeaDraftIntegrationTest {
     void clean() {
         jdbc.update("DELETE FROM ideas");
         jdbc.update("DELETE FROM auth_sessions");
-        jdbc.update("DELETE FROM point_ledgers");
+        jdbc.execute("TRUNCATE TABLE point_ledgers");
         jdbc.update("DELETE FROM point_wallets");
         jdbc.update("DELETE FROM users");
     }
@@ -82,7 +82,8 @@ class IdeaDraftIntegrationTest {
         String ideaId = body.get("id").asText();
         assertThat(body.fieldNames()).toIterable().containsExactlyInAnyOrder(
                 "id", "status", "title", "category", "summary", "problem",
-                "targetCustomer", "solution", "businessModel", "createdAt", "updatedAt");
+                "targetCustomer", "solution", "businessModel", "validationQuestions", "createdAt", "updatedAt");
+        assertThat(body.get("validationQuestions").isEmpty()).isTrue();
         assertThat(body.toString()).doesNotContain(
                 "author@example.com", "accessToken", "sessionId", "visibility", "aiJob");
 

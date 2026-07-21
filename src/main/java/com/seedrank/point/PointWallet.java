@@ -49,4 +49,16 @@ public class PointWallet {
     public static PointWallet signupWallet(User user, Instant now) {
         return new PointWallet(UUID.randomUUID(), user, now);
     }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public int getPendingRecoveryBalance() {
+        return pendingRecoveryBalance;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

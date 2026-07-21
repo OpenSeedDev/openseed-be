@@ -10,6 +10,7 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     USERS ||--o{ IDEAS : authors
     USERS ||--o{ AI_JOBS : requests
+    IDEAS ||--o{ VALIDATION_QUESTIONS : validates
 
     USERS {
         uuid id PK
@@ -93,6 +94,13 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    VALIDATION_QUESTIONS {
+        uuid id PK
+        uuid idea_id FK
+        text question "not blank"
+        int sort_order "1..3, unique per idea"
+    }
 ```
 
 ## VS-001 제약
@@ -102,6 +110,7 @@ erDiagram
 - 가입 시 User, PointWallet, PointLedger를 같은 트랜잭션에 저장한다.
 - 가입 원장은 `300 = paidAmount(300) + expiredAmount(0)`을 만족한다.
 - PointLedger는 append-only 데이터로 취급한다.
+- `point_ledgers`의 UPDATE·DELETE는 데이터베이스 trigger가 거부하며 정정이 필요하면 새 원장 행을 추가한다.
 - 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
 - Refresh Token은 family ID와 이전 세션 ID로 회전 계보를 보존하며 재사용 탐지 시 패밀리를 폐기한다.
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.
@@ -130,3 +139,10 @@ erDiagram
 - Job은 `PENDING`, retry count 0으로 생성하며 Worker 선점과 상태 전이는 후속 슬라이스에서 구현한다.
 - `(owner_id, idempotency_key)` 고유 제약으로 순차·동시 재전송을 한 Job으로 수렴시킨다.
 - 같은 사용자의 같은 Key·같은 입력은 기존 Job을 반환하고, 다른 입력에 Key를 재사용하면 거부한다.
+
+## VS-013 제약
+
+- 아이디어 작성자는 검증 질문 1~3개를 전체 교체 방식으로 저장한다.
+- 요청 배열 순서를 아이디어별 고유한 `sort_order` 1~3으로 보존한다.
+- 질문 문구는 앞뒤 공백을 제거하고 빈 값은 허용하지 않는다.
+- 아이디어 삭제 시 해당 검증 질문도 함께 삭제한다.

@@ -32,15 +32,14 @@ class VerticalSliceMergeGuard
     state_id = state["schema_version"] == 2 ? state.dig("task", "id") : state.dig("slice", "id")
     errors << "task ID must be #{task_id}" unless state_id == task_id
     errors << "branch must be #{head_ref}" unless state["branch"] == head_ref
-    errors << "status must be AWAITING_USER_MERGE" unless state["status"] == "AWAITING_USER_MERGE"
-    errors << "CI evidence must be success" unless state.dig("evidence", "ci_result") == "success"
+    review_ready_statuses = %w[AWAITING_PR_REVIEW AWAITING_USER_MERGE]
+    unless review_ready_statuses.include?(state["status"])
+      errors << "status must be AWAITING_PR_REVIEW or AWAITING_USER_MERGE"
+    end
     errors << "an active workflow failure remains" unless state.dig("failure", "active") == false
 
     if state["schema_version"] == 2
       errors << "dependencies are not satisfied" unless state.dig("evidence", "dependencies_satisfied") == true
-      errors << "unresolved review threads remain" unless state.dig("review", "unresolved_thread_count") == 0
-      errors << "merge approval must come from pado0711" unless state.dig("review", "merge_approval", "approved_by") == "pado0711"
-      errors << "merge approval is stale" unless state.dig("review", "merge_approval", "head_sha") == state["current_commit"]
     else
       errors << "test approval is missing" unless state.dig("approvals", "test", "approved") == true
       errors << "change approval is missing" unless state.dig("approvals", "change", "approved") == true

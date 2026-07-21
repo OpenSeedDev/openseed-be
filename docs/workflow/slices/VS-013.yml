@@ -1,0 +1,87 @@
+schema_version: 2
+
+task:
+  id: VS-013
+  title: "검증 질문 관리"
+  dependencies: [VS-009]
+  resource_locks: [idea]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-013-validation-questions
+base_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
+current_commit: 3ef5d9d749f55b7b2867253bfd17798bbde8599d
+
+review:
+  pr_number: 37
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/37"
+  handled_comment_ids: []
+  unresolved_thread_count: 0
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-009
+      pr_number: 29
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/29"
+      merge_commit: 087d640d87b5283e7ae952e7ad00bc63a5091344
+      merged_at: "2026-07-21T04:03:16Z"
+  red_test: "2026-07-21T13:09:46+09:00 ./gradlew test --tests com.seedrank.idea.question.ValidationQuestionIntegrationTest --no-daemon: validation_questions relation과 API 구현 부재로 5개 실패"
+  focused_tests: "2026-07-21T15:50:38+09:00 최신 main 통합 후 ValidationQuestionIntegrationTest 5개와 IdeaDraftIntegrationTest 6개 성공"
+  full_tests: "2026-07-21T15:51:23+09:00 ./gradlew clean test --no-daemon: 92개 성공, 실패·오류·건너뜀 0개"
+  migration: "V20260721041000__create_validation_questions.sql 변경 없음; 최신 main의 기존 Migration을 포함해 PostgreSQL 17에서 총 9개 Migration과 JPA ddl-auto validate 성공"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29808425820"
+  ci_result: success
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T13:07:45+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "autonomous worker: VS-013"
+    note: "백로그, 통합 기획·기능·데이터 명세, 구현 교훈과 실제 VS-009 Merge 증거를 확인하고 기능·테스트 계획을 작성했다."
+  - at: "2026-07-21T13:08:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "autonomous TDD: VS-013"
+    note: "승인 대기 없이 검증 질문 등록·정렬·수정과 상세 표시의 실패 테스트 작성을 시작했다."
+  - at: "2026-07-21T13:13:30+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "autonomous delivery: VS-013"
+    note: "Red 5개, 최소 구현·리팩터링, 집중 11개와 전체 56개 테스트, OpenAPI·ERD·새 Migration 갱신을 완료했다. 첫 전체 테스트의 fixture 정리 회귀는 IL-007 재발로 기록하고 teardown 후 복구했다."
+  - at: "2026-07-21T13:16:11+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous PR sync: #37"
+    note: "PR #37을 생성했고 기능 커밋 1220e6a의 Build and Test 성공, MERGEABLE, 일반 댓글·제출 리뷰·미해결 review thread 0개를 확인했다. Merge Guard의 승인 전 차단은 의도된 상태다."
+  - at: "2026-07-21T15:49:02+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "workflow recovery: merge origin/main"
+    note: "PR #37이 최신 main보다 뒤처진 상태에서 old Head f370c41 이후 승인 댓글 5030954350과 활성 auto-merge를 확인했다. strict 보호 병합을 위해 origin/main d53deba를 일반 merge로 통합했고 이 코드 변경으로 기존 승인을 무효화해 merge_approval 증거를 비운 채 새 Head 검증을 시작한다."
+  - at: "2026-07-21T15:54:37+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "workflow recovery: VS-013 latest main"
+    note: "stale 승인 기반 auto-merge를 해제하고 append-only 원장 정리 회귀를 수정했다. 집중 11개·전체 92개, validator 4종과 diff·secret·Migration 불변 검사가 성공했고 recovery Head 3ef5d9d의 Build and Test도 성공했다. 새 코드 Head에는 pado0711의 새 /merge-approved가 필요하다."
+
+created_at: "2026-07-21T13:07:45+09:00"
+updated_at: "2026-07-21T15:54:37+09:00"

@@ -1,0 +1,112 @@
+schema_version: 2
+
+task:
+  id: VS-030
+  title: "지갑·원장·대기 잔액 조회"
+  dependencies: [VS-001]
+  resource_locks: [wallet]
+
+status: COMPLETED_SYNCED
+branch: codex/vs-030-wallet-ledger
+base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
+current_commit: 9fbf03b1eb80fe0954b122e7fa0e7c1b70eff320
+
+review:
+  pr_number: 30
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/30"
+  handled_comment_ids: []
+  unresolved_thread_count: 0
+  merge_approval:
+    command: /merge-approved
+    approved_by: pado0711
+    comment_id: 5030798190
+    comment_url: "https://github.com/OpenSeedDev/openseed-be/pull/30#issuecomment-5030798190"
+    approved_at: "2026-07-21T06:21:47Z"
+    head_sha: 3df256b1a14115293bc4d404ee41e5cdf3e654d2
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-001
+      pr_number: 15
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/15"
+      merge_commit: e0ee1fb88d290e80de665feee7e7d614210d93ca
+      merged_at: "2026-07-20T10:08:38Z"
+  red_test: "2026-07-21T10:23:37+09:00 PointWalletQueryIntegrationTest: 조회 API와 OpenAPI, Append-only DB 제약 부재로 7개 실패; Instant Fixture 타입을 명시한 뒤 기능 Red를 확정"
+  focused_tests: "2026-07-21T15:05:16+09:00 최신 main 재통합 후 PointWalletQueryIntegrationTest, IdeaDraftIntegrationTest, CompanyProfileIntegrationTest, UpdateProfileIdIntegrationTest: 42개 성공, 실패 0개"
+  full_tests: "2026-07-21T15:07:23+09:00 ./gradlew clean test --no-daemon: 87개 성공, 실패·오류·건너뜀 0개 (신규 main 테스트의 append-only 정리 회귀 28건 수정 후 Green)"
+  migration: "V20260721012400__protect_point_ledgers_append_only.sql 적용: PostgreSQL 17 Testcontainers에서 총 8개 Migration과 ddl-auto validate 성공, UPDATE·DELETE 거부 검증"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29807031005"
+  ci_result: success
+  merge_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
+  synced_main_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T10:21:04+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "autonomous orchestrator: VS-030"
+    note: "백로그, 기능 명세, 기존 지갑·원장 구조, 교훈과 VS-001 실제 Merge를 확인했다."
+  - at: "2026-07-21T10:21:04+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "autonomous orchestrator: VS-030"
+    note: "조회 API, 안정적인 Cursor, Append-only DB 제약과 테스트 범위를 확정하고 TDD를 시작한다."
+  - at: "2026-07-21T10:28:31+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "autonomous delivery: VS-030"
+    note: "Red, 최소 구현, Cursor 쿼리 리팩터링, 집중·전체 테스트와 OpenAPI·ERD·Migration 갱신을 완료했다."
+  - at: "2026-07-21T10:35:44+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "autonomous PR delivery: VS-030"
+    note: "PR #30을 생성했고 Build and Test 성공, Merge 가능, 댓글·리뷰·미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
+  - at: "2026-07-21T13:47:08+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "conflict recovery: merge origin/main"
+    note: "GitHub에서 PR #30의 main 충돌을 확인해 승인 증거를 비운 채 최신 origin/main 통합과 회귀 검증을 시작했다."
+  - at: "2026-07-21T13:51:24+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery: VS-030"
+    note: "origin/main 병합 충돌을 해결하고 append-only 원장과 VS-009 테스트 정리의 회귀를 수정했다. 집중 13개와 전체 58개 테스트, workflow validator 4종 및 diff·secret 검사를 통과했으며 현재 코드 SHA의 CI를 기다린다."
+  - at: "2026-07-21T15:02:30+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "conflict recovery: merge latest origin/main"
+    note: "main에 VS-006·VS-055 완료 상태가 추가되어 PR #30이 다시 충돌한 사실을 GitHub에서 확인했다. 승인 증거를 비운 채 최신 origin/main을 일반 merge로 통합했다."
+  - at: "2026-07-21T15:07:30+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "conflict recovery: VS-030 second main sync"
+    note: "main의 VS-006·VS-055 기능과 상태를 모두 보존하고 교훈 ID 충돌을 해소했다. 신규 main 테스트의 append-only 원장 정리를 TRUNCATE로 맞춘 뒤 집중 42개와 전체 87개 테스트가 성공했으며 새 Head CI를 대기한다."
+  - at: "2026-07-21T15:26:02+09:00"
+    from: AWAITING_PR_REVIEW
+    to: AWAITING_USER_MERGE
+    command: "/merge-approved"
+    note: "현재 Head 3df256b 이후 pado0711이 남긴 정확한 승인 댓글 5030798190, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
+  - at: "2026-07-21T15:28:10+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "GitHub protected auto-merge"
+    note: "PR #30이 최종 Head 9fbf03b의 Build and Test와 Vertical Slice Merge Guard 성공 상태에서 Merge 커밋 9454302로 실제 병합됐다."
+  - at: "2026-07-21T15:28:59+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "git fetch origin && git merge --ff-only origin/main"
+    note: "로컬 main을 9454302로 fast-forward하고 GitHub Merge 증거를 동기화해 VS-030과 wallet lock을 완료 해제했다."
+
+created_at: "2026-07-21T10:21:04+09:00"
+updated_at: "2026-07-21T15:28:59+09:00"

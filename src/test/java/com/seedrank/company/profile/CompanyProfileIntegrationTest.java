@@ -43,7 +43,7 @@ class CompanyProfileIntegrationTest {
     void clean() {
         jdbc.update("DELETE FROM company_profiles");
         jdbc.update("DELETE FROM auth_sessions");
-        jdbc.update("DELETE FROM point_ledgers");
+        jdbc.execute("TRUNCATE TABLE point_ledgers");
         jdbc.update("DELETE FROM point_wallets");
         jdbc.update("DELETE FROM users");
     }
