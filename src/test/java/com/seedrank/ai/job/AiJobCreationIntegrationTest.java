@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ class AiJobCreationIntegrationTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired JdbcTemplate jdbc;
+    @Autowired AiJobCreationService service;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
@@ -141,6 +143,22 @@ class AiJobCreationIntegrationTest {
 
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_jobs", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT id FROM ai_jobs", UUID.class).toString()).isEqualTo(originalJobId);
+    }
+
+    @Test
+    void sameKeyReplayReturnsOriginalJobAfterServerPromptVersionChanges() throws Exception {
+        String accessToken = signupAndLogin("author@example.com", "ai_author");
+        String originalJobId = createJob(accessToken, "version-change-key", validRequest());
+
+        ReflectionTestUtils.setField(service, "promptVersion", "idea-candidates-v2");
+        try {
+            assertThat(createJob(accessToken, "version-change-key", validRequest())).isEqualTo(originalJobId);
+        } finally {
+            ReflectionTestUtils.setField(service, "promptVersion", "idea-candidates-v1");
+        }
+        assertThat(jdbc.queryForObject(
+                "SELECT prompt_version FROM ai_jobs WHERE id=?", String.class, UUID.fromString(originalJobId)))
+                .isEqualTo("idea-candidates-v1");
     }
 
     @Test

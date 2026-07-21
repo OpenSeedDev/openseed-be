@@ -120,3 +120,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "PR #29 인라인 댓글 3619109381, 계약 테스트 Red 1건과 집중 8개·전체 51개 Green"
+  - id: IL-009
+    fingerprint: "server-prompt-version-breaks-ai-job-request-idempotency"
+    status: resolved
+    occurred_at: "2026-07-21T13:24:41+09:00"
+    slice_id: VS-018
+    category: business_rule
+    review_comment_id: null
+    symptom: "같은 Idempotency-Key와 같은 사용자 입력을 재전송해도 서버 Prompt Version이 바뀌면 기존 Job 대신 409가 반환됐다."
+    root_cause: "중복 요청 충돌 판정에 클라이언트 요청이 아닌 서버 관리 Prompt Version까지 포함했다."
+    fix: "Prompt Version은 최초 Job의 생성 시점 스냅샷으로 보존하고, Key 재사용 충돌은 정규화된 사용자 입력 snapshot이 다를 때만 판정하도록 제한했다."
+    regression_test: "AiJobCreationIntegrationTest.sameKeyReplayReturnsOriginalJobAfterServerPromptVersionChanges"
+    applies_to: "서버 설정이나 정책 버전을 생성 시점에 저장하면서 클라이언트 재전송을 멱등하게 처리하는 모든 요청"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "2026-07-21T13:24:41+09:00 전용 테스트에서 expected 202 but was 409 Red 1건 확인"

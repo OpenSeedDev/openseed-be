@@ -44,7 +44,7 @@ class AiJobCreationService {
         jobs.insertPendingIfAbsent(
                 newJobId, ownerId, inputSnapshot, promptVersion, validatedKey, clock.instant());
         AiJob job = jobs.findByOwnerIdAndIdempotencyKey(ownerId, validatedKey).orElseThrow();
-        if (!sameSnapshot(job.inputSnapshot(), inputSnapshot) || !job.promptVersion().equals(promptVersion)) {
+        if (!sameSnapshot(job.inputSnapshot(), inputSnapshot)) {
             throw new IdempotencyKeyReusedException();
         }
         return new AiJobCreationResponse(job.id());

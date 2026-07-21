@@ -54,5 +54,4 @@ class AiJob {
 
     UUID id() { return id; }
     String inputSnapshot() { return inputSnapshot; }
-    String promptVersion() { return promptVersion; }
 }
