@@ -22,6 +22,7 @@ import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.idea.archive.IdeaNotArchivableException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.idea.update.IdeaNotPublishedException;
@@ -202,6 +203,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
                 "IDEA_NOT_PUBLISHED", "게시된 아이디어만 수정할 수 있습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdeaNotArchivableException.class)
+    ResponseEntity<ApiError> handleIdeaNotArchivable(
+            IdeaNotArchivableException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEA_NOT_PUBLISHED", "게시된 아이디어만 보관할 수 있습니다.", requestId(request), List.of()));
     }
 
     @ExceptionHandler(IdeaDraftNotFoundException.class)

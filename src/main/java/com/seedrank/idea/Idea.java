@@ -164,6 +164,14 @@ public class Idea {
         this.updatedAt = now;
     }
 
+    public void archive(Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.status = IdeaStatus.ARCHIVED;
+        this.updatedAt = now;
+    }
+
     private boolean complete() {
         return present(title) && present(category) && present(summary) && present(problem)
                 && present(targetCustomer) && present(solution) && present(businessModel);
