@@ -216,6 +216,7 @@ class SeedUnitPurchaseIntegrationTest {
     private ResultActions purchase(String token, String ideaId, int units, int confirmedPrice) throws Exception {
         var request = post("/api/v1/ideas/{ideaId}/unit-purchases", ideaId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .content("{\"units\":%d,\"confirmedUnitPrice\":%d}".formatted(units, confirmedPrice));
         if (token != null) request.header(HttpHeaders.AUTHORIZATION, bearer(token));
         return mockMvc.perform(request);

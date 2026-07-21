@@ -33,6 +33,7 @@ import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
 import com.seedrank.unit.purchase.InsufficientPointException;
+import com.seedrank.unit.purchase.IdempotencyKeyValidationException;
 import com.seedrank.unit.purchase.PurchaseLimitExceededException;
 import com.seedrank.unit.purchase.SelfUnitPurchaseException;
 import com.seedrank.unit.purchase.UnitPriceChangedException;
@@ -295,8 +296,16 @@ public class GlobalExceptionHandler {
                 "PURCHASE_LIMIT_EXCEEDED", "Seed Unit 구매 한도를 초과했습니다.", requestId(request), List.of()));
     }
 
+    @ExceptionHandler(IdempotencyKeyValidationException.class)
+    ResponseEntity<ApiError> handleIdempotencyKeyValidation(
+            IdempotencyKeyValidationException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "VALIDATION_ERROR", "Idempotency-Key를 확인해 주세요.", requestId(request), List.of()));
+    }
+
     @ExceptionHandler(IdempotencyKeyReusedException.class)
-    ResponseEntity<ApiError> handleIdempotencyKeyReused(
+    ResponseEntity<ApiError> handleAiIdempotencyKeyReused(
             IdempotencyKeyReusedException exception,
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
@@ -304,6 +313,15 @@ public class GlobalExceptionHandler {
                 "Idempotency-Key가 다른 요청에 이미 사용됐습니다.",
                 requestId(request),
                 List.of()));
+    }
+
+    @ExceptionHandler(com.seedrank.unit.purchase.IdempotencyKeyReusedException.class)
+    ResponseEntity<ApiError> handleUnitPurchaseIdempotencyKeyReused(
+            com.seedrank.unit.purchase.IdempotencyKeyReusedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEMPOTENCY_KEY_REUSED", "같은 Idempotency-Key를 다른 구매에 사용할 수 없습니다.",
+                requestId(request), List.of()));
     }
 
     @ExceptionHandler(AiJobNotFoundException.class)

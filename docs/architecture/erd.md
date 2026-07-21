@@ -231,6 +231,7 @@ erDiagram
         uuid id PK
         uuid idea_id FK
         uuid user_id FK
+        varchar purchase_request_key "user-scoped unique"
         int units "positive integer"
         int purchase_price "1..100 Point per Unit"
         int principal "units * purchase_price"
@@ -352,7 +353,8 @@ erDiagram
 - 구매 원금은 1회 100P, Asia/Seoul 하루 300P, 사용자별 아이디어 활성 원금 300P를 넘지 않는다.
 - Point 지갑 잔액은 음수가 될 수 없고 Point 차감, `DEBIT/UNIT_PURCHASE` append-only 원장, `LOCKED` Lot을 하나의 트랜잭션으로 생성한다.
 - Lot은 구매 시각, 구매 가격, Unit 수와 원금을 보존하며 잠금 해제 시각은 구매 후 정확히 24시간이다.
-- 동일 요청과 동시 구매 보호는 VS-033, 보유 조회와 회수는 VS-034~036에서 확장한다.
+- 구매 요청은 사용자별 `purchase_request_key` 유일 제약으로 재전송을 멱등 처리하고, 사용자 지갑 행을 먼저 잠근 뒤 중복 키·잔액·일일·아이디어별 활성 원금 한도를 검사한다.
+- 보유 조회와 회수는 VS-034~036에서 확장한다.
 
 ## VS-011 조회 제약
 
