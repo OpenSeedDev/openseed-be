@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-056
+  title: "일일 첫 접속 100P"
+  dependencies: [VS-030]
+  resource_locks: [wallet, auth]
+
+status: CREATING_PR
+branch: codex/vs-056-daily-first-access
+base_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-030
+      pr_number: 30
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/30"
+      merge_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
+      merged_at: "2026-07-21T06:28:10Z"
+  red_test: "2026-07-21T17:30:32+09:00 ./gradlew test --tests com.seedrank.auth.login.DailyFirstAccessRewardIntegrationTest --no-daemon: 6개 중 일일 지급 기능 부재로 5개 실패, 자격 증명 실패 시 미지급 1개 성공"
+  focused_tests: "2026-07-21T17:35:32+09:00 DailyFirstAccessRewardIntegrationTest와 PointWalletQueryIntegrationTest: 14개 성공, 실패 0개"
+  full_tests: "2026-07-21T17:37:14+09:00 ./gradlew test --no-daemon: 117개 성공, 실패·오류·건너뜀 0개"
+  migration: "V20260721083033__add_daily_first_access_point_reward.sql: 적용된 Migration 수정 없이 DAILY_FIRST_ACCESS 원장 출처 허용; PostgreSQL ddl-auto validate와 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T17:28:39+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-056"
+    note: "백로그, 로그인 흐름, Point 정책과 VS-030·VS-031 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T17:28:39+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-056"
+    note: "성공 로그인 기준 일일 1회, Asia/Seoul 날짜, Point 한도·소멸·멱등·동시성 테스트 범위를 확정했다."
+  - at: "2026-07-21T17:37:52+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-056"
+    note: "Red 5건 확인 후 최소 구현과 리팩터링을 완료했다. 기존 지갑 조회 테스트의 로그인 후 기대값을 새 정책에 맞춰 갱신하고 집중 14개·전체 117개 테스트, ERD와 새 UTC Migration을 검증했다."
+
+created_at: "2026-07-21T17:28:39+09:00"
+updated_at: "2026-07-21T17:37:52+09:00"

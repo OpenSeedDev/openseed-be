@@ -39,7 +39,7 @@ erDiagram
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED"
+        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED"
         uuid source_id
         date policy_date "nullable for signup, Asia/Seoul"
         timestamptz created_at
@@ -116,6 +116,13 @@ erDiagram
 - 지갑 잔액은 2,000P를 넘지 않으며 일일 한도나 지갑 상한 초과분은 원장에 `expired_amount`로 남기고 회수 대기 잔액으로 전환하지 않는다.
 - 활동 보상은 `source_type`, `source_id` 조합당 한 번만 처리하며 사용자 지갑 행 잠금으로 같은 사용자의 동시 보상을 직렬화한다.
 - 가입 보너스의 `policy_date`는 null이고 활동 보상은 Asia/Seoul 기준 날짜를 반드시 기록한다.
+
+## VS-056 제약
+
+- 활성 사용자의 성공한 로그인은 Asia/Seoul 정책 날짜별 첫 접속 1회에만 100P를 지급한다.
+- 사용자 UUID와 정책 날짜로 만든 결정적 출처 UUID 및 `(source_type, source_id)` 유일 제약으로 연속·동시 로그인을 멱등 처리한다.
+- 일일 첫 접속 보상은 하루 300P 활동 한도와 지갑 2,000P 상한을 적용하며 초과분을 원장에 소멸로 기록한다.
+- 로그인 세션 생성과 첫 접속 Point 지급은 같은 트랜잭션에서 완료되거나 함께 롤백된다.
 - 로그인 Refresh Token은 원문이 아닌 SHA-256 해시로만 AuthSession에 저장한다.
 - Refresh Token은 family ID와 이전 세션 ID로 회전 계보를 보존하며 재사용 탐지 시 패밀리를 폐기한다.
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.

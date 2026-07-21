@@ -1,5 +1,6 @@
 package com.seedrank.point;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,6 +36,27 @@ public class PointRewardService {
         Objects.requireNonNull(reward, "reward");
         Objects.requireNonNull(sourceId, "sourceId");
 
+        Instant now = clock.instant();
+        LocalDate policyDate = policyDate(now);
+        return grant(userId, reward, sourceId, now, policyDate);
+    }
+
+    @Transactional
+    public PointRewardResult grantDailyFirstAccess(UUID userId) {
+        Objects.requireNonNull(userId, "userId");
+        Instant now = clock.instant();
+        LocalDate policyDate = policyDate(now);
+        UUID sourceId = UUID.nameUUIDFromBytes(
+                ("daily-first-access:" + userId + ":" + policyDate).getBytes(StandardCharsets.UTF_8));
+        return grant(userId, ActivityReward.DAILY_FIRST_ACCESS, sourceId, now, policyDate);
+    }
+
+    private PointRewardResult grant(
+            UUID userId,
+            ActivityReward reward,
+            UUID sourceId,
+            Instant now,
+            LocalDate policyDate) {
         PointWallet wallet = wallets.findByUserIdForUpdate(userId)
                 .orElseThrow(() -> new IllegalStateException("Point wallet not found"));
         var duplicate = ledgers.findBySourceTypeAndSourceId(reward.sourceType(), sourceId);
@@ -42,8 +64,6 @@ public class PointRewardService {
             return PointRewardResult.duplicate(duplicate.orElseThrow());
         }
 
-        Instant now = clock.instant();
-        LocalDate policyDate = now.atZone(POLICY_ZONE).toLocalDate();
         int paidToday = Math.toIntExact(ledgers.sumPaidActivityRewards(userId, policyDate));
         int dailyAllowance = Math.max(0, DAILY_ACTIVITY_CAP - paidToday);
         int requestedPayment = Math.min(reward.amount(), dailyAllowance);
@@ -60,5 +80,9 @@ public class PointRewardService {
                 now);
         ledgers.saveAndFlush(ledger);
         return PointRewardResult.created(ledger);
+    }
+
+    private LocalDate policyDate(Instant now) {
+        return now.atZone(POLICY_ZONE).toLocalDate();
     }
 }
