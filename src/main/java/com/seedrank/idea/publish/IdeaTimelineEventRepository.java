@@ -1,8 +1,10 @@
 package com.seedrank.idea.publish;
 
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface IdeaTimelineEventRepository extends JpaRepository<IdeaTimelineEvent, UUID> {
+public interface IdeaTimelineEventRepository extends JpaRepository<IdeaTimelineEvent, UUID> {
+    List<IdeaTimelineEvent> findByIdeaIdOrderByCreatedAtAscIdAsc(UUID ideaId);
 }

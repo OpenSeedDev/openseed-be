@@ -125,7 +125,7 @@ erDiagram
     IDEA_TIMELINE_EVENTS {
         uuid id PK
         uuid idea_id FK
-        varchar event_type "PUBLISHED"
+        varchar event_type "PUBLISHED | UPDATED"
         uuid actor_id FK
         timestamptz created_at
     }

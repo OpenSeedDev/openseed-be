@@ -13,6 +13,8 @@ import com.seedrank.idea.IdeaRepository;
 import com.seedrank.idea.IdeaStatus;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.publish.IdeaVersionAppender;
+import com.seedrank.idea.publish.IdeaTimelineEvent;
+import com.seedrank.idea.publish.IdeaTimelineEventRepository;
 import com.seedrank.idea.question.ValidationQuestionRepository;
 
 @Service
@@ -21,6 +23,7 @@ class IdeaUpdateService {
     private final IdeaRepository ideas;
     private final ValidationQuestionRepository questions;
     private final IdeaVersionAppender versions;
+    private final IdeaTimelineEventRepository timeline;
     private final Clock clock;
 
     IdeaUpdateService(
@@ -28,11 +31,13 @@ class IdeaUpdateService {
             IdeaRepository ideas,
             ValidationQuestionRepository questions,
             IdeaVersionAppender versions,
+            IdeaTimelineEventRepository timeline,
             Clock clock) {
         this.authenticator = authenticator;
         this.ideas = ideas;
         this.questions = questions;
         this.versions = versions;
+        this.timeline = timeline;
         this.clock = clock;
     }
 
@@ -53,6 +58,7 @@ class IdeaUpdateService {
                 .map(question -> question.question())
                 .toList();
         versions.append(idea, questionSnapshot, now);
+        timeline.save(IdeaTimelineEvent.updated(ideaId, authorId, now));
         return IdeaUpdateResponse.from(idea);
     }
 }

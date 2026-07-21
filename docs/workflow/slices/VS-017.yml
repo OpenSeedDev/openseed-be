@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-017
+  title: "아이디어 타임라인"
+  dependencies: [VS-010]
+  resource_locks: [idea]
+
+status: CREATING_PR
+branch: codex/vs-017-timeline
+base_commit: 1bf9a93ff02e993181d87872e20b9b509548e446
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+    - task_id: VS-016
+      pr_number: 57
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/57"
+      head_sha: 1bf9a93ff02e993181d87872e20b9b509548e446
+      status: OPEN_STACK_PARENT
+  red_test: "2026-07-21T21:35:08+09:00 ./gradlew test --tests com.seedrank.idea.timeline.IdeaTimelineIntegrationTest --no-daemon: 조회 API·UPDATED 이벤트 부재로 5/5 의도된 실패"
+  focused_tests: "2026-07-21T21:36:49+09:00 Timeline, Publish, Update, Archive, Detail 공개 범위 위험 회귀 31/31 성공"
+  full_tests: "Fast Build stack depth 3: 로컬 전체 테스트 생략, 최종 Head CI에서 전체 회귀 검증"
+  migration: "V20260721123316__expand_idea_timeline_events.sql: event_type 제약에 UPDATED 추가, PostgreSQL ddl-auto validate와 집중 회귀 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:33:16+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build coordinator: VS-017"
+    note: "Selector가 VS-016 PR #57을 parent로 지정한 depth 3 stack과 성장 타임라인 범위를 확인했다."
+  - at: "2026-07-21T21:33:16+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build coordinator: VS-017"
+    note: "게시·수정 이벤트 조회, 접근 제어, 원자성과 비노출 계약의 Red 테스트를 먼저 작성한다."
+  - at: "2026-07-21T21:36:56+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build delivery: VS-017"
+    note: "Red 5건 확인 후 게시·수정 성장 이벤트와 접근 제어를 구현했다. 원자성·공개 범위 포함 위험 회귀 31건과 OpenAPI·ERD·새 Migration을 검증했다."
+
+created_at: "2026-07-21T21:33:16+09:00"
+updated_at: "2026-07-21T21:36:56+09:00"
