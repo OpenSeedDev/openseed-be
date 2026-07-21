@@ -102,6 +102,9 @@ module Backlog
           unmerged_dependencies.include?(item.fetch("id")) || !(item_locks & task["resource_locks"]).empty?
         end
 
+        lane_roots = lane_candidates.map { |item| item.fetch("stack_root", item.fetch("id")) }.uniq
+        next if lane_roots.length > 1
+
         dependency_candidates = lane_candidates.select { |item| unmerged_dependencies.include?(item.fetch("id")) }
         dependency_roots = dependency_candidates.map { |item| item.fetch("stack_root", item.fetch("id")) }.uniq
         next if dependency_roots.length > 1
