@@ -10,6 +10,7 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
+    USERS ||--o{ FEEDBACKS : writes
     USERS ||--o{ SEED_UNIT_LOTS : purchases
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
     USERS ||--o{ AI_JOBS : requests
@@ -22,6 +23,8 @@ erDiagram
     USERS ||--o{ MESSAGE_THREADS : receives
     USERS ||--o{ IDEA_LIKES : likes
     IDEAS ||--o{ IDEA_LIKES : receives
+    IDEAS ||--o{ FEEDBACKS : receives
+    FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
 
     USERS {
         uuid id PK
@@ -173,6 +176,31 @@ erDiagram
         timestamptz updated_at
     }
 
+    FEEDBACKS {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        varchar feedback_type "PROBLEM_EMPATHY | TARGET_CUSTOMER | SOLUTION | BUSINESS_MODEL | COMPETITION | OTHER"
+        varchar content "normalized, 100..2000"
+        varchar evidence_url "optional http/https"
+        varchar evidence_description "optional, max 1000"
+        timestamptz accepted_at "nullable until VS-027"
+        timestamptz edited_at "nullable until VS-026"
+        timestamptz deleted_at "nullable until VS-026"
+        timestamptz created_at
+    }
+
+    FEEDBACK_REVISIONS {
+        uuid id PK
+        uuid feedback_id FK
+        varchar revision_type "EDITED | DELETED"
+        varchar feedback_type "previous type"
+        varchar content "previous normalized content"
+        varchar evidence_url "previous optional URL"
+        varchar evidence_description "previous optional description"
+        timestamptz recorded_at "audit time"
+    }
+
     SEED_UNIT_LOTS {
         uuid id PK
         uuid idea_id FK
@@ -322,3 +350,13 @@ erDiagram
 - `idea_likes`의 아이디어·사용자 조합은 유일하며 반복·동시 등록과 취소를 멱등하게 처리한다.
 - 좋아요 변경은 아이디어 행 잠금 뒤 처리해 보관 전환과 경합해도 비게시 아이디어에 새 좋아요가 남지 않는다.
 - 아이디어 상세는 기존 공개 범위 필드 정책을 유지하면서 현재 좋아요 수와 조회자의 좋아요 상태를 반환한다.
+
+## VS-024 제약
+
+- 활성 로그인 사용자는 `PUBLIC`, `SEMI_PUBLIC`, `MATCHING`으로 게시된 아이디어에 구조화 피드백을 등록할 수 있다.
+- 피드백 유형과 앞뒤 공백 제거 후 100~2,000자 의견은 필수이며 HTTP(S) 근거 URL과 1,000자 이하 근거 설명은 선택이다.
+- Feedback 생성과 `FEEDBACK_CREATED` 20P 활동 보상 원장을 하나의 트랜잭션으로 처리한다.
+- Asia/Seoul 정책 날짜의 여섯 번째 피드백부터는 Feedback은 저장하되 일일 5회 제한으로 보상 전액을 소멸 기록한다.
+- 공개 가능한 피드백 목록은 삭제 행을 제외하고 채택 우선·작성 시각·ID Cursor로 조회한다.
+- 작성자만 피드백을 수정·soft delete하며 변경 전 전체 스냅샷과 감사 시각을 `feedback_revisions`에 보존한다.
+- 채택·Contribution·기여 보상은 VS-027에서 확장한다.

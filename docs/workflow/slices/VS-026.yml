@@ -1,0 +1,91 @@
+schema_version: 2
+
+task:
+  id: VS-026
+  title: "피드백 수정·삭제·이력"
+  dependencies: [VS-024]
+  resource_locks: [feedback]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-026-feedback-history
+base_commit: ad30c0ce09c5cc99d9446311fc6e30cd8bc87a60
+current_commit: b1bacef1081a5e9dec375285110e4b266f727023
+
+delivery:
+  strategy: stacked_pr
+  parent_task_id: VS-025
+  parent_pr_number: 59
+  base_ref: codex/vs-025-feedback-list
+  base_head_sha: ad30c0ce09c5cc99d9446311fc6e30cd8bc87a60
+  stack_root: VS-024
+  stack_depth: 3
+  merge_order: [VS-024, VS-025, VS-026]
+
+review:
+  pr_number: 61
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/61"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-024
+      pr_number: 53
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/53"
+      state: OPEN
+    - task_id: VS-025
+      pr_number: 59
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/59"
+      head_commit: ad30c0ce09c5cc99d9446311fc6e30cd8bc87a60
+      state: OPEN
+  red_test: "2026-07-21T21:35:03+09:00 ./gradlew test --tests com.seedrank.feedback.manage.FeedbackManageIntegrationTest --no-daemon: PUT·DELETE API 부재로 7개 실패"
+  focused_tests: "2026-07-21T21:37:22+09:00 FeedbackManage 7개·FeedbackList 5개·FeedbackCreate 10개, 총 22개 권한·이력 위험 회귀 성공"
+  full_tests: "Fast Build depth 3 checkpoint=false: 로컬 전체 테스트 생략, 최종 Head CI에서 전체 회귀 검증"
+  migration: "V20260721123500__create_feedback_revisions.sql: 수정·삭제 전 유형·본문·근거 스냅샷과 감사 시각을 보존하는 feedback_revisions 및 조회 인덱스 추가"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T21:28:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build worker: VS-026"
+    note: "Selector가 확정한 VS-025 PR #59 Head 기반 depth 3 스택과 FB-02 수정·삭제 감사 요구를 확인했다."
+  - at: "2026-07-21T21:28:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build worker: VS-026"
+    note: "작성자 권한, 수정·삭제 전 스냅샷, soft delete, 검증 롤백과 목록 제외 위험 회귀 범위를 확정했다."
+  - at: "2026-07-21T21:38:00+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build delivery: VS-026"
+    note: "Red 7건 후 작성자 전용 수정·삭제, 행 잠금, 이전 스냅샷과 soft delete를 구현했다. 피드백 생성·목록·관리 위험 회귀 22개와 OpenAPI·ERD·새 UTC Migration을 검증했고 checkpoint=false라 전체 테스트는 생략한다."
+  - at: "2026-07-21T21:40:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-026"
+    note: "구현 커밋 b1bacef를 Push하고 VS-025 PR #59를 base로 Draft PR #61을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
+
+created_at: "2026-07-21T21:28:00+09:00"
+updated_at: "2026-07-21T21:40:00+09:00"

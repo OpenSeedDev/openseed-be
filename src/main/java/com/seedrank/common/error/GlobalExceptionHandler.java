@@ -23,6 +23,7 @@ import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.archive.IdeaNotArchivableException;
+import com.seedrank.feedback.manage.FeedbackNotFoundException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.idea.update.IdeaNotPublishedException;
@@ -247,6 +248,17 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(FeedbackNotFoundException.class)
+    ResponseEntity<ApiError> handleFeedbackNotFound(
+            FeedbackNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "FEEDBACK_NOT_FOUND",
+                "피드백을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
     }
 
     @ExceptionHandler(UnitPurchaseIdeaNotFoundException.class)
