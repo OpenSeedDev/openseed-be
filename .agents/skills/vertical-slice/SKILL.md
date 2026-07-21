@@ -28,20 +28,21 @@ Perform work in this order:
 4. Enable or complete merge only when the approval, checks, resolved threads, dependency, and conflict gates pass.
 5. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
 6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit. Fast Build
-   passes open implementation PRs separately so a stacked successor can be selected. The current
+   passes open implementation PRs separately so a global stacked successor can be selected. The current
    project setting selects exactly one task per tick.
 7. Deliver the selected task in one isolated worktree. Do not run another implementation task or
    implementation sub-agent concurrently in single-task mode.
 8. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
 
 In normal mode, do not select a task when any dependency is not actually merged, another active task
-holds one of its locks, or an open PR already represents it. Fast Build uses the stricter lane and
-stack rules in its policy instead of requiring every implementation dependency to be merged.
+holds one of its locks, or an open PR already represents it. Fast Build uses the global Stack rules
+in its policy instead of requiring every implementation dependency to be merged.
 
 ## Deliver One Task
 
 1. Create a clean worktree from the selected base and a correctly named branch. The selected base is
-   latest `origin/main` in normal mode and the designated parent PR branch for a Fast Build stack.
+   latest `origin/main` in normal mode, the global integration branch for the first Fast Build task,
+   and the previous global PR branch for later tasks.
 2. Create the task state from `assets/slice-state.yml`; record dependency evidence and status `PLANNING`.
 3. Read the feature specification, backlog row, applicable policies, and lessons.
 4. Write a compact task plan containing user value, scope, exclusions, API/data impact, acceptance criteria, and test list.

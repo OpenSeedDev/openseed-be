@@ -17,8 +17,8 @@
 - Do not edit one task worktree from another worker.
 - Do not dispatch two tasks sharing any `resource_locks` value.
 - Recompute ready work after each merge, new PR, block, or lock release.
-- In Fast Build, an open PR releases its worker slot. Its lane lock may be inherited only by the next
-  stacked task in that lane; unrelated work still cannot claim the same lock concurrently.
+- In Fast Build, an open PR releases its worker slot. The next task inherits the single global Stack
+  base, while `max_parallel_workers: 1` prevents concurrent implementation changes.
 
 ## Scheduling
 
@@ -32,15 +32,15 @@ Select tasks deterministically by ascending `order`, then ID. A task is ready on
 Do not create speculative dependent PRs. A future task may be planned, but its branch and implementation begin only after all dependencies merge.
 
 When `settings.delivery_mode` is `fast_build`, the Fast Build Policy replaces the last rule:
-dependencies with an open, focused-test-passing implementation PR may be used as a stack base.
-The selector must return the parent branch and stack depth, and fan-in across different unmerged
-stacks remains blocked.
+dependencies with an open, focused-test-passing implementation PR satisfy implementation readiness.
+Existing Stack leaves are first combined in the configured global integration branch. The selector
+then returns that branch or the previous global PR as base, so fan-in stays linear and reviewable.
 
 ## Review Polling
 
 - Poll open task PRs at the configured interval in normal mode. Fast Build is triggered manually.
 - Review processing has priority over starting new tasks in normal mode. Fast Build defers it unless
-  the user explicitly requests a review tick or a failure prevents that lane from continuing.
+  the user explicitly requests a review tick or a failure prevents the global Stack from continuing.
 - Treat a review as processed only after its comment ID and resulting commit are recorded.
 - Rebase or merge `main` into an open branch only when needed to resolve an actual dependency or conflict. Run focused tests and use final-head CI for the full regression run; also run local full tests for high-risk changes.
 - Approval is bound to the PR head SHA. Any code-changing push invalidates earlier approval.

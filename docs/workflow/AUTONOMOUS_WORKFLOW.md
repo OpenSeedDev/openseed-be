@@ -8,8 +8,11 @@
 flowchart TD
   A["사용자: 다음 tick 실행"] --> B["GitHub 구현 PR 동기화"]
   B --> C{"모든 VS에 PR이 있는가?"}
-  C -- "아니요" --> D["Ready 작업 1개 선택"]
-  D --> E["Coordinator가 단일 worktree에서 구현"]
+  C -- "아니요" --> T{"전역 통합 브랜치가 있는가?"}
+  T -- "아니요" --> U["기존 VS Stack leaf 통합·전체 테스트·Push"]
+  U --> X["tick 종료"]
+  T -- "예" --> D["Ready 작업 1개 선택"]
+  D --> E["전역 Stack tip에서 단일 구현"]
   E --> F["Red → Green → 집중·위험 테스트 → Stacked PR"]
   F --> B
   C -- "예" --> G["기존 수동 리뷰·복구·병합 모드"]
@@ -30,17 +33,18 @@ flowchart TD
 
 1. Build 단계에서는 Merge되었거나 열린 구현 PR이 있는 VS 작업을 계산한다.
 2. Ready 작업을 순서대로 하나만 고른다.
-3. Merge되지 않은 선행 작업은 해당 PR branch를 base로 Stacked PR을 만든다.
-4. PR을 만든 즉시 tick을 종료하고 다음 작업은 다음 수동 tick에서 선택한다.
-5. 리뷰는 `리뷰 tick 실행`에서만 우선 처리한다.
-6. 모든 VS에 PR이 생기면 기존 수동 리뷰·복구·병합 순서로 자동 전환한다.
+3. 첫 tick은 기존 열린 VS Stack leaf들을 `codex/vs-fast-build-trunk`에 통합하고 종료한다.
+4. 첫 신규 VS는 통합 브랜치, 이후 VS는 직전 전역 PR branch를 base로 만든다.
+5. PR을 만든 즉시 tick을 종료하고 다음 작업은 다음 수동 tick에서 선택한다.
+6. 리뷰는 `리뷰 tick 실행`에서만 우선 처리한다.
+7. 모든 VS에 PR이 생기면 기존 수동 리뷰·복구·병합 순서로 자동 전환한다.
 
 ## 안전 장치
 
-- Stacked 후속 작업은 집중 테스트를 통과한 열린 선행 PR만 base로 사용한다.
-- 같은 lane의 다음 작업만 resource lock을 승계하고 다른 lane과 같은 lock을 공유하지 않는다.
-- 서로 다른 미병합 stack이 필요한 fan-in 작업은 시작하지 않는다.
-- Stack 깊이 4에서 전체 테스트 checkpoint와 리뷰·병합을 기다린다.
+- 전역 통합 브랜치는 기존 Stack leaf의 기능을 모두 보존하고 전체 테스트를 통과해야 한다.
+- 새 VS PR은 모두 하나의 `VS-GLOBAL` Stack에 일렬로 연결한다.
+- 서로 다른 기존 Stack의 fan-in은 통합 브랜치 위에서만 구현한다.
+- Stack 깊이 4마다 전체 테스트를 실행하지만 중간 병합은 요구하지 않는다.
 - 동일 실패는 최대 3회 복구하고, 이후 해당 PR만 차단한다.
 - `/merge-approved`, 해결된 리뷰 대화, 성공한 필수 검사, 충돌 없음이 모두 충족돼야 Merge된다.
 - 관리자 우회, 강제 Push, `main` 직접 Push는 허용하지 않는다.
