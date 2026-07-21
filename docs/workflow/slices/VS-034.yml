@@ -6,14 +6,14 @@ task:
   dependencies: [VS-032]
   resource_locks: [unit]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-034-owned-lots
 base_commit: 1bee85a3ae491a30ecb7a20691add4a139bd077e
-current_commit: null
+current_commit: 215f8da97a7d51d9450fc56dddbe60c5ed53811f
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 65
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/65"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -72,6 +72,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-034"
     note: "Red 4건 확인 후 활성 Lot Cursor 조회, 내부 Point 평가값, 잠금 경계와 아이디어별 합계를 구현했다. 구매·동시성 포함 위험 회귀 19건과 OpenAPI를 검증했다."
+  - at: "2026-07-21T21:55:58+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-034"
+    note: "구현 커밋 215f8da를 Push하고 VS-033 PR #55를 base로 Draft PR #65를 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:47:35+09:00"
-updated_at: "2026-07-21T21:53:57+09:00"
+updated_at: "2026-07-21T21:55:58+09:00"
