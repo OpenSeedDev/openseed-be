@@ -9,6 +9,7 @@ erDiagram
     USERS ||--o{ AUTH_SESSIONS : authenticates
     USERS ||--o| COMPANY_PROFILES : registers
     USERS ||--o{ IDEAS : authors
+    IDEAS ||--o{ VALIDATION_QUESTIONS : validates
 
     USERS {
         uuid id PK
@@ -79,6 +80,13 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    VALIDATION_QUESTIONS {
+        uuid id PK
+        uuid idea_id FK
+        text question "not blank"
+        int sort_order "1..3, unique per idea"
+    }
 ```
 
 ## VS-001 제약
@@ -110,3 +118,10 @@ erDiagram
 - Draft 작성자는 내부 User UUID로 연결하며, 작성자만 Draft 상세를 조회한다.
 - 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
 - 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
+
+## VS-013 제약
+
+- 아이디어 작성자는 검증 질문 1~3개를 전체 교체 방식으로 저장한다.
+- 요청 배열 순서를 아이디어별 고유한 `sort_order` 1~3으로 보존한다.
+- 질문 문구는 앞뒤 공백을 제거하고 빈 값은 허용하지 않는다.
+- 아이디어 삭제 시 해당 검증 질문도 함께 삭제한다.
