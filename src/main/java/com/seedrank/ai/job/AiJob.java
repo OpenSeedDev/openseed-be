@@ -65,6 +65,10 @@ class AiJob {
     }
 
     UUID id() { return id; }
+    AiJobStatus status() { return status; }
+    String failureCode() { return failureCode; }
+    Instant createdAt() { return createdAt; }
+    Instant updatedAt() { return updatedAt; }
     String inputSnapshot() { return inputSnapshot; }
     String promptVersion() { return promptVersion; }
     int retryCount() { return retryCount; }

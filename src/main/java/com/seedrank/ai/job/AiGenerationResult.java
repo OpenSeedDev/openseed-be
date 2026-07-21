@@ -45,4 +45,8 @@ class AiGenerationResult {
     static AiGenerationResult create(UUID aiJobId, String rawResult, String normalizedResult, Instant createdAt) {
         return new AiGenerationResult(aiJobId, rawResult, normalizedResult, createdAt);
     }
+
+    String normalizedResult() {
+        return normalizedResult;
+    }
 }

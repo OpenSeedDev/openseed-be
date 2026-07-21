@@ -22,6 +22,7 @@ import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.ai.job.IdempotencyKeyReusedException;
+import com.seedrank.ai.job.AiJobNotFoundException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -178,6 +179,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
                 "IDEMPOTENCY_KEY_REUSED",
                 "Idempotency-Key가 다른 요청에 이미 사용됐습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobNotFoundException.class)
+    ResponseEntity<ApiError> handleAiJobNotFound(
+            AiJobNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "AI_JOB_NOT_FOUND",
+                "AI 생성 Job을 찾을 수 없습니다.",
                 requestId(request),
                 List.of()));
     }

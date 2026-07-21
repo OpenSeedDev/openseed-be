@@ -16,6 +16,8 @@ interface AiJobRepository extends JpaRepository<AiJob, UUID> {
 
     Optional<AiJob> findByOwnerIdAndIdempotencyKey(UUID ownerId, String idempotencyKey);
 
+    Optional<AiJob> findByIdAndOwnerId(UUID id, UUID ownerId);
+
     @Query(value = """
             SELECT * FROM ai_jobs
             WHERE status = 'PENDING'
