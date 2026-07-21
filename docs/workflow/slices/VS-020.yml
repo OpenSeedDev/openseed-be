@@ -6,10 +6,10 @@ task:
   dependencies: [VS-019]
   resource_locks: [ai-job, ai-provider]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-020-ai-candidates
 base_commit: 947ae68559219083ab5d1b72fa666d68d1d40f82
-current_commit: null
+current_commit: a5c5a6c7b029162f036e4e26e81e4f78d1b0ba87
 
 delivery:
   strategy: stacked_pr
@@ -22,8 +22,8 @@ delivery:
   merge_order: [VS-018, VS-019, VS-020]
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 62
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/62"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -79,6 +79,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-020"
     note: "Red compile 11건 확인 후 후보 5개 검증·정규화·결과 저장·Lease 완료 fencing을 구현했다. AI Provider 위험 회귀 23개를 통과했고 checkpoint=false 정책에 따라 전체 테스트는 최종 Head CI에 위임한다."
+  - at: "2026-07-21T21:41:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-020"
+    note: "구현 커밋 a5c5a6c를 Push하고 VS-019 branch를 base로 Draft PR #62를 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:33:30+09:00"
-updated_at: "2026-07-21T21:39:24+09:00"
+updated_at: "2026-07-21T21:41:00+09:00"
