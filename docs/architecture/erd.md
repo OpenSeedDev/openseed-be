@@ -17,7 +17,7 @@ erDiagram
         varchar email UK "normalized, max 254"
         varchar password_hash "BCrypt"
         varchar profile_id "not unique"
-        varchar role "USER"
+        varchar role "USER | COMPANY"
         varchar status "ACTIVE"
         timestamptz created_at
         timestamptz updated_at
@@ -62,7 +62,7 @@ erDiagram
         varchar company_name "trimmed, max 100"
         varchar company_email UK "normalized, response/log excluded"
         varchar company_domain "lowercase ASCII"
-        timestamptz verified_at "null until VS-008"
+        timestamptz verified_at "company verification completion time"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -72,7 +72,7 @@ erDiagram
         uuid company_profile_id FK
         varchar token_hash UK "SHA-256 lower hex, raw token excluded"
         timestamptz expires_at
-        timestamptz used_at "null until VS-008"
+        timestamptz used_at "single-use completion time"
         timestamptz invalidated_at "set by resend"
         timestamptz created_at
     }
@@ -120,7 +120,7 @@ erDiagram
 - 사용자 삭제 시 종속 회사 프로필도 함께 삭제된다.
 - 회사 이메일 도메인은 소문자 ASCII로 정규화하고 무료 개인 메일 도메인 및 그 하위 도메인을 거부한다.
 - 회사 이메일은 API 응답과 일반 로그에 노출하지 않는다.
-- `verified_at`은 VS-008 인증 완료 전까지 null이며, 프로필이 존재하면 내 계정의 회사 인증 상태는 `PENDING`이다.
+- `verified_at`은 회사 인증 완료 전까지 null이며, 완료 시 인증 토큰의 `used_at`과 같은 시각으로 기록된다. 프로필이 존재하고 미인증이면 내 계정 상태는 `PENDING`, 인증 완료면 `VERIFIED`다.
 - 인증 토큰과 메일 발송 데이터는 VS-007, 인증 완료와 Company 역할은 VS-008에서 추가한다.
 
 ## VS-007 제약
@@ -130,7 +130,7 @@ erDiagram
 - 회사 프로필별 미사용·미무효화 인증은 하나만 존재하며 재발송 시 기존 인증을 무효화한다.
 - 메일은 요청 트랜잭션이 커밋된 뒤 별도 Executor에서 SMTP Provider로 발송한다.
 - 회사 프로필 삭제 시 종속 인증 레코드도 함께 삭제된다.
-- `used_at` 소비와 Company 권한 부여는 VS-008에서 구현한다.
+- 유효한 인증 토큰은 행 잠금 뒤 한 번만 소비하며 `used_at`, `company_profiles.verified_at`, `users.role=COMPANY`를 한 트랜잭션에서 변경한다.
 
 ## VS-009 제약
 

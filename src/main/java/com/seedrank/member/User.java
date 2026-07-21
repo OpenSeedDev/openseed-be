@@ -71,6 +71,11 @@ public class User {
         this.updatedAt = now;
     }
 
+    public void promoteToCompany(Instant now) {
+        this.role = Role.COMPANY;
+        this.updatedAt = now;
+    }
+
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
 
@@ -87,7 +92,8 @@ public class User {
     }
 
     public enum Role {
-        USER
+        USER,
+        COMPANY
     }
 
     public enum Status {

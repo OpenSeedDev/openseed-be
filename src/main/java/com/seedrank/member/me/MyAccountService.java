@@ -27,9 +27,11 @@ class MyAccountService {
     MyAccountResponse get(String authorization) {
         var principal = authenticator.authenticate(authorization);
         var user = users.findById(principal.userId()).orElseThrow(InvalidAccessTokenException::new);
-        CompanyVerificationStatus verificationStatus = companyProfiles.existsByUserId(user.getId())
-                ? CompanyVerificationStatus.PENDING
-                : CompanyVerificationStatus.NOT_STARTED;
+        CompanyVerificationStatus verificationStatus = companyProfiles.findByUserId(user.getId())
+                .map(profile -> profile.getVerifiedAt() == null
+                        ? CompanyVerificationStatus.PENDING
+                        : CompanyVerificationStatus.VERIFIED)
+                .orElse(CompanyVerificationStatus.NOT_STARTED);
         return MyAccountResponse.from(user, verificationStatus);
     }
 }

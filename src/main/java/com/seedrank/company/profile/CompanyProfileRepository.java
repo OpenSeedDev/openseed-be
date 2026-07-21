@@ -13,6 +13,8 @@ import jakarta.persistence.LockModeType;
 public interface CompanyProfileRepository extends JpaRepository<CompanyProfile, UUID> {
     boolean existsByUserId(UUID userId);
 
+    Optional<CompanyProfile> findByUserId(UUID userId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select profile from CompanyProfile profile where profile.user.id = :userId")
     Optional<CompanyProfile> findByUserIdForUpdate(@Param("userId") UUID userId);
