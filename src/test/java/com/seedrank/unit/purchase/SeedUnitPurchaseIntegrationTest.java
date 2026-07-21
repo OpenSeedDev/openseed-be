@@ -45,7 +45,7 @@ class SeedUnitPurchaseIntegrationTest {
     void clean() {
         jdbc.update("DELETE FROM seed_unit_lots");
         jdbc.update("DELETE FROM idea_timeline_events");
-        jdbc.update("DELETE FROM idea_versions");
+        jdbc.execute("TRUNCATE TABLE idea_versions");
         jdbc.update("DELETE FROM validation_questions");
         jdbc.update("DELETE FROM ideas");
         jdbc.update("DELETE FROM auth_sessions");
@@ -216,6 +216,7 @@ class SeedUnitPurchaseIntegrationTest {
     private ResultActions purchase(String token, String ideaId, int units, int confirmedPrice) throws Exception {
         var request = post("/api/v1/ideas/{ideaId}/unit-purchases", ideaId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .content("{\"units\":%d,\"confirmedUnitPrice\":%d}".formatted(units, confirmedPrice));
         if (token != null) request.header(HttpHeaders.AUTHORIZATION, bearer(token));
         return mockMvc.perform(request);

@@ -1,8 +1,6 @@
 package com.seedrank.common.error;
 
 import java.util.List;
-import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,12 +20,20 @@ import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.idea.archive.IdeaNotArchivableException;
+import com.seedrank.feedback.manage.FeedbackNotFoundException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
+import com.seedrank.idea.update.IdeaNotPublishedException;
+import com.seedrank.ai.job.IdempotencyKeyReusedException;
+import com.seedrank.ai.job.AiJobNotFoundException;
+import com.seedrank.ai.job.AiJobAlreadySelectedException;
+import com.seedrank.ai.job.AiJobNotSelectableException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
 import com.seedrank.unit.purchase.InsufficientPointException;
+import com.seedrank.unit.purchase.IdempotencyKeyValidationException;
 import com.seedrank.unit.purchase.PurchaseLimitExceededException;
 import com.seedrank.unit.purchase.SelfUnitPurchaseException;
 import com.seedrank.unit.purchase.UnitPriceChangedException;
@@ -37,6 +43,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.http.HttpServletRequest;
+import com.seedrank.ops.http.RequestIdFilter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 @RestControllerAdvice
@@ -202,6 +209,22 @@ public class GlobalExceptionHandler {
                 "IDEA_ALREADY_PUBLISHED", "이미 게시된 아이디어입니다.", requestId(request), List.of()));
     }
 
+    @ExceptionHandler(IdeaNotPublishedException.class)
+    ResponseEntity<ApiError> handleIdeaNotPublished(
+            IdeaNotPublishedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEA_NOT_PUBLISHED", "게시된 아이디어만 수정할 수 있습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdeaNotArchivableException.class)
+    ResponseEntity<ApiError> handleIdeaNotArchivable(
+            IdeaNotArchivableException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEA_NOT_PUBLISHED", "게시된 아이디어만 보관할 수 있습니다.", requestId(request), List.of()));
+    }
+
     @ExceptionHandler(IdeaDraftNotFoundException.class)
     ResponseEntity<ApiError> handleIdeaDraftNotFound(
             IdeaDraftNotFoundException exception,
@@ -227,6 +250,17 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(FeedbackNotFoundException.class)
+    ResponseEntity<ApiError> handleFeedbackNotFound(
+            FeedbackNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "FEEDBACK_NOT_FOUND",
+                "피드백을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
     }
 
     @ExceptionHandler(UnitPurchaseIdeaNotFoundException.class)
@@ -263,6 +297,67 @@ public class GlobalExceptionHandler {
                 "PURCHASE_LIMIT_EXCEEDED", "Seed Unit 구매 한도를 초과했습니다.", requestId(request), List.of()));
     }
 
+    @ExceptionHandler(IdempotencyKeyValidationException.class)
+    ResponseEntity<ApiError> handleIdempotencyKeyValidation(
+            IdempotencyKeyValidationException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "VALIDATION_ERROR", "Idempotency-Key를 확인해 주세요.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(IdempotencyKeyReusedException.class)
+    ResponseEntity<ApiError> handleAiIdempotencyKeyReused(
+            IdempotencyKeyReusedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEMPOTENCY_KEY_REUSED",
+                "Idempotency-Key가 다른 요청에 이미 사용됐습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(com.seedrank.unit.purchase.IdempotencyKeyReusedException.class)
+    ResponseEntity<ApiError> handleUnitPurchaseIdempotencyKeyReused(
+            com.seedrank.unit.purchase.IdempotencyKeyReusedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "IDEMPOTENCY_KEY_REUSED", "같은 Idempotency-Key를 다른 구매에 사용할 수 없습니다.",
+                requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(AiJobNotFoundException.class)
+    ResponseEntity<ApiError> handleAiJobNotFound(
+            AiJobNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "AI_JOB_NOT_FOUND",
+                "AI 생성 Job을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobNotSelectableException.class)
+    ResponseEntity<ApiError> handleAiJobNotSelectable(
+            AiJobNotSelectableException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "AI_JOB_NOT_SELECTABLE",
+                "완료된 AI 후보 결과만 Draft로 선택할 수 있습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(AiJobAlreadySelectedException.class)
+    ResponseEntity<ApiError> handleAiJobAlreadySelected(
+            AiJobAlreadySelectedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "AI_JOB_ALREADY_SELECTED",
+                "이 AI Job에서는 이미 Draft가 생성됐습니다.",
+                requestId(request),
+                List.of()));
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleUnexpected(Exception exception, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.of(
@@ -273,7 +368,7 @@ public class GlobalExceptionHandler {
     }
 
     private String requestId(HttpServletRequest request) {
-        String supplied = request.getHeader("X-Request-Id");
-        return supplied == null || supplied.isBlank() ? UUID.randomUUID().toString() : supplied;
+        Object requestId = request.getAttribute(RequestIdFilter.REQUEST_ATTRIBUTE);
+        return requestId instanceof String value ? value : "unavailable";
     }
 }

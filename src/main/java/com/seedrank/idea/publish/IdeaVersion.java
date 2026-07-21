@@ -35,10 +35,21 @@ class IdeaVersion {
     protected IdeaVersion() {}
 
     static IdeaVersion initialSnapshot(Idea idea, List<String> questions, Instant now) {
+        return snapshot(idea, questions, 1, now);
+    }
+
+    static IdeaVersion nextSnapshot(Idea idea, List<String> questions, int versionNumber, Instant now) {
+        if (versionNumber < 2) {
+            throw new IllegalArgumentException("Updated snapshot version must be at least 2");
+        }
+        return snapshot(idea, questions, versionNumber, now);
+    }
+
+    private static IdeaVersion snapshot(Idea idea, List<String> questions, int versionNumber, Instant now) {
         IdeaVersion version = new IdeaVersion();
         version.id = UUID.randomUUID();
         version.ideaId = idea.id();
-        version.versionNumber = 1;
+        version.versionNumber = versionNumber;
         version.title = idea.title();
         version.category = idea.category();
         version.summary = idea.summary();

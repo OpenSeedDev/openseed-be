@@ -65,8 +65,24 @@ class SeedUnitPurchaseService {
     }
 
     @Transactional
-    SeedUnitPurchaseResponse purchase(String authorization, UUID ideaId, SeedUnitPurchaseRequest request) {
+    SeedUnitPurchaseResponse purchase(
+            String authorization, String idempotencyKey, UUID ideaId, SeedUnitPurchaseRequest request) {
         UUID userId = authenticator.authenticate(authorization).userId();
+        String normalizedKey = validateIdempotencyKey(idempotencyKey);
+        PointWallet wallet = wallets.findByUserIdForUpdate(userId)
+                .orElseThrow(() -> new IllegalStateException("Point wallet not found"));
+        var existing = lots.findByUserIdAndPurchaseRequestKey(userId, normalizedKey);
+        if (existing.isPresent()) {
+            SeedUnitLot existingLot = existing.get();
+            if (!existingLot.matchesPurchase(ideaId, request.units(), request.confirmedUnitPrice())) {
+                throw new IdempotencyKeyReusedException();
+            }
+            PointLedger originalLedger = ledgers.findBySourceTypeAndSourceId(
+                            PointLedger.SourceType.UNIT_PURCHASE, existingLot.id())
+                    .orElseThrow(() -> new IllegalStateException("Unit purchase ledger not found"));
+            return SeedUnitPurchaseResponse.from(existingLot, originalLedger.getBalanceAfter(), NON_MONETARY_NOTICE);
+        }
+
         Idea idea = publishedIdea(ideaId);
         rejectSelfPurchase(idea, userId);
         if (request.confirmedUnitPrice() != idea.currentUnitPrice()) {
@@ -84,14 +100,13 @@ class SeedUnitPurchaseService {
             throw new PurchaseLimitExceededException();
         }
 
-        PointWallet wallet = wallets.findByUserId(userId)
-                .orElseThrow(() -> new IllegalStateException("Point wallet not found"));
         if (wallet.getBalance() < principal) {
             throw new InsufficientPointException();
         }
 
         var user = users.findById(userId).orElseThrow(() -> new IllegalStateException("User not found"));
-        SeedUnitLot lot = lots.save(SeedUnitLot.locked(idea, user, request.units(), idea.currentUnitPrice(), now));
+        SeedUnitLot lot = lots.save(SeedUnitLot.locked(
+                idea, user, request.units(), idea.currentUnitPrice(), normalizedKey, now));
         wallet.debit(principal, now);
         ledgers.save(PointLedger.unitPurchase(user, lot.id(), principal, wallet.getBalance(), policyDate, now));
         return SeedUnitPurchaseResponse.from(lot, wallet.getBalance(), NON_MONETARY_NOTICE);
@@ -123,5 +138,12 @@ class SeedUnitPurchaseService {
         if (principal > SINGLE_PURCHASE_CAP) {
             throw new PurchaseLimitExceededException();
         }
+    }
+
+    private String validateIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 100) {
+            throw new IdempotencyKeyValidationException();
+        }
+        return idempotencyKey;
     }
 }

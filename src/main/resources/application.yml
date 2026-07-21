@@ -30,7 +30,20 @@ app:
   auth:
     jwt-secret: ${JWT_SECRET}
     cookie-secure: ${AUTH_COOKIE_SECURE:true}
+  ai:
+    prompt-version: ${AI_IDEA_PROMPT_VERSION:idea-candidates-v1}
   company-verification:
     expires-in: ${COMPANY_VERIFICATION_EXPIRES_IN:PT30M}
     confirm-url: ${COMPANY_VERIFICATION_CONFIRM_URL:http://localhost:3000/company-verification/confirm}
     mail-from: ${MAIL_FROM:no-reply@seedrank.local}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never

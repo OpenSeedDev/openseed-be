@@ -12,6 +12,8 @@ import com.seedrank.idea.IdeaRepository;
 import com.seedrank.idea.IdeaStatus;
 import com.seedrank.idea.IdeaVisibility;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
+import com.seedrank.idea.like.IdeaLikeQuery;
+import com.seedrank.idea.metrics.IdeaViewMetricRecorder;
 import com.seedrank.idea.question.ValidationQuestion;
 import com.seedrank.idea.question.ValidationQuestionRepository;
 
@@ -20,37 +22,47 @@ class IdeaDetailService {
     private final AccessTokenAuthenticator authenticator;
     private final IdeaRepository ideas;
     private final ValidationQuestionRepository questions;
+    private final IdeaLikeQuery likes;
+    private final IdeaViewMetricRecorder viewMetrics;
 
     IdeaDetailService(
             AccessTokenAuthenticator authenticator,
             IdeaRepository ideas,
-            ValidationQuestionRepository questions) {
+            ValidationQuestionRepository questions,
+            IdeaLikeQuery likes,
+            IdeaViewMetricRecorder viewMetrics) {
         this.authenticator = authenticator;
         this.ideas = ideas;
         this.questions = questions;
+        this.likes = likes;
+        this.viewMetrics = viewMetrics;
     }
 
-    @Transactional(readOnly = true)
-    IdeaDetailResponse get(String authorization, UUID ideaId) {
-        UUID viewerId = authorization == null ? null : authenticator.authenticate(authorization).userId();
+    @Transactional
+    IdeaDetailResponse get(String authorization, UUID ideaId, String guestSessionId) {
+        var principal = authorization == null ? null : authenticator.authenticate(authorization);
+        UUID viewerId = principal == null ? null : principal.userId();
         Idea idea = ideas.findById(ideaId).orElseThrow(IdeaDraftNotFoundException::new);
         boolean author = idea.authorId().equals(viewerId);
+        long likeCount = likes.count(ideaId);
+        boolean liked = viewerId != null && likes.likedBy(ideaId, viewerId);
 
         if (idea.status() != IdeaStatus.PUBLISHED) {
             if (!author) {
                 throw new IdeaDraftNotFoundException();
             }
-            return IdeaDetailResponse.full(idea, questions(idea));
+            return IdeaDetailResponse.full(idea, questions(idea), likeCount, liked, 0L);
         }
+        long viewCount = viewMetrics.record(ideaId, viewerId, guestSessionId);
         if (author || idea.visibility() == IdeaVisibility.PUBLIC) {
-            return IdeaDetailResponse.full(idea, questions(idea));
+            return IdeaDetailResponse.full(idea, questions(idea), likeCount, liked, viewCount);
         }
         if (idea.visibility() == IdeaVisibility.SEMI_PUBLIC) {
             return viewerId == null
-                    ? IdeaDetailResponse.semiPublicGuest(idea)
-                    : IdeaDetailResponse.full(idea, questions(idea));
+                    ? IdeaDetailResponse.semiPublicGuest(idea, likeCount, liked, viewCount)
+                    : IdeaDetailResponse.full(idea, questions(idea), likeCount, liked, viewCount);
         }
-        return IdeaDetailResponse.summaryOnly(idea);
+        return IdeaDetailResponse.summaryOnly(idea, likeCount, liked, viewCount);
     }
 
     private List<ValidationQuestion> questions(Idea idea) {

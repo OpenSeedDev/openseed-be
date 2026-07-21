@@ -40,6 +40,9 @@ public class SeedUnitLot {
     @Column(nullable = false)
     private int principal;
 
+    @Column(name = "purchase_request_key", nullable = false, length = 100)
+    private String purchaseRequestKey;
+
     @Column(name = "purchased_at", nullable = false)
     private Instant purchasedAt;
 
@@ -53,31 +56,41 @@ public class SeedUnitLot {
     protected SeedUnitLot() {
     }
 
-    private SeedUnitLot(UUID id, Idea idea, User user, int units, int purchasePrice, Instant purchasedAt) {
+    private SeedUnitLot(
+            UUID id, Idea idea, User user, int units, int purchasePrice, String purchaseRequestKey, Instant purchasedAt) {
         this.id = id;
         this.idea = idea;
         this.user = user;
         this.units = units;
         this.purchasePrice = purchasePrice;
         this.principal = Math.multiplyExact(units, purchasePrice);
+        this.purchaseRequestKey = purchaseRequestKey;
         this.purchasedAt = purchasedAt;
         this.unlockedAt = purchasedAt.plusSeconds(24 * 60 * 60);
         this.status = Status.LOCKED;
     }
 
-    public static SeedUnitLot locked(Idea idea, User user, int units, int purchasePrice, Instant purchasedAt) {
-        return new SeedUnitLot(UUID.randomUUID(), idea, user, units, purchasePrice, purchasedAt);
+    public static SeedUnitLot locked(
+            Idea idea, User user, int units, int purchasePrice, String purchaseRequestKey, Instant purchasedAt) {
+        return new SeedUnitLot(UUID.randomUUID(), idea, user, units, purchasePrice, purchaseRequestKey, purchasedAt);
     }
 
     public UUID id() { return id; }
     public UUID ideaId() { return idea.id(); }
+    public String ideaTitle() { return idea.title(); }
+    public int currentUnitPrice() { return idea.currentUnitPrice(); }
     public UUID userId() { return user.getId(); }
     public int units() { return units; }
     public int purchasePrice() { return purchasePrice; }
     public int principal() { return principal; }
+    public String purchaseRequestKey() { return purchaseRequestKey; }
     public Instant purchasedAt() { return purchasedAt; }
     public Instant unlockedAt() { return unlockedAt; }
     public Status status() { return status; }
+
+    public boolean matchesPurchase(UUID requestedIdeaId, int requestedUnits, int requestedPrice) {
+        return idea.id().equals(requestedIdeaId) && units == requestedUnits && purchasePrice == requestedPrice;
+    }
 
     public enum Status {
         LOCKED,

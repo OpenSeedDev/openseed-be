@@ -10,14 +10,25 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
+    USERS ||--o{ FEEDBACKS : writes
     USERS ||--o{ SEED_UNIT_LOTS : purchases
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
+    USERS ||--o{ AI_JOBS : requests
+    AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
+    AI_JOBS ||--o| IDEAS : selected_into
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
     IDEAS ||--o{ MESSAGE_THREADS : receives
     COMPANY_PROFILES ||--o{ MESSAGE_THREADS : starts
     USERS ||--o{ MESSAGE_THREADS : receives
+    USERS ||--o{ IDEA_LIKES : likes
+    IDEAS ||--o{ IDEA_LIKES : receives
+    IDEAS ||--o{ FEEDBACKS : receives
+    FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
+    IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
+    IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
+    IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
 
     USERS {
         uuid id PK
@@ -99,8 +110,35 @@ erDiagram
         varchar visibility "PUBLIC | SEMI_PUBLIC | MATCHING, nullable for Draft"
         int current_unit_price "10P at publication, nullable for Draft"
         timestamptz published_at "nullable for Draft"
+        uuid source_ai_job_id FK,UK "nullable, selected AI Job"
+        int source_ai_candidate_number "nullable, 1..5"
         timestamptz created_at
         timestamptz updated_at
+    }
+
+    AI_JOBS {
+        uuid id PK
+        uuid owner_id FK
+        varchar status "PENDING, PROCESSING, RETRY_WAIT, SUCCEEDED, FAILED"
+        jsonb input_snapshot "keyword, background"
+        varchar prompt_version
+        varchar idempotency_key "unique per owner"
+        int retry_count "0 or greater"
+        timestamptz locked_until "nullable"
+        varchar lease_owner "nullable worker id"
+        uuid lease_token "nullable fencing token"
+        timestamptz next_attempt_at "nullable backoff"
+        varchar failure_code "nullable, INVALID_RESPONSE_SCHEMA"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    AI_GENERATION_RESULTS {
+        uuid id PK
+        uuid ai_job_id FK,UK
+        jsonb raw_result "provider structured output"
+        jsonb normalized_result "problem analysis and 5 candidates"
+        timestamptz created_at
     }
 
     VALIDATION_QUESTIONS {
@@ -113,7 +151,7 @@ erDiagram
     IDEA_VERSIONS {
         uuid id PK
         uuid idea_id FK
-        int version_number "unique per idea"
+        int version_number "unique per idea, append-only"
         varchar title
         varchar category
         varchar summary
@@ -130,7 +168,7 @@ erDiagram
     IDEA_TIMELINE_EVENTS {
         uuid id PK
         uuid idea_id FK
-        varchar event_type "PUBLISHED"
+        varchar event_type "PUBLISHED | UPDATED"
         uuid actor_id FK
         timestamptz created_at
     }
@@ -144,16 +182,72 @@ erDiagram
         timestamptz updated_at
     }
 
+    FEEDBACKS {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        varchar feedback_type "PROBLEM_EMPATHY | TARGET_CUSTOMER | SOLUTION | BUSINESS_MODEL | COMPETITION | OTHER"
+        varchar content "normalized, 100..2000"
+        varchar evidence_url "optional http/https"
+        varchar evidence_description "optional, max 1000"
+        timestamptz accepted_at "nullable until VS-027"
+        timestamptz edited_at "nullable until VS-026"
+        timestamptz deleted_at "nullable until VS-026"
+        timestamptz created_at
+    }
+
+    FEEDBACK_REVISIONS {
+        uuid id PK
+        uuid feedback_id FK
+        varchar revision_type "EDITED | DELETED"
+        varchar feedback_type "previous type"
+        varchar content "previous normalized content"
+        varchar evidence_url "previous optional URL"
+        varchar evidence_description "previous optional description"
+        timestamptz recorded_at "audit time"
+    }
+
+    IDEA_VIEW_EVENTS {
+        uuid id PK
+        uuid idea_id FK
+        uuid viewer_user_id FK "nullable for Guest"
+        char guest_session_hash "nullable for User, SHA-256"
+        char viewer_key_hash "dedupe key, SHA-256"
+        timestamptz bucket_hour "UTC hour"
+        timestamptz created_at
+    }
+
+    IDEA_METRIC_CURRENT {
+        uuid idea_id PK,FK
+        bigint view_count
+        timestamptz updated_at
+    }
+
+    IDEA_METRIC_HOURLY {
+        uuid idea_id PK,FK
+        timestamptz bucket_hour PK "UTC hour"
+        bigint view_delta
+        timestamptz updated_at
+    }
+
     SEED_UNIT_LOTS {
         uuid id PK
         uuid idea_id FK
         uuid user_id FK
+        varchar purchase_request_key "user-scoped unique"
         int units "positive integer"
         int purchase_price "1..100 Point per Unit"
         int principal "units * purchase_price"
         timestamptz purchased_at
         timestamptz unlocked_at "purchased_at + 24 hours"
         varchar status "LOCKED | RECOVERED"
+    }
+
+    IDEA_LIKES {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        timestamptz created_at
     }
 ```
 
@@ -210,6 +304,36 @@ erDiagram
 - 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
 - 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
 
+## VS-018 제약
+
+- 로그인 사용자의 사업화 키워드와 문제의식, 서버 Prompt Version을 생성 시점의 JSON 스냅샷으로 저장한다.
+- Job은 `PENDING`, retry count 0으로 생성하며 Worker 선점과 상태 전이는 후속 슬라이스에서 구현한다.
+- `(owner_id, idempotency_key)` 고유 제약으로 순차·동시 재전송을 한 Job으로 수렴시킨다.
+- 같은 사용자의 같은 Key·같은 입력은 기존 Job을 반환하고, 다른 입력에 Key를 재사용하면 거부한다.
+
+## VS-019 제약
+
+- Worker는 실행 가능한 Job을 생성 시각 순으로 `FOR UPDATE SKIP LOCKED` 선점해 같은 Job의 중복 처리를 막는다.
+- 선점 시 `PROCESSING` 상태, Worker ID, 매번 새로 발급한 fencing token과 2분 Lease를 저장한다.
+- Lease가 만료된 Job은 새 token으로 재선점하며 이전 token은 상태를 변경할 수 없다.
+- Timeout·429·5xx는 `RETRY_WAIT`로 전환하고 30초부터 최대 15분까지 지수 Backoff한 `next_attempt_at` 이후 다시 선점한다.
+
+## VS-020 제약
+
+- AI Provider 응답은 문제 분석과 제목·카테고리·요약·문제·고객·해결책·수익 모델을 모두 갖춘 후보 정확히 5개여야 한다.
+- 후보 제목은 공백과 대소문자를 정규화한 기준으로 서로 달라야 하며 필드 길이는 Idea Draft 계약을 따른다.
+- 유효한 원본·정규화 JSON은 Job당 하나의 `ai_generation_results`에 저장하고 Job을 `SUCCEEDED`로 종료한다.
+- Schema 오류는 Timeout·429·5xx 재시도와 구분해 `FAILED / INVALID_RESPONSE_SCHEMA`로 기록한다.
+
+## VS-022 제약
+
+- 성공한 AI Job 소유자만 후보 번호 1~5와 편집 완료한 내용을 Idea Draft로 저장한다.
+- Job당 AI 출처 Draft는 하나이며 Job 행 잠금과 `ideas.source_ai_job_id` 유일 제약으로 순차·동시 중복 선택을 막는다.
+- AI 출처와 후보 번호는 내부에만 보존하고 응답에 Provider 원본·입력·Prompt·Lease 정보를 노출하지 않는다.
+- 후보 선택은 Draft만 생성하며 게시·버전·타임라인·검증 질문·Point 원장을 생성하지 않는다.
+- 원본 AI Job 삭제 시 해당 출처 Draft도 함께 제거해 출처가 끊긴 AI Draft가 남지 않게 한다.
+- 성공·실패 완료는 활성 Lease fencing token으로 보호하고 결과만 저장하며 Idea를 자동 생성하거나 게시하지 않는다.
+
 ## VS-013 제약
 
 - 아이디어 작성자는 검증 질문 1~3개를 전체 교체 방식으로 저장한다.
@@ -240,7 +364,8 @@ erDiagram
 - 구매 원금은 1회 100P, Asia/Seoul 하루 300P, 사용자별 아이디어 활성 원금 300P를 넘지 않는다.
 - Point 지갑 잔액은 음수가 될 수 없고 Point 차감, `DEBIT/UNIT_PURCHASE` append-only 원장, `LOCKED` Lot을 하나의 트랜잭션으로 생성한다.
 - Lot은 구매 시각, 구매 가격, Unit 수와 원금을 보존하며 잠금 해제 시각은 구매 후 정확히 24시간이다.
-- 동일 요청과 동시 구매 보호는 VS-033, 보유 조회와 회수는 VS-034~036에서 확장한다.
+- 구매 요청은 사용자별 `purchase_request_key` 유일 제약으로 재전송을 멱등 처리하고, 사용자 지갑 행을 먼저 잠근 뒤 중복 키·잔액·일일·아이디어별 활성 원금 한도를 검사한다.
+- 보유 조회와 회수는 VS-034~036에서 확장한다.
 
 ## VS-011 조회 제약
 
@@ -249,3 +374,36 @@ erDiagram
 - 매칭형은 Guest·User·Company에 요약과 공통 게시 정보만 반환하고 작성자에게만 전체 내용을 반환한다.
 - 공개 범위상 숨겨진 필드는 `null` 값으로 직렬화하지 않고 JSON 응답 키 자체를 제외한다.
 - Draft와 향후 비게시 상태는 작성자에게만 반환하며 다른 조회자에게는 존재 여부를 숨긴다.
+
+## VS-012 제약
+
+- 게시된 아이디어의 작성자만 제목·카테고리·요약·문제·대상 고객·해결책·수익 모델을 수정할 수 있다.
+- 공개 범위·상태·가격·게시 시각은 내용 수정 API로 변경하지 않는다.
+- 아이디어 행 잠금 뒤 최신 내용과 `updated_at`을 변경하고 다음 버전 번호의 전체 내용·현재 공개 범위·검증 질문·수정자·동일 시각 스냅샷을 한 트랜잭션으로 저장한다.
+- `idea_versions`는 DB trigger가 UPDATE·DELETE를 거부하는 append-only 이력이다.
+- 사용자 API에는 버전 목록·비교·복원 경로를 제공하지 않고 최신 내용과 `updatedAt`만 노출한다.
+
+## VS-028 제약
+
+- 활성 로그인 사용자는 세 공개 범위의 게시 아이디어에 좋아요를 등록·취소할 수 있다.
+- `idea_likes`의 아이디어·사용자 조합은 유일하며 반복·동시 등록과 취소를 멱등하게 처리한다.
+- 좋아요 변경은 아이디어 행 잠금 뒤 처리해 보관 전환과 경합해도 비게시 아이디어에 새 좋아요가 남지 않는다.
+- 아이디어 상세는 기존 공개 범위 필드 정책을 유지하면서 현재 좋아요 수와 조회자의 좋아요 상태를 반환한다.
+
+## VS-024 제약
+
+- 활성 로그인 사용자는 `PUBLIC`, `SEMI_PUBLIC`, `MATCHING`으로 게시된 아이디어에 구조화 피드백을 등록할 수 있다.
+- 피드백 유형과 앞뒤 공백 제거 후 100~2,000자 의견은 필수이며 HTTP(S) 근거 URL과 1,000자 이하 근거 설명은 선택이다.
+- Feedback 생성과 `FEEDBACK_CREATED` 20P 활동 보상 원장을 하나의 트랜잭션으로 처리한다.
+- Asia/Seoul 정책 날짜의 여섯 번째 피드백부터는 Feedback은 저장하되 일일 5회 제한으로 보상 전액을 소멸 기록한다.
+- 공개 가능한 피드백 목록은 삭제 행을 제외하고 채택 우선·작성 시각·ID Cursor로 조회한다.
+- 작성자만 피드백을 수정·soft delete하며 변경 전 전체 스냅샷과 감사 시각을 `feedback_revisions`에 보존한다.
+- 채택·Contribution·기여 보상은 VS-027에서 확장한다.
+
+## VS-029 제약
+
+- 성공한 게시 아이디어 상세 조회만 집계하고 Draft·401·404 응답은 집계하지 않는다.
+- 로그인 사용자는 사용자 ID, Guest는 원문을 저장하지 않는 서버 세션 ID 해시를 조회자 키로 사용한다.
+- 같은 아이디어·조회자·UTC 시간 버킷의 이벤트는 unique 제약으로 한 번만 인정한다.
+- 새 이벤트와 현재 누계·시간별 증가량은 하나의 트랜잭션에서 원자적으로 upsert한다.
+- 상세 응답은 공개 범위와 무관한 공통 공개 지표 `viewCount`를 포함한다.

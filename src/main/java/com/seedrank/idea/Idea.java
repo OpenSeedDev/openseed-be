@@ -55,6 +55,12 @@ public class Idea {
     @Column(name = "published_at")
     private Instant publishedAt;
 
+    @Column(name = "source_ai_job_id", unique = true)
+    private UUID sourceAiJobId;
+
+    @Column(name = "source_ai_candidate_number")
+    private Integer sourceAiCandidateNumber;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -73,6 +79,8 @@ public class Idea {
             String targetCustomer,
             String solution,
             String businessModel,
+            UUID sourceAiJobId,
+            Integer sourceAiCandidateNumber,
             Instant now) {
         this.id = UUID.randomUUID();
         this.authorId = authorId;
@@ -84,6 +92,8 @@ public class Idea {
         this.targetCustomer = optional(targetCustomer);
         this.solution = optional(solution);
         this.businessModel = optional(businessModel);
+        this.sourceAiJobId = sourceAiJobId;
+        this.sourceAiCandidateNumber = sourceAiCandidateNumber;
         this.createdAt = now;
         this.updatedAt = now;
     }
@@ -98,7 +108,24 @@ public class Idea {
             String solution,
             String businessModel,
             Instant now) {
-        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel, now);
+        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel,
+                null, null, now);
+    }
+
+    static Idea draftFromAi(
+            UUID authorId,
+            UUID sourceAiJobId,
+            int sourceAiCandidateNumber,
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel,
+            Instant now) {
+        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel,
+                sourceAiJobId, sourceAiCandidateNumber, now);
     }
 
     private static String required(String value) {
@@ -139,6 +166,36 @@ public class Idea {
         this.visibility = visibility;
         this.currentUnitPrice = 10;
         this.publishedAt = now;
+        this.updatedAt = now;
+    }
+
+    public void updatePublishedContent(
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel,
+            Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.title = required(title);
+        this.category = required(category);
+        this.summary = required(summary);
+        this.problem = required(problem);
+        this.targetCustomer = required(targetCustomer);
+        this.solution = required(solution);
+        this.businessModel = required(businessModel);
+        this.updatedAt = now;
+    }
+
+    public void archive(Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.status = IdeaStatus.ARCHIVED;
         this.updatedAt = now;
     }
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -59,8 +60,10 @@ class SeedUnitPurchaseController {
     @ResponseStatus(HttpStatus.CREATED)
     SeedUnitPurchaseResponse purchase(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            @Parameter(description = "구매 재전송 중복 방지 키", required = true)
+            @RequestHeader(name = "Idempotency-Key", required = false) String idempotencyKey,
             @PathVariable UUID ideaId,
             @Valid @RequestBody SeedUnitPurchaseRequest request) {
-        return service.purchase(authorization, ideaId, request);
+        return service.purchase(authorization, idempotencyKey, ideaId, request);
     }
 }
