@@ -6,10 +6,10 @@ task:
   dependencies: [VS-001]
   resource_locks: [wallet]
 
-status: AWAITING_USER_MERGE
+status: COMPLETED_SYNCED
 branch: codex/vs-030-wallet-ledger
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: 3df256b1a14115293bc4d404ee41e5cdf3e654d2
+current_commit: 9fbf03b1eb80fe0954b122e7fa0e7c1b70eff320
 
 review:
   pr_number: 30
@@ -36,10 +36,10 @@ evidence:
   focused_tests: "2026-07-21T15:05:16+09:00 최신 main 재통합 후 PointWalletQueryIntegrationTest, IdeaDraftIntegrationTest, CompanyProfileIntegrationTest, UpdateProfileIdIntegrationTest: 42개 성공, 실패 0개"
   full_tests: "2026-07-21T15:07:23+09:00 ./gradlew clean test --no-daemon: 87개 성공, 실패·오류·건너뜀 0개 (신규 main 테스트의 append-only 정리 회귀 28건 수정 후 Green)"
   migration: "V20260721012400__protect_point_ledgers_append_only.sql 적용: PostgreSQL 17 Testcontainers에서 총 8개 Migration과 ddl-auto validate 성공, UPDATE·DELETE 거부 검증"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29806234644"
+  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29807031005"
   ci_result: success
-  merge_commit: null
-  synced_main_commit: null
+  merge_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
+  synced_main_commit: 9454302d4cd93f7df13a03f5737dd98d452c4b6c
 
 failure:
   active: false
@@ -97,6 +97,16 @@ history:
     to: AWAITING_USER_MERGE
     command: "/merge-approved"
     note: "현재 Head 3df256b 이후 pado0711이 남긴 정확한 승인 댓글 5030798190, Build and Test 성공, 미해결 thread 0개, VS-001 실제 Merge, 충돌과 활성 실패 없음을 확인했다."
+  - at: "2026-07-21T15:28:10+09:00"
+    from: AWAITING_USER_MERGE
+    to: MERGED_AWAITING_SYNC
+    command: "GitHub protected auto-merge"
+    note: "PR #30이 최종 Head 9fbf03b의 Build and Test와 Vertical Slice Merge Guard 성공 상태에서 Merge 커밋 9454302로 실제 병합됐다."
+  - at: "2026-07-21T15:28:59+09:00"
+    from: MERGED_AWAITING_SYNC
+    to: COMPLETED_SYNCED
+    command: "git fetch origin && git merge --ff-only origin/main"
+    note: "로컬 main을 9454302로 fast-forward하고 GitHub Merge 증거를 동기화해 VS-030과 wallet lock을 완료 해제했다."
 
 created_at: "2026-07-21T10:21:04+09:00"
-updated_at: "2026-07-21T15:26:02+09:00"
+updated_at: "2026-07-21T15:28:59+09:00"
