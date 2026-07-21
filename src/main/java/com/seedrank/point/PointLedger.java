@@ -146,6 +146,7 @@ public class PointLedger {
 
     public enum SourceType {
         SIGNUP_BONUS,
+        DAILY_FIRST_ACCESS,
         IDEA_PUBLISHED,
         FEEDBACK_CREATED,
         FEEDBACK_ACCEPTED

@@ -64,7 +64,7 @@ tasks:
   - { id: VS-029, order: 290, title: "조회 지표", depends_on: [VS-011], resource_locks: [metrics] }
   - { id: VS-030, order: 300, title: "지갑·원장·대기 잔액 조회", depends_on: [VS-001], resource_locks: [wallet] }
   - { id: VS-031, order: 310, title: "Point 정책과 초과분 소멸", depends_on: [VS-030], resource_locks: [wallet, feedback] }
-  - { id: VS-056, order: 315, title: "일일 첫 접속 100P", depends_on: [VS-030], resource_locks: [wallet, auth] }
+  - { id: VS-056, order: 315, title: "일일 첫 접속 30P", depends_on: [VS-030], resource_locks: [wallet, auth] }
   - { id: VS-032, order: 320, title: "Unit 구매와 Lot", depends_on: [VS-010, VS-030], resource_locks: [unit, wallet] }
   - { id: VS-033, order: 330, title: "구매 동시성 보호", depends_on: [VS-032], resource_locks: [unit, wallet] }
   - { id: VS-034, order: 340, title: "보유 Lot 조회", depends_on: [VS-032], resource_locks: [unit] }
