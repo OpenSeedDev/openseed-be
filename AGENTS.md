@@ -9,6 +9,8 @@
 ## Autonomous Vertical Slice Workflow
 
 - 백로그 구현, PR 리뷰 반영, 복구 작업에는 `.agents/skills/vertical-slice/SKILL.md`를 반드시 사용한다.
+- 자동 백로그 실행은 `.codex/agents/vertical-slice-coordinator.toml`의 `vertical-slice-coordinator`가 조정한다.
+- 각 Ready 작업 구현과 리뷰 수정은 `.codex/agents/vertical-slice-worker.toml`의 `vertical-slice-worker`에게 작업 하나씩 위임한다.
 - `docs/workflow/backlog.yml`을 작업 순서와 의존성의 기준으로 사용한다.
 - 사용자는 생성된 PR을 리뷰하고, 병합 준비가 끝난 PR에 `/merge-approved` 댓글만 남긴다.
 - 기능·테스트 계획 승인, 변경 승인, 리뷰 수정 계획 승인을 기다리지 않는다.
