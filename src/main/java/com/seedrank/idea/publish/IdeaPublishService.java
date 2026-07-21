@@ -60,7 +60,10 @@ class IdeaPublishService {
         } catch (IllegalArgumentException exception) {
             throw new IdeaNotReadyToPublishException();
         }
-        versions.save(IdeaVersion.first(idea, questionRows.stream().map(row -> row.question()).toList(), now));
+        versions.save(IdeaVersion.initialSnapshot(
+                idea,
+                questionRows.stream().map(row -> row.question()).toList(),
+                now));
         timeline.save(IdeaTimelineEvent.published(ideaId, authorId, now));
 
         if (request.visibility() == IdeaVisibility.MATCHING) {

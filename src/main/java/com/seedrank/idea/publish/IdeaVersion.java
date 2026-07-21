@@ -34,7 +34,7 @@ class IdeaVersion {
 
     protected IdeaVersion() {}
 
-    static IdeaVersion first(Idea idea, List<String> questions, Instant now) {
+    static IdeaVersion initialSnapshot(Idea idea, List<String> questions, Instant now) {
         IdeaVersion version = new IdeaVersion();
         version.id = UUID.randomUUID();
         version.ideaId = idea.id();
