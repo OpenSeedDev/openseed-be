@@ -43,8 +43,8 @@ evidence:
   full_tests:
     command: "./gradlew clean test --no-daemon"
     conclusion: success
-    at: "2026-07-21T10:47:53+09:00"
-    evidence: "전체 49개 테스트 성공"
+    at: "2026-07-22T00:12:32+09:00"
+    evidence: "열린 VS/OPS PR Head를 전역 Stack으로 통합한 최종 Head에서 전체 257개 테스트 성공"
   migration:
     required: false
     evidence: "HTTP 상태·추적 설정만 변경해 DB와 ERD 구조 변경이 없다."
@@ -84,5 +84,15 @@ history:
     to: AWAITING_PR_REVIEW
     command: "autonomous PR delivery"
     note: "PR #31을 생성했고 코드 커밋 065706f의 Build and Test 성공, Merge 가능, 댓글·리뷰와 미해결 thread 0개를 확인했다. Merge Guard는 /merge-approved 전 의도대로 차단 중이다."
+  - at: "2026-07-22T00:05:00+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "integrate all open PR heads"
+    note: "사용자의 전체 PR 병합 요청에 따라 VS-022 전역 Stack을 OPS-01 PR에 통합하고 충돌 복구를 시작했다."
+  - at: "2026-07-22T00:12:32+09:00"
+    from: APPLYING_REVIEW_CHANGES
+    to: AWAITING_PR_REVIEW
+    command: "final integration stabilization"
+    note: "열린 PR 15개의 Head를 하나의 최종 Head로 통합했고, 공용 예외 처리 충돌과 AI 결과 테스트 정리 순서를 해결한 뒤 전체 257개 테스트를 통과했다."
 created_at: "2026-07-21T10:38:12+09:00"
-updated_at: "2026-07-21T10:51:30+09:00"
+updated_at: "2026-07-22T00:12:32+09:00"

@@ -45,6 +45,22 @@ public class Idea {
     @Column(name = "business_model", length = 2000)
     private String businessModel;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private IdeaVisibility visibility;
+
+    @Column(name = "current_unit_price")
+    private Integer currentUnitPrice;
+
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
+    @Column(name = "source_ai_job_id", unique = true)
+    private UUID sourceAiJobId;
+
+    @Column(name = "source_ai_candidate_number")
+    private Integer sourceAiCandidateNumber;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -63,6 +79,8 @@ public class Idea {
             String targetCustomer,
             String solution,
             String businessModel,
+            UUID sourceAiJobId,
+            Integer sourceAiCandidateNumber,
             Instant now) {
         this.id = UUID.randomUUID();
         this.authorId = authorId;
@@ -74,6 +92,8 @@ public class Idea {
         this.targetCustomer = optional(targetCustomer);
         this.solution = optional(solution);
         this.businessModel = optional(businessModel);
+        this.sourceAiJobId = sourceAiJobId;
+        this.sourceAiCandidateNumber = sourceAiCandidateNumber;
         this.createdAt = now;
         this.updatedAt = now;
     }
@@ -88,7 +108,24 @@ public class Idea {
             String solution,
             String businessModel,
             Instant now) {
-        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel, now);
+        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel,
+                null, null, now);
+    }
+
+    static Idea draftFromAi(
+            UUID authorId,
+            UUID sourceAiJobId,
+            int sourceAiCandidateNumber,
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel,
+            Instant now) {
+        return new Idea(authorId, title, category, summary, problem, targetCustomer, solution, businessModel,
+                sourceAiJobId, sourceAiCandidateNumber, now);
     }
 
     private static String required(String value) {
@@ -114,4 +151,60 @@ public class Idea {
     public String businessModel() { return businessModel; }
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
+    public IdeaVisibility visibility() { return visibility; }
+    public Integer currentUnitPrice() { return currentUnitPrice; }
+    public Instant publishedAt() { return publishedAt; }
+
+    public void publish(IdeaVisibility visibility, Instant now) {
+        if (status != IdeaStatus.DRAFT) {
+            throw new IllegalStateException("Idea is not a draft");
+        }
+        if (!complete()) {
+            throw new IllegalArgumentException("Idea content is incomplete");
+        }
+        this.status = IdeaStatus.PUBLISHED;
+        this.visibility = visibility;
+        this.currentUnitPrice = 10;
+        this.publishedAt = now;
+        this.updatedAt = now;
+    }
+
+    public void updatePublishedContent(
+            String title,
+            String category,
+            String summary,
+            String problem,
+            String targetCustomer,
+            String solution,
+            String businessModel,
+            Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.title = required(title);
+        this.category = required(category);
+        this.summary = required(summary);
+        this.problem = required(problem);
+        this.targetCustomer = required(targetCustomer);
+        this.solution = required(solution);
+        this.businessModel = required(businessModel);
+        this.updatedAt = now;
+    }
+
+    public void archive(Instant now) {
+        if (status != IdeaStatus.PUBLISHED) {
+            throw new IllegalStateException("Idea is not published");
+        }
+        this.status = IdeaStatus.ARCHIVED;
+        this.updatedAt = now;
+    }
+
+    private boolean complete() {
+        return present(title) && present(category) && present(summary) && present(problem)
+                && present(targetCustomer) && present(solution) && present(businessModel);
+    }
+
+    private static boolean present(String value) {
+        return value != null && !value.isBlank();
+    }
 }

@@ -10,11 +10,15 @@
 
 ## Concurrency
 
-- Use one coordinator and at most `settings.max_parallel_workers` task workers.
+- Use one coordinator and at most `settings.max_parallel_workers` active implementation tasks.
+- With `max_parallel_workers: 1`, the Coordinator delivers the selected task directly and does not
+  start concurrent implementation workers.
 - Give each worker a dedicated Git worktree, branch, state file, and PR.
 - Do not edit one task worktree from another worker.
 - Do not dispatch two tasks sharing any `resource_locks` value.
 - Recompute ready work after each merge, new PR, block, or lock release.
+- In Fast Build, an open PR releases its worker slot. The next task inherits the single global Stack
+  base, while `max_parallel_workers: 1` prevents concurrent implementation changes.
 
 ## Scheduling
 
@@ -27,10 +31,16 @@ Select tasks deterministically by ascending `order`, then ID. A task is ready on
 
 Do not create speculative dependent PRs. A future task may be planned, but its branch and implementation begin only after all dependencies merge.
 
+When `settings.delivery_mode` is `fast_build`, the Fast Build Policy replaces the last rule:
+dependencies with an open, focused-test-passing implementation PR satisfy implementation readiness.
+Existing Stack leaves are first combined in the configured global integration branch. The selector
+then returns that branch or the previous global PR as base, so fan-in stays linear and reviewable.
+
 ## Review Polling
 
-- Poll open task PRs at the configured interval.
-- Review processing has priority over starting new tasks.
+- Poll open task PRs at the configured interval in normal mode. Fast Build is triggered manually.
+- Review processing has priority over starting new tasks in normal mode. Fast Build defers it unless
+  the user explicitly requests a review tick or a failure prevents the global Stack from continuing.
 - Treat a review as processed only after its comment ID and resulting commit are recorded.
 - Rebase or merge `main` into an open branch only when needed to resolve an actual dependency or conflict. Run focused tests and use final-head CI for the full regression run; also run local full tests for high-risk changes.
 - Approval is bound to the PR head SHA. Any code-changing push invalidates earlier approval.
@@ -57,6 +67,8 @@ GitHub branch protection must remain enabled. Do not use administrator bypass, f
 - An actual GitHub Merge immediately satisfies downstream dependency checks and releases resource locks.
 - Do not create or wait for a per-task completion-state PR.
 - Historical state maintenance may be batched separately and must never block Ready task selection.
+- During Fast Build's Build stage, do not proactively merge. Once every `VS-*` task is merged or has
+  an open implementation PR, subsequent manual ticks return to this normal synchronization policy.
 
 ## Failure Isolation
 

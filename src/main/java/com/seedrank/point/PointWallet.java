@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 public class PointWallet {
 
     public static final int SIGNUP_BALANCE = 300;
+    public static final int MAX_BALANCE = 2_000;
 
     @Id
     private UUID id;
@@ -48,6 +49,27 @@ public class PointWallet {
 
     public static PointWallet signupWallet(User user, Instant now) {
         return new PointWallet(UUID.randomUUID(), user, now);
+    }
+
+    int credit(int requestedAmount, Instant now) {
+        int paidAmount = Math.min(requestedAmount, MAX_BALANCE - balance);
+        balance += paidAmount;
+        if (paidAmount > 0) {
+            updatedAt = now;
+        }
+        return paidAmount;
+    }
+
+    public void debit(int amount, Instant now) {
+        if (amount <= 0 || amount > balance) {
+            throw new IllegalArgumentException("Point debit exceeds available balance");
+        }
+        balance -= amount;
+        updatedAt = now;
+    }
+
+    User getUser() {
+        return user;
     }
 
     public int getBalance() {

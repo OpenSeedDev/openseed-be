@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-012
+  title: "게시자 수정·버전 스냅샷·updatedAt"
+  dependencies: [VS-010]
+  resource_locks: [idea]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-012-update-history
+base_commit: 482c811d2307a2224f63a6b55b95bab208ce88c2
+current_commit: a84e49846618b1dd668f6ea111c14d17d9e3842d
+
+review:
+  pr_number: 52
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/52"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+  red_test: "2026-07-21T19:54:10+09:00 ./gradlew test --tests com.seedrank.idea.update.IdeaUpdateIntegrationTest --no-daemon: 수정 API 부재로 7개 중 6개 실패"
+  focused_tests: "2026-07-21T19:56:11+09:00 IdeaUpdateIntegrationTest 7개와 IdeaPublishIntegrationTest 8개 성공"
+  full_tests: "2026-07-21T19:57:15+09:00 ./gradlew test --no-daemon: 145개 성공, 실패·오류 0개"
+  migration: "V20260721105500__protect_idea_versions_append_only.sql: 내부 버전 UPDATE·DELETE 거부 trigger; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-21T19:30:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-012"
+    note: "백로그, 기획, 상세 명세, 구현 lessons와 VS-010 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-21T19:30:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-012"
+    note: "게시자 전용 수정, 전체 불변 스냅샷, updatedAt과 동시성·원자성 테스트 범위를 확정했다."
+  - at: "2026-07-21T19:57:15+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-012"
+    note: "Red 6건 확인 후 최소 구현과 리팩터링을 완료했다. 동시 수정·롤백·불변 이력 포함 집중 15개와 전체 145개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-21T19:59:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-012"
+    note: "구현 커밋 a84e498을 Push하고 Draft PR #52를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-21T19:30:00+09:00"
+updated_at: "2026-07-21T19:59:00+09:00"

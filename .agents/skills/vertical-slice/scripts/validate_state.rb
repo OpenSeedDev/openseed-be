@@ -142,6 +142,30 @@ def validate_autonomous(data, path)
   reject("unsupported autonomous status: #{status}") unless AUTONOMOUS_STATUSES.include?(status)
   require_keys(data, %w[branch base_commit current_commit created_at updated_at])
 
+  if data.key?("delivery")
+    delivery = mapping(data, "delivery")
+    require_keys(delivery, %w[strategy parent_task_id parent_pr_number base_ref base_head_sha stack_root stack_depth merge_order], "delivery")
+    reject("delivery.strategy must be main, stacked_pr, or global_stacked_pr") unless %w[main stacked_pr global_stacked_pr].include?(delivery["strategy"])
+    reject("delivery.stack_depth must be 1..64") unless delivery["stack_depth"].is_a?(Integer) && delivery["stack_depth"].between?(1, 64)
+    reject("delivery.merge_order must be a list") unless delivery["merge_order"].is_a?(Array)
+    if delivery["strategy"] == "stacked_pr"
+      reject("delivery.parent_task_id is required for stacked_pr") unless present?(delivery["parent_task_id"])
+      reject("delivery.parent_pr_number is required for stacked_pr") unless delivery["parent_pr_number"].is_a?(Integer)
+      reject("delivery.base_ref is required for stacked_pr") unless present?(delivery["base_ref"])
+      reject("delivery.base_head_sha is required for stacked_pr") unless present?(delivery["base_head_sha"])
+      reject("delivery.stack_depth must be greater than 1 for stacked_pr") unless delivery["stack_depth"] > 1
+    end
+    if delivery["strategy"] == "global_stacked_pr"
+      reject("delivery.base_ref is required for global_stacked_pr") unless present?(delivery["base_ref"])
+      reject("delivery.base_head_sha is required for global_stacked_pr") unless present?(delivery["base_head_sha"])
+      reject("delivery.stack_root must be VS-GLOBAL") unless delivery["stack_root"] == "VS-GLOBAL"
+      if delivery["stack_depth"] > 1
+        reject("delivery.parent_task_id is required after the first global task") unless present?(delivery["parent_task_id"])
+        reject("delivery.parent_pr_number is required after the first global task") unless delivery["parent_pr_number"].is_a?(Integer)
+      end
+    end
+  end
+
   review = mapping(data, "review")
   require_keys(review, %w[pr_number pr_url handled_comment_ids unresolved_thread_count merge_approval], "review")
   reject("review.handled_comment_ids must be a list") unless review["handled_comment_ids"].is_a?(Array)

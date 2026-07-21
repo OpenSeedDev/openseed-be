@@ -58,27 +58,31 @@ class PointWalletQueryIntegrationTest {
 
         mockMvc.perform(authenticatedGet("/api/v1/me/wallet", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(300))
+                .andExpect(jsonPath("$.balance").value(330))
                 .andExpect(jsonPath("$.pendingRecoveryBalance").value(0))
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty());
     }
 
     @Test
-    void returnsSignupLedgerWithCompleteImmutableAccountingFields() throws Exception {
+    void returnsDailyAccessAndSignupLedgersWithCompleteImmutableAccountingFields() throws Exception {
         String token = signupAndLogin("member@example.com", "seed_member");
         UUID userId = userId("member@example.com");
 
         mockMvc.perform(authenticatedGet("/api/v1/me/point-ledgers", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items.length()").value(2))
                 .andExpect(jsonPath("$.items[0].type").value("CREDIT"))
-                .andExpect(jsonPath("$.items[0].originalAmount").value(300))
-                .andExpect(jsonPath("$.items[0].paidAmount").value(300))
+                .andExpect(jsonPath("$.items[0].originalAmount").value(30))
+                .andExpect(jsonPath("$.items[0].paidAmount").value(30))
                 .andExpect(jsonPath("$.items[0].expiredAmount").value(0))
-                .andExpect(jsonPath("$.items[0].balanceAfter").value(300))
-                .andExpect(jsonPath("$.items[0].sourceType").value("SIGNUP_BONUS"))
-                .andExpect(jsonPath("$.items[0].sourceId").value(userId.toString()))
+                .andExpect(jsonPath("$.items[0].balanceAfter").value(330))
+                .andExpect(jsonPath("$.items[0].sourceType").value("DAILY_FIRST_ACCESS"))
                 .andExpect(jsonPath("$.items[0].createdAt").isNotEmpty())
+                .andExpect(jsonPath("$.items[1].originalAmount").value(300))
+                .andExpect(jsonPath("$.items[1].paidAmount").value(300))
+                .andExpect(jsonPath("$.items[1].balanceAfter").value(300))
+                .andExpect(jsonPath("$.items[1].sourceType").value("SIGNUP_BONUS"))
+                .andExpect(jsonPath("$.items[1].sourceId").value(userId.toString()))
                 .andExpect(jsonPath("$.nextCursor").doesNotExist())
                 .andExpect(jsonPath("$.hasNext").value(false));
     }
@@ -92,12 +96,12 @@ class PointWalletQueryIntegrationTest {
         insertLedger(userId, UUID.fromString("00000000-0000-0000-0000-000000000002"), sameTime, 302);
         insertLedger(userId, UUID.fromString("00000000-0000-0000-0000-000000000003"), sameTime, 303);
 
-        JsonNode first = getJson("/api/v1/me/point-ledgers?size=2", token);
-        assertThat(first.get("items").size()).isEqualTo(2);
+        JsonNode first = getJson("/api/v1/me/point-ledgers?size=3", token);
+        assertThat(first.get("items").size()).isEqualTo(3);
         assertThat(first.get("hasNext").asBoolean()).isTrue();
         String cursor = first.get("nextCursor").asText();
 
-        JsonNode second = getJson("/api/v1/me/point-ledgers?size=2&cursor=" + cursor, token);
+        JsonNode second = getJson("/api/v1/me/point-ledgers?size=3&cursor=" + cursor, token);
         assertThat(second.get("items").size()).isEqualTo(2);
         assertThat(second.get("hasNext").asBoolean()).isFalse();
         assertThat(second.get("nextCursor").isNull()).isTrue();
@@ -106,8 +110,8 @@ class PointWalletQueryIntegrationTest {
                 .flatMap(page -> java.util.stream.StreamSupport.stream(page.get("items").spliterator(), false))
                 .map(item -> item.get("id").asText())
                 .toList();
-        assertThat(ids).hasSize(4);
-        assertThat(new HashSet<>(ids)).hasSize(4);
+        assertThat(ids).hasSize(5);
+        assertThat(new HashSet<>(ids)).hasSize(5);
     }
 
     @Test
@@ -138,15 +142,16 @@ class PointWalletQueryIntegrationTest {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(authenticatedGet("/api/v1/me/wallet", firstToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(300));
+                .andExpect(jsonPath("$.balance").value(330));
         mockMvc.perform(authenticatedGet("/api/v1/me/point-ledgers", firstToken))
-                .andExpect(jsonPath("$.items.length()").value(1));
+                .andExpect(jsonPath("$.items.length()").value(2));
     }
 
     @Test
     void databaseRejectsLedgerUpdateAndDelete() throws Exception {
         signupAndLogin("member@example.com", "seed_member");
-        UUID ledgerId = jdbc.queryForObject("SELECT id FROM point_ledgers", UUID.class);
+        UUID ledgerId = jdbc.queryForObject(
+                "SELECT id FROM point_ledgers WHERE source_type='SIGNUP_BONUS'", UUID.class);
 
         assertThatThrownBy(() -> jdbc.update("UPDATE point_ledgers SET paid_amount=0 WHERE id=?", ledgerId))
                 .isInstanceOf(DataAccessException.class);
