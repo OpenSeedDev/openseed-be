@@ -63,4 +63,3 @@ Content-Type: application/json
 ## 데이터 영향
 
 기존 `users.profile_id`, `users.updated_at` 컬럼을 사용하므로 Migration과 ERD 구조 변경은 없다.
-
