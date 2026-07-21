@@ -60,6 +60,14 @@ public class PointWallet {
         return paidAmount;
     }
 
+    public void debit(int amount, Instant now) {
+        if (amount <= 0 || amount > balance) {
+            throw new IllegalArgumentException("Point debit exceeds available balance");
+        }
+        balance -= amount;
+        updatedAt = now;
+    }
+
     User getUser() {
         return user;
     }
