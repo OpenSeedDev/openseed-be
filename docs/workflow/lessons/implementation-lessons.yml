@@ -120,6 +120,51 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "PR #29 인라인 댓글 3619109381, 계약 테스트 Red 1건과 집중 8개·전체 51개 Green"
+  - id: IL-012
+    fingerprint: "jdbc-instant-parameter-type-not-inferred"
+    status: resolved
+    occurred_at: "2026-07-21T10:23:37+09:00"
+    slice_id: VS-030
+    category: test_setup
+    review_comment_id: null
+    symptom: "원장 Cursor Fixture를 JDBC로 추가할 때 PostgreSQL 드라이버가 java.time.Instant의 SQL 타입을 추론하지 못했다."
+    root_cause: "JdbcTemplate의 일반 Object 파라미터가 Instant를 TIMESTAMP WITH TIME ZONE으로 자동 변환할 것으로 가정했다."
+    fix: "Fixture가 java.sql.Timestamp.from(createdAt)을 명시적으로 전달하도록 변경했다."
+    regression_test: "PointWalletQueryIntegrationTest.cursorPaginationHasNoDuplicatesOrGapsIncludingEqualTimestamps"
+    applies_to: "JdbcTemplate로 TIMESTAMP WITH TIME ZONE 파라미터를 전달하는 통합 테스트와 운영 코드"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "PointWalletQueryIntegrationTest 첫 Red의 PSQLException 후 Timestamp 변환 및 집중 테스트 7개 성공"
+  - id: IL-013
+    fingerprint: "nullable-jpql-instant-parameter-postgresql-typing"
+    status: resolved
+    occurred_at: "2026-07-21T10:26:56+09:00"
+    slice_id: VS-030
+    category: repository
+    review_comment_id: null
+    symptom: "첫 원장 페이지 조회에서 nullable Instant Cursor 파라미터의 PostgreSQL 타입을 결정할 수 없어 500이 발생했다."
+    root_cause: "하나의 JPQL에서 ':cursorAt is null'과 시간 비교를 결합하면 null 바인딩의 DB 타입이 안정적으로 결정된다고 가정했다."
+    fix: "Cursor 없는 첫 페이지 쿼리와 Cursor 이후 keyset 쿼리를 분리해 null 시간 파라미터를 제거했다."
+    regression_test: "PointWalletQueryIntegrationTest의 첫 페이지, size 경계, 동일 시각 Cursor 중복·누락 검증"
+    applies_to: "PostgreSQL에서 nullable Cursor 값을 사용하는 JPQL keyset pagination"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "SQLState 42P18 확인 후 repository 쿼리 분리, 집중 7개와 전체 50개 성공"
+  - id: IL-014
+    fingerprint: "append-only-ledger-breaks-later-test-cleanup"
+    status: resolved
+    occurred_at: "2026-07-21T13:48:53+09:00"
+    slice_id: VS-030
+    category: test_setup
+    review_comment_id: null
+    symptom: "최신 main 통합 때마다 뒤늦게 추가된 통합 테스트의 원장 DELETE 정리가 append-only 트리거에 거부됐다. 첫 복구에서는 IdeaDraft 6건, 두 번째 복구에서는 CompanyProfile·UpdateProfileId 28건이 실패했다."
+    root_cause: "VS-030보다 뒤에 병합된 테스트들이 원장 정리에 기존 DELETE 방식을 사용해 새 DB 불변식과 호환되지 않았다."
+    fix: "IdeaDraftIntegrationTest와 후속 CompanyProfileIntegrationTest·UpdateProfileIdIntegrationTest의 원장 정리를 다른 통합 테스트와 동일한 TRUNCATE 방식으로 변경했다."
+    regression_test: "append-only point_ledgers를 정리하는 통합 테스트의 집중 실행과 ./gradlew clean test"
+    applies_to: "append-only point_ledgers를 정리하는 현재와 이후의 모든 PostgreSQL 통합 테스트"
+    recurrence_count: 2
+    promoted_to: "conflict recovery focused cleanup compatibility checks"
+    evidence: "첫 main 통합에서 IdeaDraft SQLState P0001 6건, 두 번째 main 통합에서 CompanyProfile·UpdateProfileId 28건 확인 후 TRUNCATE 정리로 통일"
   - id: IL-009
     fingerprint: "dependent-profile-fk-blocks-user-cleanup"
     status: resolved

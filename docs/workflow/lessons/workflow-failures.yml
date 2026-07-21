@@ -28,3 +28,17 @@ failures:
     recurrence_count: 1
     promoted_to: null
     evidence: "초기 ModuleNotFoundError 후 공식 generate_openai_yaml.py 성공 및 quick_validate.py: Skill is valid"
+  - id: WF-003
+    fingerprint: "manually-copied-feature-commit-sha-mismatch"
+    status: resolved
+    occurred_at: "2026-07-21T10:33:00+09:00"
+    slice_id: VS-030
+    stage: creating_pr
+    command: "git rev-parse HEAD; state evidence update"
+    symptom: "상태 파일의 current_commit에 터미널의 축약 SHA를 수기로 확장해 실제 구현 커밋과 다른 값을 기록했다."
+    root_cause: "git rev-parse로 출력된 전체 SHA를 기계적으로 전달하지 않고 축약 SHA를 사람이 추정해 입력했다."
+    resolution: "실제 구현 커밋 f5808225018178704f9aa3c19a6128ab0fc003bb를 다시 조회해 상태 증거를 수정했다."
+    prevention: "current_commit 갱신 전후 `git rev-parse <commit>` 결과와 상태 값을 직접 비교하고 상태 검증에 커밋 존재 확인을 함께 수행한다."
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "git rev-parse HEAD 직전 구현 커밋 결과와 VS-030.yml current_commit 비교"
