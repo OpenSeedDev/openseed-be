@@ -6,10 +6,10 @@ task:
   dependencies: [VS-018]
   resource_locks: [ai-job]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-019-worker-lease
 base_commit: 3b0f158942975bb786ea31d5c63fdc1fa842c520
-current_commit: null
+current_commit: 71e557e586f12f1ddfdae9f13fdc254ec00152db
 
 delivery:
   strategy: stacked_pr
@@ -22,8 +22,8 @@ delivery:
   merge_order: [VS-018, VS-019]
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 58
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/58"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -79,6 +79,11 @@ history:
     to: CREATING_PR
     command: "fast-build delivery: VS-019"
     note: "Red compile 15건 확인 후 Worker Lease·fencing·SKIP LOCKED·Backoff를 구현했다. AI Job 변경 영역 위험 회귀 15개를 통과했고 checkpoint=false 정책에 따라 전체 테스트는 최종 Head CI에 위임한다."
+  - at: "2026-07-21T21:25:30+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-019"
+    note: "구현 커밋 71e557e를 Push하고 VS-018 branch를 base로 Draft PR #58을 생성했다. 최종 상태 Push 후 Ready로 전환하며 원격 CI는 기다리지 않는다."
 
 created_at: "2026-07-21T21:19:10+09:00"
-updated_at: "2026-07-21T21:24:05+09:00"
+updated_at: "2026-07-21T21:25:30+09:00"
