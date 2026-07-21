@@ -6,14 +6,14 @@ task:
   dependencies: [VS-010]
   resource_locks: [idea]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-012-update-history
 base_commit: 482c811d2307a2224f63a6b55b95bab208ce88c2
-current_commit: null
+current_commit: a84e49846618b1dd668f6ea111c14d17d9e3842d
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 52
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/52"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-012"
     note: "Red 6건 확인 후 최소 구현과 리팩터링을 완료했다. 동시 수정·롤백·불변 이력 포함 집중 15개와 전체 145개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-21T19:59:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-012"
+    note: "구현 커밋 a84e498을 Push하고 Draft PR #52를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
 
 created_at: "2026-07-21T19:30:00+09:00"
-updated_at: "2026-07-21T19:57:15+09:00"
+updated_at: "2026-07-21T19:59:00+09:00"
