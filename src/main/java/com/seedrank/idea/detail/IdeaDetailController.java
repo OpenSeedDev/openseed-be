@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,7 +40,9 @@ class IdeaDetailController {
     @GetMapping("/{ideaId}")
     IdeaDetailResponse get(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
-            @PathVariable UUID ideaId) {
-        return service.get(authorization, ideaId);
+            @PathVariable UUID ideaId,
+            HttpServletRequest request) {
+        String guestSessionId = authorization == null ? request.getSession(true).getId() : null;
+        return service.get(authorization, ideaId, guestSessionId);
     }
 }

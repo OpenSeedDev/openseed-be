@@ -25,6 +25,9 @@ erDiagram
     IDEAS ||--o{ IDEA_LIKES : receives
     IDEAS ||--o{ FEEDBACKS : receives
     FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
+    IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
+    IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
+    IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
 
     USERS {
         uuid id PK
@@ -201,6 +204,29 @@ erDiagram
         timestamptz recorded_at "audit time"
     }
 
+    IDEA_VIEW_EVENTS {
+        uuid id PK
+        uuid idea_id FK
+        uuid viewer_user_id FK "nullable for Guest"
+        char guest_session_hash "nullable for User, SHA-256"
+        char viewer_key_hash "dedupe key, SHA-256"
+        timestamptz bucket_hour "UTC hour"
+        timestamptz created_at
+    }
+
+    IDEA_METRIC_CURRENT {
+        uuid idea_id PK,FK
+        bigint view_count
+        timestamptz updated_at
+    }
+
+    IDEA_METRIC_HOURLY {
+        uuid idea_id PK,FK
+        timestamptz bucket_hour PK "UTC hour"
+        bigint view_delta
+        timestamptz updated_at
+    }
+
     SEED_UNIT_LOTS {
         uuid id PK
         uuid idea_id FK
@@ -360,3 +386,11 @@ erDiagram
 - 공개 가능한 피드백 목록은 삭제 행을 제외하고 채택 우선·작성 시각·ID Cursor로 조회한다.
 - 작성자만 피드백을 수정·soft delete하며 변경 전 전체 스냅샷과 감사 시각을 `feedback_revisions`에 보존한다.
 - 채택·Contribution·기여 보상은 VS-027에서 확장한다.
+
+## VS-029 제약
+
+- 성공한 게시 아이디어 상세 조회만 집계하고 Draft·401·404 응답은 집계하지 않는다.
+- 로그인 사용자는 사용자 ID, Guest는 원문을 저장하지 않는 서버 세션 ID 해시를 조회자 키로 사용한다.
+- 같은 아이디어·조회자·UTC 시간 버킷의 이벤트는 unique 제약으로 한 번만 인정한다.
+- 새 이벤트와 현재 누계·시간별 증가량은 하나의 트랜잭션에서 원자적으로 upsert한다.
+- 상세 응답은 공개 범위와 무관한 공통 공개 지표 `viewCount`를 포함한다.
