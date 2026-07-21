@@ -8,6 +8,7 @@ erDiagram
     USERS ||--o{ POINT_LEDGERS : receives
     USERS ||--o{ AUTH_SESSIONS : authenticates
     USERS ||--o| COMPANY_PROFILES : registers
+    USERS ||--o{ IDEAS : authors
 
     USERS {
         uuid id PK
@@ -63,6 +64,21 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    IDEAS {
+        uuid id PK
+        uuid author_id FK
+        varchar status "DRAFT"
+        varchar title "1..100"
+        varchar category "1..50"
+        varchar summary "max 200, nullable"
+        varchar problem "1..2000"
+        varchar target_customer "max 1000, nullable"
+        varchar solution "max 2000, nullable"
+        varchar business_model "max 2000, nullable"
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
 ## VS-001 제약
@@ -86,3 +102,10 @@ erDiagram
 - 회사 이메일은 API 응답과 일반 로그에 노출하지 않는다.
 - `verified_at`은 VS-008 인증 완료 전까지 null이며, 프로필이 존재하면 내 계정의 회사 인증 상태는 `PENDING`이다.
 - 인증 토큰과 메일 발송 데이터는 VS-007, 인증 완료와 Company 역할은 VS-008에서 추가한다.
+
+## VS-009 제약
+
+- 로그인 사용자는 AI 없이 Idea를 `DRAFT` 상태로 생성한다.
+- Draft 작성자는 내부 User UUID로 연결하며, 작성자만 Draft 상세를 조회한다.
+- 제목·카테고리·문제는 필수이고 나머지 내용은 미완성 Draft를 위해 nullable이다.
+- 게시 상태, 공개 범위, 최초 버전, 가격·보상과 AI Job 연결은 후속 슬라이스에서 추가한다.
