@@ -6,16 +6,22 @@ task:
   dependencies: [VS-001]
   resource_locks: [company]
 
-status: AWAITING_PR_REVIEW
+status: APPLYING_REVIEW_CHANGES
 branch: codex/vs-006-company-profile
 base_commit: bc2a6c2f31e945295176e2c94a206a8ae862bc96
-current_commit: f679324af9c7cf2b306babb38cee66c27fd98ebe
+current_commit: 24fdfb08fc35667ad402d331a7fe77f14a1b30d9
 
 review:
   pr_number: 28
   pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/28"
   handled_comment_ids: []
   unresolved_thread_count: 1
+  active_review:
+    comment_id: 3619484742
+    thread_id: PRRT_kwDOTWkifc6SdgcH
+    regression_test: "CompanyProfileIntegrationTest.mapsConcurrentUniqueConstraintConflictsToCompanyProfileAlreadyExists"
+    red_conclusion: passed_existing_implementation
+    red_note: "테스트 추가 직후 기존 saveAndFlush 예외 변환 구현에서 성공해 지적된 500 응답은 재현되지 않았고 동시성 회귀 검증 누락만 확인됐다."
   merge_approval:
     command: /merge-approved
     approved_by: null
@@ -39,16 +45,16 @@ evidence:
   focused_tests:
     command: "./gradlew test --tests com.seedrank.company.profile.CompanyProfileIntegrationTest --no-daemon"
     conclusion: success
-    at: "2026-07-21T13:38:59+09:00"
-    summary: "7개 성공, 실패 0개"
+    at: "2026-07-21T13:47:30+09:00"
+    summary: "동일 사용자·동일 회사 이메일 동시성 회귀 검증을 포함해 8개 성공, 실패 0개"
   full_tests:
     command: "./gradlew clean test --no-daemon"
     conclusion: success
-    at: "2026-07-21T13:39:30+09:00"
-    summary: "전체 58개 성공, 실패 0개"
+    at: "2026-07-21T13:48:42+09:00"
+    summary: "전체 59개 성공, 실패 0개"
   migration: "V20260721043400__create_company_profiles.sql 적용 및 PostgreSQL ddl-auto validate 성공"
-  ci_url: "https://github.com/OpenSeedDev/openseed-be/actions/runs/29801939522"
-  ci_result: success
+  ci_url: null
+  ci_result: pending
   merge_commit: null
   synced_main_commit: null
 
@@ -93,6 +99,11 @@ history:
     to: AWAITING_PR_REVIEW
     command: "conflict recovery complete"
     note: "ERD·구현 교훈·공통 예외 처리 충돌을 양쪽 기능을 보존해 해결하고 중복 Flyway 버전을 새 UTC 버전으로 조정했다. 회사 프로필 집중 7개와 전체 58개 테스트가 성공했으며 새 Head CI를 대기한다."
+  - at: "2026-07-21T13:45:30+09:00"
+    from: AWAITING_PR_REVIEW
+    to: APPLYING_REVIEW_CHANGES
+    command: "autonomous review fix: comment 3619484742"
+    note: "동일 사용자·동일 회사 이메일 동시 등록의 DB unique 경합이 500이 될 수 있다는 thread PRRT_kwDOTWkifc6SdgcH를 수집하고 PostgreSQL 동시성 회귀 테스트부터 추가했다. 기존 saveAndFlush 예외 변환으로 테스트가 즉시 성공해 운영 결함은 재현되지 않았다."
 
 created_at: "2026-07-21T01:30:00+09:00"
-updated_at: "2026-07-21T13:43:30+09:00"
+updated_at: "2026-07-21T13:49:00+09:00"
