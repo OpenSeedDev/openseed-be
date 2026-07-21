@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,6 +155,28 @@ class CompanyProfileIntegrationTest {
     }
 
     @Test
+    void mapsConcurrentUniqueConstraintConflictsToCompanyProfileAlreadyExists() throws Exception {
+        signup("same-user@example.com", "same_user");
+        signup("first@example.com", "first_user");
+        signup("second@example.com", "second_user");
+        String sameUser = login("same-user@example.com");
+        String first = login("first@example.com");
+        String second = login("second@example.com");
+
+        var duplicateUserResponses = performConcurrently(
+                () -> create(sameUser, "OpenSeed", "same-user@first.example"),
+                () -> create(sameUser, "OpenSeed", "same-user@second.example"));
+        assertOneCreatedAndOneConflict(duplicateUserResponses);
+
+        var duplicateEmailResponses = performConcurrently(
+                () -> create(first, "OpenSeed", "shared@corp.example"),
+                () -> create(second, "OpenSeed", "SHARED@CORP.EXAMPLE"));
+        assertOneCreatedAndOneConflict(duplicateEmailResponses);
+
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM company_profiles", Integer.class)).isEqualTo(2);
+    }
+
+    @Test
     void publishesTheCompanyProfileOpenApiContract() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
@@ -194,5 +219,50 @@ class CompanyProfileIntegrationTest {
 
     private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder me(String accessToken) {
         return get("/api/v1/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+    }
+
+    private java.util.List<ConcurrentResponse> performConcurrently(
+            RequestFactory first,
+            RequestFactory second) throws Exception {
+        var ready = new CountDownLatch(2);
+        var start = new CountDownLatch(1);
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var firstResponse = executor.submit(() -> performAfterBarrier(first, ready, start));
+            var secondResponse = executor.submit(() -> performAfterBarrier(second, ready, start));
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+            start.countDown();
+            return java.util.List.of(
+                    firstResponse.get(10, TimeUnit.SECONDS),
+                    secondResponse.get(10, TimeUnit.SECONDS));
+        }
+    }
+
+    private ConcurrentResponse performAfterBarrier(
+            RequestFactory request,
+            CountDownLatch ready,
+            CountDownLatch start) throws Exception {
+        ready.countDown();
+        assertThat(start.await(5, TimeUnit.SECONDS)).isTrue();
+        var response = mockMvc.perform(request.create()).andReturn().getResponse();
+        return new ConcurrentResponse(response.getStatus(), response.getContentAsString());
+    }
+
+    private void assertOneCreatedAndOneConflict(java.util.List<ConcurrentResponse> responses) throws Exception {
+        assertThat(responses).extracting(ConcurrentResponse::status).containsExactlyInAnyOrder(201, 409);
+        String conflictBody = responses.stream()
+                .filter(response -> response.status() == 409)
+                .findFirst()
+                .orElseThrow()
+                .body();
+        assertThat(objectMapper.readTree(conflictBody).get("code").asText())
+                .isEqualTo("COMPANY_PROFILE_ALREADY_EXISTS");
+    }
+
+    @FunctionalInterface
+    private interface RequestFactory {
+        org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder create() throws Exception;
+    }
+
+    private record ConcurrentResponse(int status, String body) {
     }
 }

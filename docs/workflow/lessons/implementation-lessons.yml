@@ -135,3 +135,18 @@ lessons:
     recurrence_count: 1
     promoted_to: null
     evidence: "./gradlew clean test에서 MyAccountIntegrationTest 7건 FK 실패 후 Migration 수정"
+  - id: IL-010
+    fingerprint: "company-profile-unique-race-lacks-regression-coverage"
+    status: resolved
+    occurred_at: "2026-07-21T13:47:30+09:00"
+    slice_id: VS-006
+    category: pr_review
+    review_comment_id: 3619484742
+    symptom: "동일 사용자의 동시 프로필 등록과 서로 다른 사용자의 동일 회사 이메일 등록이 DB unique 경합 시 500으로 노출될 수 있다는 리뷰 우려가 제기됐다."
+    root_cause: "CompanyProfileService는 최초 구현부터 saveAndFlush의 DataIntegrityViolationException을 409 도메인 예외로 변환했지만, 실제 PostgreSQL 동시 요청으로 이를 보장하는 회귀 테스트가 없었다."
+    fix: "동일 사용자 동시 요청과 동일 회사 이메일 동시 요청에서 각각 201 한 건과 COMPANY_PROFILE_ALREADY_EXISTS 409 한 건이 반환되는 통합 테스트를 추가했다."
+    regression_test: "CompanyProfileIntegrationTest.mapsConcurrentUniqueConstraintConflictsToCompanyProfileAlreadyExists"
+    applies_to: "사전 중복 조회 뒤 DB unique 제약으로 최종 동시성 정합성을 보장하는 생성 API"
+    recurrence_count: 1
+    promoted_to: null
+    evidence: "리뷰 댓글 3619484742; 테스트 추가 직후 기존 saveAndFlush 예외 변환 구현에서 집중 8개 성공"
