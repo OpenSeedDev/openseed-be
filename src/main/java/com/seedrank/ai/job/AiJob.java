@@ -52,6 +52,9 @@ class AiJob {
     @Column(name = "next_attempt_at")
     private Instant nextAttemptAt;
 
+    @Column(name = "failure_code", length = 50)
+    private String failureCode;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -78,10 +81,7 @@ class AiJob {
     }
 
     void scheduleRetry(UUID claimedToken, Instant retryAt, Instant now) {
-        if (status != AiJobStatus.PROCESSING || leaseToken == null || !leaseToken.equals(claimedToken)
-                || lockedUntil == null || !lockedUntil.isAfter(now)) {
-            throw new StaleAiJobLeaseException();
-        }
+        verifyActiveLease(claimedToken, now);
         status = AiJobStatus.RETRY_WAIT;
         retryCount++;
         leaseOwner = null;
@@ -89,5 +89,35 @@ class AiJob {
         lockedUntil = null;
         nextAttemptAt = retryAt;
         updatedAt = now;
+    }
+
+    void complete(UUID claimedToken, Instant now) {
+        verifyActiveLease(claimedToken, now);
+        status = AiJobStatus.SUCCEEDED;
+        clearLease();
+        failureCode = null;
+        updatedAt = now;
+    }
+
+    void failInvalidResponse(UUID claimedToken, Instant now) {
+        verifyActiveLease(claimedToken, now);
+        status = AiJobStatus.FAILED;
+        clearLease();
+        failureCode = "INVALID_RESPONSE_SCHEMA";
+        updatedAt = now;
+    }
+
+    private void verifyActiveLease(UUID claimedToken, Instant now) {
+        if (status != AiJobStatus.PROCESSING || leaseToken == null || !leaseToken.equals(claimedToken)
+                || lockedUntil == null || !lockedUntil.isAfter(now)) {
+            throw new StaleAiJobLeaseException();
+        }
+    }
+
+    private void clearLease() {
+        leaseOwner = null;
+        leaseToken = null;
+        lockedUntil = null;
+        nextAttemptAt = null;
     }
 }

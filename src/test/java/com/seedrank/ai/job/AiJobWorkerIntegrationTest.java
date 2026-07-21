@@ -132,6 +132,21 @@ class AiJobWorkerIntegrationTest {
                 .isEqualTo("worker-new");
     }
 
+    @Test
+    void rejectsCompletionWithAnExpiredLeaseToken() throws Exception {
+        String token = signupAndLogin("complete@example.com", "complete_worker");
+        UUID jobId = createJob(token, "complete");
+        AiJobClaim claim = worker.claimNext("worker-old").orElseThrow();
+
+        clock.advanceSeconds(121);
+
+        assertThatThrownBy(() -> worker.complete(
+                jobId, claim.leaseToken(),
+                "{}", "{}"))
+                .isInstanceOf(StaleAiJobLeaseException.class);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_generation_results", Integer.class)).isZero();
+    }
+
     @ParameterizedTest
     @EnumSource(AiJobFailure.class)
     void retriesTimeoutRateLimitAndServerErrorsAfterBackoff(AiJobFailure failure) throws Exception {

@@ -15,10 +15,12 @@ class AiJobWorkerService {
     private static final long MAX_BACKOFF_SECONDS = 15 * 60;
 
     private final AiJobRepository jobs;
+    private final AiGenerationResultRepository results;
     private final Clock clock;
 
-    AiJobWorkerService(AiJobRepository jobs, Clock clock) {
+    AiJobWorkerService(AiJobRepository jobs, AiGenerationResultRepository results, Clock clock) {
         this.jobs = jobs;
+        this.results = results;
         this.clock = clock;
     }
 
@@ -38,6 +40,26 @@ class AiJobWorkerService {
         AiJob job = jobs.findByIdForUpdate(jobId).orElseThrow(StaleAiJobLeaseException::new);
         Instant now = clock.instant();
         job.scheduleRetry(leaseToken, now.plusSeconds(backoffSeconds(job.retryCount() + 1)), now);
+    }
+
+    @Transactional
+    void complete(UUID jobId, UUID leaseToken, String rawResult, String normalizedResult) {
+        if (jobId == null || leaseToken == null || rawResult == null || normalizedResult == null) {
+            throw new IllegalArgumentException("Job completion requires job, lease token and results");
+        }
+        AiJob job = jobs.findByIdForUpdate(jobId).orElseThrow(StaleAiJobLeaseException::new);
+        Instant now = clock.instant();
+        job.complete(leaseToken, now);
+        results.save(AiGenerationResult.create(jobId, rawResult, normalizedResult, now));
+    }
+
+    @Transactional
+    void failInvalidResponse(UUID jobId, UUID leaseToken) {
+        if (jobId == null || leaseToken == null) {
+            throw new IllegalArgumentException("Job failure requires job and lease token");
+        }
+        AiJob job = jobs.findByIdForUpdate(jobId).orElseThrow(StaleAiJobLeaseException::new);
+        job.failInvalidResponse(leaseToken, clock.instant());
     }
 
     private long backoffSeconds(int retryCount) {

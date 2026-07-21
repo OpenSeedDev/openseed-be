@@ -11,6 +11,7 @@ erDiagram
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
     USERS ||--o{ AI_JOBS : requests
+    AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
 
     USERS {
@@ -96,7 +97,7 @@ erDiagram
     AI_JOBS {
         uuid id PK
         uuid owner_id FK
-        varchar status "PENDING"
+        varchar status "PENDING, PROCESSING, RETRY_WAIT, SUCCEEDED, FAILED"
         jsonb input_snapshot "keyword, background"
         varchar prompt_version
         varchar idempotency_key "unique per owner"
@@ -105,8 +106,17 @@ erDiagram
         varchar lease_owner "nullable worker id"
         uuid lease_token "nullable fencing token"
         timestamptz next_attempt_at "nullable backoff"
+        varchar failure_code "nullable, INVALID_RESPONSE_SCHEMA"
         timestamptz created_at
         timestamptz updated_at
+    }
+
+    AI_GENERATION_RESULTS {
+        uuid id PK
+        uuid ai_job_id FK,UK
+        jsonb raw_result "provider structured output"
+        jsonb normalized_result "problem analysis and 5 candidates"
+        timestamptz created_at
     }
 
     VALIDATION_QUESTIONS {
@@ -169,6 +179,14 @@ erDiagram
 - 선점 시 `PROCESSING` 상태, Worker ID, 매번 새로 발급한 fencing token과 2분 Lease를 저장한다.
 - Lease가 만료된 Job은 새 token으로 재선점하며 이전 token은 상태를 변경할 수 없다.
 - Timeout·429·5xx는 `RETRY_WAIT`로 전환하고 30초부터 최대 15분까지 지수 Backoff한 `next_attempt_at` 이후 다시 선점한다.
+
+## VS-020 제약
+
+- AI Provider 응답은 문제 분석과 제목·카테고리·요약·문제·고객·해결책·수익 모델을 모두 갖춘 후보 정확히 5개여야 한다.
+- 후보 제목은 공백과 대소문자를 정규화한 기준으로 서로 달라야 하며 필드 길이는 Idea Draft 계약을 따른다.
+- 유효한 원본·정규화 JSON은 Job당 하나의 `ai_generation_results`에 저장하고 Job을 `SUCCEEDED`로 종료한다.
+- Schema 오류는 Timeout·429·5xx 재시도와 구분해 `FAILED / INVALID_RESPONSE_SCHEMA`로 기록한다.
+- 성공·실패 완료는 활성 Lease fencing token으로 보호하고 결과만 저장하며 Idea를 자동 생성하거나 게시하지 않는다.
 
 ## VS-013 제약
 
