@@ -17,6 +17,8 @@ import com.seedrank.auth.login.InvalidAccessTokenException;
 import com.seedrank.company.profile.CompanyEmailDomainNotAllowedException;
 import com.seedrank.company.profile.CompanyProfileAlreadyExistsException;
 import com.seedrank.company.profile.CompanyProfileValidationException;
+import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
+import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,6 +115,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiError.of(
                 "VALIDATION_ERROR", "입력값을 확인해 주세요.", requestId(request),
                 List.of(new ApiFieldError(exception.getField(), exception.getMessage()))));
+    }
+
+    @ExceptionHandler(CompanyProfileRequiredException.class)
+    ResponseEntity<ApiError> handleCompanyProfileRequired(
+            CompanyProfileRequiredException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "COMPANY_PROFILE_REQUIRED", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(CompanyAlreadyVerifiedException.class)
+    ResponseEntity<ApiError> handleCompanyAlreadyVerified(
+            CompanyAlreadyVerifiedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "COMPANY_ALREADY_VERIFIED", exception.getMessage(), requestId(request), List.of()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
