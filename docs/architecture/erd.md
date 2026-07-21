@@ -15,6 +15,7 @@ erDiagram
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
     USERS ||--o{ AI_JOBS : requests
     AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
+    AI_JOBS ||--o| IDEAS : selected_into
     IDEAS ||--o{ VALIDATION_QUESTIONS : validates
     IDEAS ||--o{ IDEA_VERSIONS : snapshots
     IDEAS ||--o{ IDEA_TIMELINE_EVENTS : records
@@ -109,6 +110,8 @@ erDiagram
         varchar visibility "PUBLIC | SEMI_PUBLIC | MATCHING, nullable for Draft"
         int current_unit_price "10P at publication, nullable for Draft"
         timestamptz published_at "nullable for Draft"
+        uuid source_ai_job_id FK,UK "nullable, selected AI Job"
+        int source_ai_candidate_number "nullable, 1..5"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -321,6 +324,14 @@ erDiagram
 - 후보 제목은 공백과 대소문자를 정규화한 기준으로 서로 달라야 하며 필드 길이는 Idea Draft 계약을 따른다.
 - 유효한 원본·정규화 JSON은 Job당 하나의 `ai_generation_results`에 저장하고 Job을 `SUCCEEDED`로 종료한다.
 - Schema 오류는 Timeout·429·5xx 재시도와 구분해 `FAILED / INVALID_RESPONSE_SCHEMA`로 기록한다.
+
+## VS-022 제약
+
+- 성공한 AI Job 소유자만 후보 번호 1~5와 편집 완료한 내용을 Idea Draft로 저장한다.
+- Job당 AI 출처 Draft는 하나이며 Job 행 잠금과 `ideas.source_ai_job_id` 유일 제약으로 순차·동시 중복 선택을 막는다.
+- AI 출처와 후보 번호는 내부에만 보존하고 응답에 Provider 원본·입력·Prompt·Lease 정보를 노출하지 않는다.
+- 후보 선택은 Draft만 생성하며 게시·버전·타임라인·검증 질문·Point 원장을 생성하지 않는다.
+- 원본 AI Job 삭제 시 해당 출처 Draft도 함께 제거해 출처가 끊긴 AI Draft가 남지 않게 한다.
 - 성공·실패 완료는 활성 Lease fencing token으로 보호하고 결과만 저장하며 Idea를 자동 생성하거나 게시하지 않는다.
 
 ## VS-013 제약

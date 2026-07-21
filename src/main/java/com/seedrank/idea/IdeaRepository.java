@@ -14,6 +14,8 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 public interface IdeaRepository extends JpaRepository<Idea, UUID> {
+    boolean existsBySourceAiJobId(UUID sourceAiJobId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select idea from Idea idea where idea.id = :id")
     Optional<Idea> findByIdForUpdate(@Param("id") UUID id);
