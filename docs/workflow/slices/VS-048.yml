@@ -6,14 +6,14 @@ task:
   dependencies: [VS-047]
   resource_locks: [messaging]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-048-text-message
 base_commit: 6e6a04d55d267f17016b470c9f153e9d3d865609
-current_commit: null
+current_commit: 907f1a78cd701a9caee14fe7f8277d28621fcd9f
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 80
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/80"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "fast-build stacked delivery: VS-048"
     note: "Red 7건 후 최소 구현과 리팩터링을 완료했다. 메시징·Thread·로그인 집중 회귀 21개와 OpenAPI·ERD·새 UTC Migration, 워크플로우 검증을 통과했다."
+  - at: "2026-07-22T16:42:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-048"
+    note: "구현 커밋 907f1a7을 Push하고 미병합 VS-044 PR #74를 base로 Draft PR #80을 생성했다. 최종 상태 Push 후 Ready로 전환하며 최종 main 통합 Head CI에서 전체 회귀를 수행한다."
 
 created_at: "2026-07-22T16:29:49+09:00"
-updated_at: "2026-07-22T16:40:29+09:00"
+updated_at: "2026-07-22T16:42:00+09:00"
