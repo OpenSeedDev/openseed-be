@@ -21,12 +21,14 @@ Perform work in this order:
 
 1. Reconcile task PRs, merged PRs, CI results, comments, reviews, and unresolved threads.
 2. Process actionable review feedback for open PRs before starting more work.
-3. Detect exact `/merge-approved` comments by the configured approver against the live PR head; do not push an approval-evidence-only commit.
-4. Enable or complete merge only when the approval, checks, resolved threads, dependency, and conflict gates pass.
-5. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
-6. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit.
-7. Dispatch each selected task to a separate worktree and agent context.
-8. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
+3. Before asking for or accepting approval, update every review-ready task PR whose base SHA is behind the latest `main`. The update creates a new head, disables stale auto-merge, and starts fresh required checks.
+4. Wait for `Build and Test` and `Vertical Slice Merge Guard` to succeed on that up-to-date head. Do not accept `/merge-approved` before both checks succeed.
+5. Detect an exact `/merge-approved` comment by the configured approver only after main synchronization and required-check success; do not push an approval-evidence-only commit.
+6. Enable or complete merge only when the approval, checks, resolved threads, dependency, latest-main, and conflict gates pass.
+7. Confirm actual GitHub merges and immediately release dependency and resource locks without waiting for a completion-state PR.
+8. Select ready tasks with `select_ready_tasks.rb`, up to the configured worker limit.
+9. Dispatch each selected task to a separate worktree and agent context.
+10. Leave ambiguous or repeatedly failing tasks blocked while continuing unrelated tasks.
 
 Do not select a task when any dependency is not actually merged, another active task holds one of its locks, or an open PR already represents it.
 
@@ -66,6 +68,7 @@ For every open task PR, collect general comments, submitted reviews, inline comm
 Treat the live PR as `AWAITING_USER_MERGE` only when all conditions hold:
 
 - focused and full tests passed;
+- the PR base SHA equals the latest `main` SHA;
 - required CI succeeded for the current head commit;
 - no active failure exists;
 - all dependencies were confirmed merged before the branch was created;
@@ -73,7 +76,7 @@ Treat the live PR as `AWAITING_USER_MERGE` only when all conditions hold:
 - the configured approver posted an exact `/merge-approved` comment on this PR;
 - the PR is mergeable and has no conflict.
 
-Read the comment ID, URL, author, timestamp, and approved head SHA from GitHub at decision time. Do not commit this observation to the PR branch. A later push disables auto-merge and requires a new `/merge-approved` comment for the new head.
+Read the comment ID, URL, author, timestamp, and approved head SHA from GitHub at decision time. The approval comment must be newer than the successful required checks for the up-to-date head. Do not commit this observation to the PR branch. A later push or a newer `main` disables auto-merge and requires branch synchronization, fresh checks, and a new `/merge-approved` comment.
 
 The repository Merge Guard validates static task readiness; GitHub required checks, thread resolution, strict up-to-date policy, and protected auto-merge validate live readiness. Never bypass them or force-merge.
 
@@ -96,6 +99,7 @@ Run these checks after workflow-file changes and before every task PR:
 ruby .agents/skills/vertical-slice/scripts/validate_backlog.rb docs/workflow/backlog.yml
 ruby .agents/skills/vertical-slice/scripts/validate_state.rb docs/workflow/slices/TASK-ID.yml
 ruby .agents/skills/vertical-slice/scripts/check_merge_guard_test.rb
+ruby .agents/skills/vertical-slice/scripts/check_merge_approval_gate_test.rb
 ruby .agents/skills/vertical-slice/scripts/validate_backlog_test.rb
 ruby .agents/skills/vertical-slice/scripts/select_backend_test_scope_test.rb
 ```
