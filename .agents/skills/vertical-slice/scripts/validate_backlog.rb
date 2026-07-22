@@ -13,22 +13,11 @@ module Backlog
     raise "schema_version must be 1" unless data["schema_version"] == 1
     settings = data["settings"]
     raise "settings must be a mapping" unless settings.is_a?(Hash)
-    required_settings = %w[repository base_branch approver merge_command max_parallel_workers review_poll_minutes max_recovery_attempts delivery_mode dependency_strategy review_strategy max_stack_depth full_test_checkpoint_size fast_build_exit global_stack_branch]
+    required_settings = %w[repository base_branch approver merge_command max_parallel_workers review_poll_minutes max_recovery_attempts]
     required_settings.each { |key| raise "missing settings.#{key}" unless settings.key?(key) }
     raise "merge_command must be /merge-approved" unless settings["merge_command"] == "/merge-approved"
     raise "max_parallel_workers must be 1..3" unless settings["max_parallel_workers"].is_a?(Integer) && settings["max_parallel_workers"].between?(1, 3)
     raise "max_recovery_attempts must be 3" unless settings["max_recovery_attempts"] == 3
-    raise "delivery_mode must be safe_merge or fast_build" unless %w[safe_merge fast_build].include?(settings["delivery_mode"])
-    raise "dependency_strategy must be merged_only, stacked_pr, or global_stacked_pr" unless %w[merged_only stacked_pr global_stacked_pr].include?(settings["dependency_strategy"])
-    raise "review_strategy must be immediate or deferred" unless %w[immediate deferred].include?(settings["review_strategy"])
-    raise "max_stack_depth must be 1..64" unless settings["max_stack_depth"].is_a?(Integer) && settings["max_stack_depth"].between?(1, 64)
-    raise "full_test_checkpoint_size must be 1..8" unless settings["full_test_checkpoint_size"].is_a?(Integer) && settings["full_test_checkpoint_size"].between?(1, 8)
-    raise "fast_build_exit must be all_vs_tasks_have_pr" unless settings["fast_build_exit"] == "all_vs_tasks_have_pr"
-    raise "global_stack_branch must start with codex/" unless settings["global_stack_branch"].is_a?(String) && settings["global_stack_branch"].start_with?("codex/")
-    if settings["delivery_mode"] == "fast_build"
-      raise "fast_build requires a stacked strategy" unless %w[stacked_pr global_stacked_pr].include?(settings["dependency_strategy"])
-      raise "fast_build requires deferred reviews" unless settings["review_strategy"] == "deferred"
-    end
 
     tasks = data["tasks"]
     raise "tasks must be a non-empty list" unless tasks.is_a?(Array) && !tasks.empty?
@@ -72,95 +61,22 @@ module Backlog
     graph.each_key { |id| visit.call(id) }
   end
 
-  def ready(data, merged:, active:, open: [], limit: nil)
+  def ready(data, merged:, active:, limit: nil)
     merged_ids = (data["initial_merged"] + merged).uniq
     active_ids = active.map { |item| item.fetch("id") }
-    open_ids = open.map { |item| item.fetch("id") }
     held_locks = active.flat_map { |item| item.fetch("resource_locks", []) }.uniq
     selected_locks = []
     capacity = [limit || data.dig("settings", "max_parallel_workers"), data.dig("settings", "max_parallel_workers") - active.length].min
     return [] if capacity <= 0
 
-    fast_build = data.dig("settings", "delivery_mode") == "fast_build"
-    task_by_id = data["tasks"].to_h { |task| [task["id"], task] }
-    order_by_id = task_by_id.transform_values { |task| task["order"] }
-
     data["tasks"].sort_by { |task| [task["order"], task["id"]] }.each_with_object([]) do |task, result|
-      next if fast_build && !task["id"].start_with?("VS-")
-      next if merged_ids.include?(task["id"]) || active_ids.include?(task["id"]) || open_ids.include?(task["id"])
-
-      task_fast_build = fast_build && task["id"].start_with?("VS-")
-      implemented_ids = task_fast_build ? (merged_ids + open_ids).uniq : merged_ids
-      unmerged_dependencies = task["depends_on"] - merged_ids
-      next unless (task["depends_on"] - implemented_ids).empty?
+      next if merged_ids.include?(task["id"]) || active_ids.include?(task["id"])
+      next unless (task["depends_on"] - merged_ids).empty?
       next unless (task["resource_locks"] & (held_locks + selected_locks)).empty?
-
-      selected = task.dup
-      if task_fast_build && data.dig("settings", "dependency_strategy") == "global_stacked_pr"
-        global_candidates = open.select { |item| item.fetch("stack_root", item.fetch("id")) == "VS-GLOBAL" }
-        parent = global_candidates.max_by do |item|
-          [item.fetch("stack_depth", 1), order_by_id.fetch(item.fetch("id"), -1)]
-        end
-        stack_depth = parent ? parent.fetch("stack_depth", 1) + 1 : 1
-        next if stack_depth > data.dig("settings", "max_stack_depth")
-
-        selected["delivery"] = {
-          "strategy" => "global_stacked_pr",
-          "base_ref" => parent ? parent.fetch("head_ref") : data.dig("settings", "global_stack_branch"),
-          "parent_id" => parent&.fetch("id", nil),
-          "parent_pr" => parent&.fetch("pr_number", nil),
-          "stack_root" => "VS-GLOBAL",
-          "stack_depth" => stack_depth,
-          "full_test_checkpoint" => (stack_depth % data.dig("settings", "full_test_checkpoint_size")).zero?
-        }
-      elsif task_fast_build
-        lane_candidates = open.select do |item|
-          item_task = task_by_id[item.fetch("id")]
-          item_locks = item.fetch("resource_locks", item_task&.fetch("resource_locks", []))
-          unmerged_dependencies.include?(item.fetch("id")) || !(item_locks & task["resource_locks"]).empty?
-        end
-
-        lane_roots = lane_candidates.map { |item| item.fetch("stack_root", item.fetch("id")) }.uniq
-        next if lane_roots.length > 1
-
-        dependency_candidates = lane_candidates.select { |item| unmerged_dependencies.include?(item.fetch("id")) }
-        dependency_roots = dependency_candidates.map { |item| item.fetch("stack_root", item.fetch("id")) }.uniq
-        next if dependency_roots.length > 1
-
-        compatible_candidates = if dependency_roots.empty?
-                                  lane_candidates
-                                else
-                                  lane_candidates.select do |item|
-                                    item.fetch("stack_root", item.fetch("id")) == dependency_roots.first
-                                  end
-                                end
-        parent = compatible_candidates.max_by do |item|
-          [item.fetch("stack_depth", 1), order_by_id.fetch(item.fetch("id"), -1)]
-        end
-        stack_depth = parent ? parent.fetch("stack_depth", 1) + 1 : 1
-        next if stack_depth > data.dig("settings", "max_stack_depth")
-
-        selected["delivery"] = {
-          "strategy" => parent ? "stacked_pr" : "main",
-          "base_ref" => parent ? parent.fetch("head_ref") : data.dig("settings", "base_branch"),
-          "parent_id" => parent&.fetch("id", nil),
-          "parent_pr" => parent&.fetch("pr_number", nil),
-          "stack_root" => parent ? parent.fetch("stack_root", parent.fetch("id")) : task["id"],
-          "stack_depth" => stack_depth,
-          "full_test_checkpoint" => (stack_depth % data.dig("settings", "full_test_checkpoint_size")).zero?
-        }
-      end
-
-      result << selected
+      result << task
       selected_locks.concat(task["resource_locks"])
       break result if result.length >= capacity
     end
-  end
-
-  def fast_build_complete?(data, merged:, open:)
-    vs_ids = data["tasks"].map { |task| task["id"] }.select { |id| id.start_with?("VS-") }
-    implemented_ids = (data["initial_merged"] + merged + open.map { |item| item.fetch("id") }).uniq
-    (vs_ids - implemented_ids).empty?
   end
 end
 
