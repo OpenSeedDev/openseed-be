@@ -139,6 +139,23 @@ public class PointLedger {
         return ledger;
     }
 
+    public static PointLedger unitRecovery(
+            User user, UUID lotId, int paidAmount, int balanceAfter, LocalDate policyDate, Instant now) {
+        PointLedger ledger = new PointLedger();
+        ledger.id = UUID.randomUUID();
+        ledger.user = user;
+        ledger.type = Type.CREDIT;
+        ledger.originalAmount = paidAmount;
+        ledger.paidAmount = paidAmount;
+        ledger.expiredAmount = 0;
+        ledger.balanceAfter = balanceAfter;
+        ledger.sourceType = SourceType.UNIT_RECOVERY;
+        ledger.sourceId = lotId;
+        ledger.createdAt = now;
+        ledger.policyDate = policyDate;
+        return ledger;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -192,6 +209,7 @@ public class PointLedger {
         IDEA_PUBLISHED,
         FEEDBACK_CREATED,
         FEEDBACK_ACCEPTED,
-        UNIT_PURCHASE
+        UNIT_PURCHASE,
+        UNIT_RECOVERY
     }
 }
