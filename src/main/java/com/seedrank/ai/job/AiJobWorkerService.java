@@ -13,6 +13,7 @@ class AiJobWorkerService {
     private static final long LEASE_SECONDS = 120;
     private static final long BASE_BACKOFF_SECONDS = 30;
     private static final long MAX_BACKOFF_SECONDS = 15 * 60;
+    private static final int MAX_ATTEMPTS = 3;
 
     private final AiJobRepository jobs;
     private final AiGenerationResultRepository results;
@@ -33,13 +34,18 @@ class AiJobWorkerService {
     }
 
     @Transactional
-    void scheduleRetry(UUID jobId, UUID leaseToken, AiJobFailure failure) {
+    boolean scheduleRetry(UUID jobId, UUID leaseToken, AiJobFailure failure) {
         if (jobId == null || leaseToken == null || failure == null) {
             throw new IllegalArgumentException("Job retry requires job, lease token and failure");
         }
         AiJob job = jobs.findByIdForUpdate(jobId).orElseThrow(StaleAiJobLeaseException::new);
         Instant now = clock.instant();
+        if (job.retryCount() + 1 >= MAX_ATTEMPTS) {
+            job.failAfterRetries(leaseToken, now);
+            return false;
+        }
         job.scheduleRetry(leaseToken, now.plusSeconds(backoffSeconds(job.retryCount() + 1)), now);
+        return true;
     }
 
     @Transactional

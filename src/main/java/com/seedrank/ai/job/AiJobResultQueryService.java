@@ -33,8 +33,9 @@ class AiJobResultQueryService {
         AiJobPublicStatus publicStatus = AiJobPublicStatus.from(job.status());
         AiCandidateResult result = publicStatus == AiJobPublicStatus.SUCCEEDED ? result(job.id()) : null;
         String failureCode = publicStatus == AiJobPublicStatus.FAILED ? job.failureCode() : null;
+        AiJobManualForm manualForm = publicStatus == AiJobPublicStatus.FAILED ? AiJobManualForm.empty() : null;
         return new AiJobResultResponse(
-                job.id(), publicStatus, result, failureCode, job.createdAt(), job.updatedAt());
+                job.id(), publicStatus, result, failureCode, manualForm, job.createdAt(), job.updatedAt());
     }
 
     private AiCandidateResult result(UUID jobId) {
