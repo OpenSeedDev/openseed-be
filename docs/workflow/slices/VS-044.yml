@@ -6,14 +6,14 @@ task:
   dependencies: [VS-008, VS-010]
   resource_locks: [company, idea]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-044-company-interest
 base_commit: cde1ae8a2ad2a466312d0429fee1d1c6a5ee78f5
-current_commit: cde1ae8a2ad2a466312d0429fee1d1c6a5ee78f5
+current_commit: 24cd4bced39b37b903f930861cd1c7dbfa1cc18f
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 74
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/74"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -72,6 +72,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-044"
     note: "Red 7건 확인 후 최소 구현과 리팩터링을 완료했다. 순차·동시 멱등성을 포함한 집중 7개와 전체 267개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-22T13:53:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-044"
+    note: "구현 커밋 24cd4bc를 Push하고 Draft PR #74를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
 
 created_at: "2026-07-22T13:44:41+09:00"
-updated_at: "2026-07-22T13:51:00+09:00"
+updated_at: "2026-07-22T13:53:00+09:00"
