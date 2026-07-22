@@ -6,14 +6,14 @@ task:
   dependencies: [VS-032]
   resource_locks: [unit, wallet]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-035-lot-recovery
 base_commit: e7a13dc7ec2c12f03a0b596b999b91e85644349b
-current_commit: null
+current_commit: fdf9f477ed0cea902478c9f27f1cb40b877d9c43
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 76
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/76"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-035"
     note: "Red 7건 뒤 Lot·지갑 잠금, 전체 회수, 일일 500P·지갑 상한 지급, 가격 고정 대기 잔액과 멱등 회수를 구현했다. 집중 26건과 전체 276건이 성공했다."
+  - at: "2026-07-22T15:37:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-035"
+    note: "구현 커밋 fdf9f47을 Push하고 Draft PR #76을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI는 다음 Coordinator tick에서 확인한다."
 
 created_at: "2026-07-22T15:23:29+09:00"
-updated_at: "2026-07-22T15:35:30+09:00"
+updated_at: "2026-07-22T15:37:00+09:00"
