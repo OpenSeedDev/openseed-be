@@ -23,7 +23,9 @@ class AiJobResultQueryController {
         this.service = service;
     }
 
-    @Operation(summary = "내 AI 아이디어 생성 Job 상태와 결과 조회")
+    @Operation(
+            summary = "내 AI 아이디어 생성 Job 상태와 결과 조회",
+            description = "최종 실패 시 AI_GENERATION_FAILED 코드와 일반 Draft 작성용 manualForm을 반환합니다.")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Job 상태와 결과 또는 실패 코드 조회 성공"),

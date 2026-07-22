@@ -30,8 +30,10 @@ class AiCandidateProcessingService {
         try {
             rawResult = provider.generate(job.inputSnapshot(), job.promptVersion());
         } catch (AiProviderException exception) {
-            worker.scheduleRetry(job.jobId(), job.leaseToken(), exception.failure());
-            return AiCandidateProcessingOutcome.RETRY_SCHEDULED;
+            boolean retryScheduled = worker.scheduleRetry(job.jobId(), job.leaseToken(), exception.failure());
+            return retryScheduled
+                    ? AiCandidateProcessingOutcome.RETRY_SCHEDULED
+                    : AiCandidateProcessingOutcome.FAILED_FINAL;
         }
 
         final String normalizedResult;
