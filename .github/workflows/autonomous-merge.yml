@@ -5,6 +5,9 @@ on:
     types: [created]
   pull_request:
     types: [synchronize]
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -20,6 +23,9 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Validate task PR and enable protected auto-merge
         env:
           GH_TOKEN: ${{ github.token }}
@@ -30,6 +36,7 @@ jobs:
           IS_CROSS_REPOSITORY=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json isCrossRepository --jq '.isCrossRepository')
           HEAD_BRANCH=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json headRefName --jq '.headRefName')
           BASE_BRANCH=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json baseRefName --jq '.baseRefName')
+          PR_BASE_SHA=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json baseRefOid --jq '.baseRefOid')
           if [ "$IS_CROSS_REPOSITORY" != "false" ]; then
             echo "Refusing a PR from a fork"
             exit 1
@@ -47,6 +54,13 @@ jobs:
             echo "The PR head changed while validating approval"
             exit 1
           fi
+          LATEST_BASE_SHA=$(gh api "repos/$REPOSITORY/git/ref/heads/$BASE_BRANCH" --jq '.object.sha')
+          CHECK_RUNS_FILE="$RUNNER_TEMP/current-head-check-runs.json"
+          gh api "repos/$REPOSITORY/commits/$CURRENT_HEAD/check-runs?per_page=100" > "$CHECK_RUNS_FILE"
+          ruby .agents/skills/vertical-slice/scripts/check_merge_approval_gate.rb \
+            --pr-base-sha "$PR_BASE_SHA" \
+            --latest-base-sha "$LATEST_BASE_SHA" \
+            --check-runs-file "$CHECK_RUNS_FILE"
           gh pr merge "$PR_NUMBER" --repo "$REPOSITORY" --auto --merge
 
   invalidate-stale-auto-merge:
@@ -76,3 +90,31 @@ jobs:
           else
             echo "Auto-merge is not enabled."
           fi
+
+  invalidate-behind-auto-merge:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Disable approvals whose base is no longer current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          LATEST_MAIN_SHA: ${{ github.sha }}
+        run: |
+          gh pr list --repo "$REPOSITORY" --state open --limit 100 \
+            --json number,headRefName,baseRefOid,autoMergeRequest \
+            --jq '.[] | select(.autoMergeRequest != null) | @base64' |
+          while read -r encoded; do
+            [ -n "$encoded" ] || continue
+            pr_json=$(printf '%s' "$encoded" | base64 --decode)
+            number=$(printf '%s' "$pr_json" | jq -r '.number')
+            head_branch=$(printf '%s' "$pr_json" | jq -r '.headRefName')
+            base_sha=$(printf '%s' "$pr_json" | jq -r '.baseRefOid')
+            if [[ "$head_branch" =~ ^codex/(vs-[0-9]{3}|ops-[0-9]{2}|e2e-[0-9]{2})-[a-z0-9][a-z0-9-]*$ ]] &&
+               [ "$base_sha" != "$LATEST_MAIN_SHA" ]; then
+              gh pr merge "$number" --repo "$REPOSITORY" --disable-auto
+              echo "Disabled auto-merge for PR #$number because main advanced."
+            fi
+          done
