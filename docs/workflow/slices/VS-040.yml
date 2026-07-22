@@ -6,14 +6,14 @@ task:
   dependencies: [VS-039]
   resource_locks: [ranking]
 
-status: CREATING_PR
+status: AWAITING_PR_REVIEW
 branch: codex/vs-040-ranking-main
 base_commit: 563a9141987bff1766943c43fa2f54a22648f115
-current_commit: null
+current_commit: 5bcb5ff7b00215712a04d04737e2a879ecb6c240
 
 review:
-  pr_number: null
-  pr_url: null
+  pr_number: 79
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/79"
   handled_comment_ids: []
   unresolved_thread_count: null
   merge_approval:
@@ -67,6 +67,11 @@ history:
     to: CREATING_PR
     command: "vertical-slice delivery: VS-040 fast build"
     note: "Red 5건 뒤 랭킹순 7필드 API와 원시 반응 수 스냅샷을 구현했다. 랭킹·게시·계산·좋아요 집중 회귀 21개와 최종 보강 테스트 10개가 성공했다."
+  - at: "2026-07-22T16:39:23+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-040 fast build"
+    note: "구현 커밋 5bcb5ff를 Push하고 미병합 parent PR #77을 base로 Draft PR #79를 생성했다. 최종 상태 Push 뒤 Ready로 전환한다."
 
 created_at: "2026-07-22T16:29:55+09:00"
-updated_at: "2026-07-22T16:38:03+09:00"
+updated_at: "2026-07-22T16:39:23+09:00"
