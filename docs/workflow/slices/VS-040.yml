@@ -9,7 +9,7 @@ task:
 status: AWAITING_PR_REVIEW
 branch: codex/vs-040-ranking-main
 base_commit: 563a9141987bff1766943c43fa2f54a22648f115
-current_commit: 5bcb5ff7b00215712a04d04737e2a879ecb6c240
+current_commit: 0e4859322582c720c5f835bd83f350c0665f8369
 
 review:
   pr_number: 79
@@ -32,10 +32,10 @@ evidence:
       pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/77"
       merge_commit: null
       merged_at: null
-  red_test: "2026-07-22T16:32:06+09:00 랭킹 집중 테스트: API·OpenAPI 부재 4건과 원시 반응 수 스냅샷 부재 1건, 총 5건 실패"
-  focused_tests: "2026-07-22T16:37:56+09:00 RankingMainIntegrationTest 4개와 HourlyRankingPublicationIntegrationTest 6개 성공. 직전 실행에서 계산·좋아요 회귀까지 포함한 21개도 성공"
-  full_tests: "일반 조회 API 변경으로 로컬 전체 테스트 생략; 최종 통합 Head의 GitHub Build and Test에서 전체 회귀 수행"
-  migration: "DB 스키마 변경 없음. 기존 ranking_current.components JSON에 원시 기업 관심 수와 좋아요 수를 추가하고 누락된 기존 값은 0으로 호환 조회"
+  red_test: "2026-07-22T16:32:06+09:00 API·OpenAPI·원시 반응 수 부재 5건 실패; fan-in 후 2026-07-22T16:42:46+09:00 기업 관심 2건이 랭킹에 0으로 저장되는 회귀 1건 실패"
+  focused_tests: "2026-07-22T16:44:09+09:00 CompanyInterest 7, RankingMain 4, RankingPublication 6, RankingCalculator 5, IdeaLike 7로 집중 회귀 29개 성공"
+  full_tests: "2026-07-22T16:46:44+09:00 ./gradlew test --no-daemon --console=plain: 298개 성공, 실패·오류 0개"
+  migration: "PR #74 Migration V20260722044500과 PR #77 V20260722064500을 포함한 32개 버전 중복 없음; JPA validate·전체 테스트 성공, ERD에 양쪽 모델과 실제 기업 관심 집계를 반영"
   ci_url: null
   ci_result: null
   merge_commit: null
@@ -74,4 +74,4 @@ history:
     note: "구현 커밋 5bcb5ff를 Push하고 미병합 parent PR #77을 base로 Draft PR #79를 생성했다. 최종 상태 Push 뒤 Ready로 전환한다."
 
 created_at: "2026-07-22T16:29:55+09:00"
-updated_at: "2026-07-22T16:39:23+09:00"
+updated_at: "2026-07-22T16:46:58+09:00"
