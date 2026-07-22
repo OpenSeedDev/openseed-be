@@ -77,9 +77,11 @@ public class SeedUnitLot {
 
     public UUID id() { return id; }
     public UUID ideaId() { return idea.id(); }
+    public Idea idea() { return idea; }
     public String ideaTitle() { return idea.title(); }
     public int currentUnitPrice() { return idea.currentUnitPrice(); }
     public UUID userId() { return user.getId(); }
+    public User user() { return user; }
     public int units() { return units; }
     public int purchasePrice() { return purchasePrice; }
     public int principal() { return principal; }
@@ -90,6 +92,16 @@ public class SeedUnitLot {
 
     public boolean matchesPurchase(UUID requestedIdeaId, int requestedUnits, int requestedPrice) {
         return idea.id().equals(requestedIdeaId) && units == requestedUnits && purchasePrice == requestedPrice;
+    }
+
+    public void recover(Instant recoveredAt) {
+        if (status != Status.LOCKED) {
+            throw new IllegalStateException("Seed Unit Lot is not locked");
+        }
+        if (recoveredAt.isBefore(unlockedAt)) {
+            throw new IllegalArgumentException("Seed Unit Lot is still locked");
+        }
+        status = Status.RECOVERED;
     }
 
     public enum Status {

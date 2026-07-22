@@ -40,6 +40,9 @@ import com.seedrank.unit.purchase.PurchaseLimitExceededException;
 import com.seedrank.unit.purchase.SelfUnitPurchaseException;
 import com.seedrank.unit.purchase.UnitPriceChangedException;
 import com.seedrank.unit.purchase.UnitPurchaseIdeaNotFoundException;
+import com.seedrank.unit.recovery.PartialRecoveryNotSupportedException;
+import com.seedrank.unit.recovery.SeedUnitLockedException;
+import com.seedrank.unit.recovery.SeedUnitLotNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -343,6 +346,27 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
                 "IDEMPOTENCY_KEY_REUSED", "같은 Idempotency-Key를 다른 구매에 사용할 수 없습니다.",
+                requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(SeedUnitLotNotFoundException.class)
+    ResponseEntity<ApiError> handleSeedUnitLotNotFound(
+            SeedUnitLotNotFoundException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "UNIT_LOT_NOT_FOUND", "회수할 Seed Unit Lot을 찾을 수 없습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(SeedUnitLockedException.class)
+    ResponseEntity<ApiError> handleSeedUnitLocked(SeedUnitLockedException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "UNIT_LOCKED", "구매 후 24시간이 지나야 회수할 수 있습니다.", requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(PartialRecoveryNotSupportedException.class)
+    ResponseEntity<ApiError> handlePartialRecoveryNotSupported(
+            PartialRecoveryNotSupportedException exception, HttpServletRequest request) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                "PARTIAL_RECOVERY_NOT_SUPPORTED", "Lot은 전체 Unit만 회수할 수 있습니다.",
                 requestId(request), List.of()));
     }
 

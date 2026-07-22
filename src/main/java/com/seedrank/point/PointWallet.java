@@ -68,6 +68,24 @@ public class PointWallet {
         updatedAt = now;
     }
 
+    public int creditRecovery(int requestedAmount, Instant now) {
+        if (requestedAmount < 0) {
+            throw new IllegalArgumentException("Recovery amount must not be negative");
+        }
+        int paidAmount = Math.min(requestedAmount, MAX_BALANCE - balance);
+        balance += paidAmount;
+        if (paidAmount > 0) updatedAt = now;
+        return paidAmount;
+    }
+
+    public void addPendingRecovery(int amount, Instant now) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Pending recovery amount must not be negative");
+        }
+        pendingRecoveryBalance = Math.addExact(pendingRecoveryBalance, amount);
+        if (amount > 0) updatedAt = now;
+    }
+
     User getUser() {
         return user;
     }

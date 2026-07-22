@@ -13,6 +13,9 @@ erDiagram
     USERS ||--o{ FEEDBACKS : writes
     USERS ||--o{ SEED_UNIT_LOTS : purchases
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
+    SEED_UNIT_LOTS ||--o| SEED_UNIT_RECOVERIES : realizes
+    USERS ||--o{ SEED_UNIT_RECOVERIES : receives
+    IDEAS ||--o{ SEED_UNIT_RECOVERIES : prices
     USERS ||--o{ AI_JOBS : requests
     AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     AI_JOBS ||--o| IDEAS : selected_into
@@ -62,7 +65,7 @@ erDiagram
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE"
+        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE, UNIT_RECOVERY"
         uuid source_id
         uuid reward_scope_id "nullable, idea scope for accepted feedback"
         date policy_date "nullable for signup, Asia/Seoul"
@@ -258,6 +261,19 @@ erDiagram
         varchar status "LOCKED | RECOVERED"
     }
 
+    SEED_UNIT_RECOVERIES {
+        uuid id PK
+        uuid lot_id FK,UK
+        uuid user_id FK
+        uuid idea_id FK
+        int units "whole recovered lot"
+        int recovery_price "request-time price, 1..100"
+        int realized_amount "units * recovery_price"
+        int wallet_paid_amount "daily and wallet-cap limited"
+        int pending_amount "fixed unpaid realization"
+        timestamptz created_at
+    }
+
     IDEA_LIKES {
         uuid id PK
         uuid idea_id FK
@@ -388,6 +404,15 @@ erDiagram
 - Lot은 구매 시각, 구매 가격, Unit 수와 원금을 보존하며 잠금 해제 시각은 구매 후 정확히 24시간이다.
 - 구매 요청은 사용자별 `purchase_request_key` 유일 제약으로 재전송을 멱등 처리하고, 사용자 지갑 행을 먼저 잠근 뒤 중복 키·잔액·일일·아이디어별 활성 원금 한도를 검사한다.
 - 보유 조회와 회수는 VS-034~036에서 확장한다.
+
+## VS-035 제약
+
+- 소유자의 `LOCKED` Lot은 `unlocked_at` 이상인 시점에만 전체 Unit을 한 번 회수한다.
+- 회수 실현액은 Lot 전체 Unit과 요청 시점의 아이디어 현재가로 고정하고 Lot 상태를 `RECOVERED`로 전환한다.
+- Asia/Seoul 정책 날짜별 즉시 회수 지급 합계는 500P, 지갑 잔액은 2,000P를 넘지 않는다.
+- 즉시 지급하지 못한 금액은 소멸하지 않고 `pending_recovery_balance`와 변경 불가능한 회수 기록에 보존한다.
+- Lot 행과 사용자 지갑 행을 잠가 같은 Lot 재요청과 서로 다른 Lot의 동시 회수가 중복 지급되지 않게 한다.
+- 즉시 지급분은 `CREDIT/UNIT_RECOVERY` append-only 원장으로 남기며 회수 기록은 Lot당 하나만 존재한다.
 
 ## VS-011 조회 제약
 
