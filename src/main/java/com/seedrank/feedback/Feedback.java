@@ -99,6 +99,13 @@ public class Feedback {
         this.deletedAt = now;
     }
 
+    public void accept(Instant now) {
+        if (now == null) throw new IllegalArgumentException("Acceptance time is required");
+        if (deletedAt != null) throw new IllegalStateException("Deleted feedback cannot be accepted");
+        if (acceptedAt != null) throw new IllegalStateException("Feedback is already accepted");
+        this.acceptedAt = now;
+    }
+
     private static String normalizeContent(String value) {
         if (value == null) throw new IllegalArgumentException("Feedback content is required");
         String normalized = value.strip();
@@ -132,6 +139,7 @@ public class Feedback {
 
     public UUID id() { return id; }
     public UUID ideaId() { return idea.id(); }
+    public UUID ideaAuthorId() { return idea.authorId(); }
     public UUID authorId() { return author.getId(); }
     public String authorProfileId() { return author.getProfileId(); }
     public Type type() { return type; }

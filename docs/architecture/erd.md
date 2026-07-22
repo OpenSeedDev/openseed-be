@@ -28,6 +28,9 @@ erDiagram
     IDEAS ||--o{ COMPANY_INTERESTS : receives
     IDEAS ||--o{ FEEDBACKS : receives
     FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
+    FEEDBACKS ||--o| CONTRIBUTIONS : accepted_as
+    USERS ||--o{ CONTRIBUTIONS : receives
+    IDEAS ||--o{ CONTRIBUTIONS : recognizes
     IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
     IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
     IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
@@ -61,6 +64,7 @@ erDiagram
         int balance_after "0..2000"
         varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE"
         uuid source_id
+        uuid reward_scope_id "nullable, idea scope for accepted feedback"
         date policy_date "nullable for signup, Asia/Seoul"
         timestamptz created_at
     }
@@ -170,8 +174,9 @@ erDiagram
     IDEA_TIMELINE_EVENTS {
         uuid id PK
         uuid idea_id FK
-        varchar event_type "PUBLISHED | UPDATED"
+        varchar event_type "PUBLISHED | UPDATED | FEEDBACK_ACCEPTED"
         uuid actor_id FK
+        uuid source_id "nullable, accepted feedback"
         timestamptz created_at
     }
 
@@ -192,7 +197,7 @@ erDiagram
         varchar content "normalized, 100..2000"
         varchar evidence_url "optional http/https"
         varchar evidence_description "optional, max 1000"
-        timestamptz accepted_at "nullable until VS-027"
+        timestamptz accepted_at "nullable until accepted"
         timestamptz edited_at "nullable until VS-026"
         timestamptz deleted_at "nullable until VS-026"
         timestamptz created_at
@@ -207,6 +212,14 @@ erDiagram
         varchar evidence_url "previous optional URL"
         varchar evidence_description "previous optional description"
         timestamptz recorded_at "audit time"
+    }
+
+    CONTRIBUTIONS {
+        uuid id PK
+        uuid idea_id FK
+        uuid user_id FK
+        uuid source_feedback_id FK,UK
+        timestamptz created_at
     }
 
     IDEA_VIEW_EVENTS {
@@ -408,6 +421,15 @@ erDiagram
 - 공개 가능한 피드백 목록은 삭제 행을 제외하고 채택 우선·작성 시각·ID Cursor로 조회한다.
 - 작성자만 피드백을 수정·soft delete하며 변경 전 전체 스냅샷과 감사 시각을 `feedback_revisions`에 보존한다.
 - 채택·Contribution·기여 보상은 VS-027에서 확장한다.
+
+## VS-027 제약
+
+- 아이디어 작성자만 삭제되지 않은 미채택 피드백을 요청 본문 없이 한 번 채택할 수 있다.
+- Feedback 채택 시각, 원본 피드백당 하나의 Contribution, `FEEDBACK_ACCEPTED` 타임라인과 100P 원장은 하나의 트랜잭션으로 처리한다.
+- 동일 기여자·아이디어·Asia/Seoul 정책 날짜의 첫 채택만 100P를 지급하며 이후 채택은 Contribution과 타임라인을 남기되 100P 전액 소멸 원장을 기록한다.
+- `point_ledgers.reward_scope_id`는 기여 보상의 아이디어 범위를 저장하며 지갑 행 잠금 안에서 범위별 지급 횟수를 검사한다.
+- 반복·동시 채택은 피드백 행 잠금과 원본 피드백 유일 제약으로 Contribution·원장·타임라인 중복을 방지한다.
+- 채택 취소, 채택 이유·수정 방향, AI 보강·자동 버전 연결은 MVP에서 제공하지 않는다.
 
 ## VS-029 제약
 

@@ -17,6 +17,7 @@ public class IdeaTimelineEvent {
     @Column(name = "idea_id", nullable = false) private UUID ideaId;
     @Enumerated(EnumType.STRING) @Column(name = "event_type", nullable = false, length = 30) private Type eventType;
     @Column(name = "actor_id", nullable = false) private UUID actorId;
+    @Column(name = "source_id") private UUID sourceId;
     @Column(name = "created_at", nullable = false) private Instant createdAt;
 
     protected IdeaTimelineEvent() {}
@@ -37,6 +38,13 @@ public class IdeaTimelineEvent {
         return event(ideaId, actorId, Type.COMPANY_INTEREST_REMOVED, now);
     }
 
+    public static IdeaTimelineEvent feedbackAccepted(
+            UUID ideaId, UUID contributorId, UUID feedbackId, Instant now) {
+        IdeaTimelineEvent event = event(ideaId, contributorId, Type.FEEDBACK_ACCEPTED, now);
+        event.sourceId = feedbackId;
+        return event;
+    }
+
     private static IdeaTimelineEvent event(UUID ideaId, UUID actorId, Type type, Instant now) {
         IdeaTimelineEvent event = new IdeaTimelineEvent();
         event.id = UUID.randomUUID();
@@ -51,7 +59,14 @@ public class IdeaTimelineEvent {
     public UUID ideaId() { return ideaId; }
     public Type eventType() { return eventType; }
     public UUID actorId() { return actorId; }
+    public UUID sourceId() { return sourceId; }
     public Instant createdAt() { return createdAt; }
 
-    public enum Type { PUBLISHED, UPDATED, COMPANY_INTERESTED, COMPANY_INTEREST_REMOVED }
+    public enum Type {
+        PUBLISHED,
+        UPDATED,
+        COMPANY_INTERESTED,
+        COMPANY_INTEREST_REMOVED,
+        FEEDBACK_ACCEPTED
+    }
 }
