@@ -29,6 +29,14 @@ public class IdeaTimelineEvent {
         return event(ideaId, actorId, Type.UPDATED, now);
     }
 
+    public static IdeaTimelineEvent companyInterested(UUID ideaId, UUID actorId, Instant now) {
+        return event(ideaId, actorId, Type.COMPANY_INTERESTED, now);
+    }
+
+    public static IdeaTimelineEvent companyInterestRemoved(UUID ideaId, UUID actorId, Instant now) {
+        return event(ideaId, actorId, Type.COMPANY_INTEREST_REMOVED, now);
+    }
+
     private static IdeaTimelineEvent event(UUID ideaId, UUID actorId, Type type, Instant now) {
         IdeaTimelineEvent event = new IdeaTimelineEvent();
         event.id = UUID.randomUUID();
@@ -45,5 +53,5 @@ public class IdeaTimelineEvent {
     public UUID actorId() { return actorId; }
     public Instant createdAt() { return createdAt; }
 
-    public enum Type { PUBLISHED, UPDATED }
+    public enum Type { PUBLISHED, UPDATED, COMPANY_INTERESTED, COMPANY_INTEREST_REMOVED }
 }

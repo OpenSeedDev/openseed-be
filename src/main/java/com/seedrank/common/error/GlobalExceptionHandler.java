@@ -19,6 +19,7 @@ import com.seedrank.company.profile.CompanyProfileValidationException;
 import com.seedrank.company.verification.CompanyAlreadyVerifiedException;
 import com.seedrank.company.verification.CompanyProfileRequiredException;
 import com.seedrank.company.verification.InvalidCompanyVerificationTokenException;
+import com.seedrank.company.interest.CompanyInterestIdeaNotFoundException;
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.archive.IdeaNotArchivableException;
 import com.seedrank.feedback.manage.FeedbackNotFoundException;
@@ -247,6 +248,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MessageThreadIdeaNotFoundException.class)
     ResponseEntity<ApiError> handleMessageThreadIdeaNotFound(
             MessageThreadIdeaNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(CompanyInterestIdeaNotFoundException.class)
+    ResponseEntity<ApiError> handleCompanyInterestIdeaNotFound(
+            CompanyInterestIdeaNotFoundException exception,
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
