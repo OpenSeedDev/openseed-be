@@ -53,7 +53,7 @@ public final class HourlyRankingCalculator {
             RankingSignal signal = result.signal();
             ranked.add(new RankingResult(signal.ideaId(), index + 1, result.score(),
                     signal.uniqueActiveInvestors(), signal.acceptedFeedbackCount(),
-                    signal.companyInterestCount(), signal.publishedAt(), targetHour));
+                    signal.companyInterestCount(), signal.likeCount(), signal.publishedAt(), targetHour));
         }
         return List.copyOf(ranked);
     }

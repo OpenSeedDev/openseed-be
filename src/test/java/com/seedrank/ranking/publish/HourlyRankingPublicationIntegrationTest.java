@@ -70,6 +70,12 @@ class HourlyRankingPublicationIntegrationTest {
                 "SELECT (components ->> 'growth')::double precision FROM ranking_current WHERE idea_id=?",
                 Double.class, richIdea)).isEqualTo(15.0);
         assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'companyInterestCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, richIdea)).isZero();
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'likeCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, richIdea)).isEqualTo(1);
+        assertThat(jdbc.queryForObject(
                 "SELECT (components ->> 'growth')::double precision FROM ranking_current WHERE idea_id=?",
                 Double.class, quietIdea)).isEqualTo(1.25);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ranking_runs WHERE target_hour=?",
@@ -120,6 +126,23 @@ class HourlyRankingPublicationIntegrationTest {
         assertThat(jdbc.queryForObject(
                 "SELECT previous_rank_position FROM ranking_current WHERE idea_id=?", Integer.class, second))
                 .isEqualTo(2);
+    }
+
+    @Test
+    void storesRawCompanyInterestAndLikeCountsForRankingCards() {
+        UUID ideaId = publishedIdea("card_counts");
+        RankingScore score = new RankingScore(1, 2, 3, 4, 5, 6, 0, 21, 21);
+        RankingResult result = new RankingResult(
+                ideaId, 1, score, 2, 1, 4, 6,
+                FIRST_HOUR.minusSeconds(86_400), FIRST_HOUR);
+
+        assertThat(currentStore.replace(FIRST_HOUR, List.of(result)).published()).isTrue();
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'companyInterestCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, ideaId)).isEqualTo(4);
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'likeCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, ideaId)).isEqualTo(6);
     }
 
     @Test
@@ -177,7 +200,7 @@ class HourlyRankingPublicationIntegrationTest {
     }
 
     private RankingResult result(UUID ideaId, int position, RankingScore score, Instant calculatedAt) {
-        return new RankingResult(ideaId, position, score, 0, 0, 0,
+        return new RankingResult(ideaId, position, score, 0, 0, 0, 0,
                 calculatedAt.minusSeconds(86_400), calculatedAt);
     }
 

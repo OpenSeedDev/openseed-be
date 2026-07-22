@@ -10,6 +10,7 @@ public record RankingResult(
         int uniqueActiveInvestors,
         int acceptedFeedbackCount,
         int companyInterestCount,
+        int likeCount,
         Instant publishedAt,
         Instant calculatedAt) {
 }

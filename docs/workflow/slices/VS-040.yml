@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-040
+  title: "7필드 랭킹순 메인"
+  dependencies: [VS-039]
+  resource_locks: [ranking]
+
+status: CREATING_PR
+branch: codex/vs-040-ranking-main
+base_commit: 563a9141987bff1766943c43fa2f54a22648f115
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: false
+  dependency_prs:
+    - task_id: VS-039
+      pr_number: 77
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/77"
+      merge_commit: null
+      merged_at: null
+  red_test: "2026-07-22T16:32:06+09:00 랭킹 집중 테스트: API·OpenAPI 부재 4건과 원시 반응 수 스냅샷 부재 1건, 총 5건 실패"
+  focused_tests: "2026-07-22T16:37:56+09:00 RankingMainIntegrationTest 4개와 HourlyRankingPublicationIntegrationTest 6개 성공. 직전 실행에서 계산·좋아요 회귀까지 포함한 21개도 성공"
+  full_tests: "일반 조회 API 변경으로 로컬 전체 테스트 생략; 최종 통합 Head의 GitHub Build and Test에서 전체 회귀 수행"
+  migration: "DB 스키마 변경 없음. 기존 ranking_current.components JSON에 원시 기업 관심 수와 좋아요 수를 추가하고 누락된 기존 값은 0으로 호환 조회"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T16:29:55+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-040 fast build"
+    note: "백로그, 통합 기획·기능 명세와 PR #77 Head를 확인했다. 사용자 override에 따라 미병합 parent Head를 선행 구현 증거로 사용한다."
+  - at: "2026-07-22T16:29:55+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-040 fast build"
+    note: "인증 없는 랭킹순 7필드 응답, 순위 변동, 공개 범위 비차등, 스냅샷 반응 수와 OpenAPI 테스트 범위를 확정했다."
+  - at: "2026-07-22T16:38:03+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-040 fast build"
+    note: "Red 5건 뒤 랭킹순 7필드 API와 원시 반응 수 스냅샷을 구현했다. 랭킹·게시·계산·좋아요 집중 회귀 21개와 최종 보강 테스트 10개가 성공했다."
+
+created_at: "2026-07-22T16:29:55+09:00"
+updated_at: "2026-07-22T16:38:03+09:00"
