@@ -1,0 +1,82 @@
+schema_version: 2
+
+task:
+  id: VS-038
+  title: "1시간 랭킹 계산"
+  dependencies: [VS-029, VS-032]
+  resource_locks: [ranking, metrics]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-038-hourly-ranking
+base_commit: 0a7be1a50c1397667872826a83601671305c522b
+current_commit: 0d12eab5276a9af4f283fd834310e72431985f51
+
+review:
+  pr_number: 71
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/71"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-029
+      pr_number: 54
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/54"
+      merge_commit: 335bd366835a6474f2901655b816891e6e8b4749
+      merged_at: "2026-07-21T15:17:10Z"
+    - task_id: VS-032
+      pr_number: 50
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/50"
+      merge_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
+      merged_at: "2026-07-21T11:05:09Z"
+  red_test: "2026-07-22T11:31:00+09:00 ./gradlew test --tests com.seedrank.ranking.calculate.HourlyRankingCalculatorTest --no-daemon: 계산 타입과 구현 부재로 compileTestJava 27개 오류"
+  focused_tests: "2026-07-22T11:37:45+09:00 HourlyRankingCalculatorTest 5개 성공, 실패·오류 0개"
+  full_tests: "일반 순수 계산 변경: 로컬 전체 테스트 생략, 최종 Head GitHub Build and Test를 전체 회귀 검증으로 사용"
+  migration: "없음: 순수 계산 코어이며 DB 집계·게시와 RankingCurrent 저장은 VS-039 범위"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T11:30:22+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-038"
+    note: "백로그, 통합 명세, 랭킹 공식, 구현 lessons와 VS-029·VS-032 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-22T11:30:22+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-038"
+    note: "순수 계산 코어, 승인 가중치·상한·감쇠와 동점 Fixture의 테스트 범위를 확정했다."
+  - at: "2026-07-22T11:37:59+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-038"
+    note: "Red 컴파일 실패 뒤 계산 코어를 최소 구현하고 승인 공식·상한·7일 유예와 일 2% 감쇠·동점·불변성 집중 테스트 5개를 통과했다. API·DB 변경은 없다."
+  - at: "2026-07-22T11:39:26+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-038"
+    note: "구현 커밋 0d12eab를 Push하고 Draft PR #71을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-22T11:30:22+09:00"
+updated_at: "2026-07-22T11:39:26+09:00"
