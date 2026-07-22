@@ -17,6 +17,7 @@ erDiagram
     USERS ||--o{ SEED_UNIT_RECOVERIES : receives
     IDEAS ||--o{ SEED_UNIT_RECOVERIES : prices
     USERS ||--o{ PENDING_RECOVERY_PAYOUTS : requests
+    FINANCIAL_CONSISTENCY_CHECKS ||--o{ FINANCIAL_CONSISTENCY_FINDINGS : detects
     USERS ||--o{ AI_JOBS : requests
     AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     AI_JOBS ||--o| IDEAS : selected_into
@@ -282,6 +283,26 @@ erDiagram
         timestamptz paid_at
     }
 
+    FINANCIAL_CONSISTENCY_CHECKS {
+        uuid id PK
+        varchar status "CONSISTENT | INCONSISTENT"
+        int finding_count
+        timestamptz started_at
+        timestamptz completed_at
+    }
+
+    FINANCIAL_CONSISTENCY_FINDINGS {
+        uuid id PK
+        uuid check_id FK
+        varchar code "stable invariant code"
+        uuid user_id "nullable trace key"
+        varchar entity_type
+        uuid entity_id "nullable trace key"
+        bigint expected_value "nullable"
+        bigint actual_value "nullable"
+        timestamptz created_at
+    }
+
     IDEA_LIKES {
         uuid id PK
         uuid idea_id FK
@@ -317,6 +338,13 @@ erDiagram
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.
 - 현재 로그아웃은 세션 family를 `LOGOUT`으로, 전체 로그아웃은 사용자의 모든 활성 세션을 `LOGOUT_ALL`로 폐기한다.
 - 로그인·갱신·로그아웃의 세션 변경은 사용자 행 잠금 후 수행해 동시 요청을 직렬화한다.
+
+## VS-037 제약
+
+- 매시간 15분(UTC)에 Wallet·Ledger·Lot·Recovery·대기 지급 정합성을 읽기 전용으로 검사한다.
+- PostgreSQL transaction advisory lock으로 여러 서버의 같은 시각 중복 실행을 방지한다.
+- 지갑과 최신 원장 잔액, 원장 잔액 연속성, 회수 대기 합계, Lot·Recovery·지급과 출처 원장의 대응을 검사한다.
+- 검사 실행과 발견 사항은 append-only로 보존하며 자동으로 경제 데이터를 정정하지 않는다.
 
 ## VS-006 제약
 
