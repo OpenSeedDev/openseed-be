@@ -14,7 +14,7 @@ import jakarta.persistence.LockModeType;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select feedback from Feedback feedback join fetch feedback.author where feedback.id = :id")
+    @Query("select feedback from Feedback feedback join fetch feedback.author join fetch feedback.idea where feedback.id = :id")
     java.util.Optional<Feedback> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""

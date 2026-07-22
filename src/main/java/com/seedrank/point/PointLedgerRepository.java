@@ -38,6 +38,19 @@ public interface PointLedgerRepository extends JpaRepository<PointLedger, UUID> 
             @Param("sourceType") PointLedger.SourceType sourceType);
 
     @Query("""
+            select count(ledger) from PointLedger ledger
+            where ledger.user.id = :userId
+              and ledger.policyDate = :policyDate
+              and ledger.sourceType = :sourceType
+              and ledger.rewardScopeId = :rewardScopeId
+            """)
+    long countPaidRewardsInScope(
+            @Param("userId") UUID userId,
+            @Param("policyDate") LocalDate policyDate,
+            @Param("sourceType") PointLedger.SourceType sourceType,
+            @Param("rewardScopeId") UUID rewardScopeId);
+
+    @Query("""
             select coalesce(sum(ledger.paidAmount), 0) from PointLedger ledger
             where ledger.user.id = :userId
               and ledger.policyDate = :policyDate

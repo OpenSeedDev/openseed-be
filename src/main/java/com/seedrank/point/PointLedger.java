@@ -50,6 +50,9 @@ public class PointLedger {
     @Column(name = "source_id", nullable = false)
     private UUID sourceId;
 
+    @Column(name = "reward_scope_id")
+    private UUID rewardScopeId;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -85,6 +88,19 @@ public class PointLedger {
             int balanceAfter,
             LocalDate policyDate,
             Instant now) {
+        return activityReward(user, sourceType, sourceId, null, originalAmount, paidAmount, balanceAfter, policyDate, now);
+    }
+
+    static PointLedger activityReward(
+            User user,
+            SourceType sourceType,
+            UUID sourceId,
+            UUID rewardScopeId,
+            int originalAmount,
+            int paidAmount,
+            int balanceAfter,
+            LocalDate policyDate,
+            Instant now) {
         PointLedger ledger = new PointLedger();
         ledger.id = UUID.randomUUID();
         ledger.user = user;
@@ -95,6 +111,7 @@ public class PointLedger {
         ledger.balanceAfter = balanceAfter;
         ledger.sourceType = sourceType;
         ledger.sourceId = sourceId;
+        ledger.rewardScopeId = rewardScopeId;
         ledger.createdAt = now;
         ledger.policyDate = policyDate;
         return ledger;
@@ -153,6 +170,8 @@ public class PointLedger {
     public UUID getSourceId() {
         return sourceId;
     }
+
+    public UUID getRewardScopeId() { return rewardScopeId; }
 
     public Instant getCreatedAt() {
         return createdAt;
