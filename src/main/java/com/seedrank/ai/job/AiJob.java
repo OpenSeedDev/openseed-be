@@ -112,6 +112,15 @@ class AiJob {
         updatedAt = now;
     }
 
+    void failAfterRetries(UUID claimedToken, Instant now) {
+        verifyActiveLease(claimedToken, now);
+        status = AiJobStatus.FAILED;
+        retryCount++;
+        clearLease();
+        failureCode = "AI_GENERATION_FAILED";
+        updatedAt = now;
+    }
+
     private void verifyActiveLease(UUID claimedToken, Instant now) {
         if (status != AiJobStatus.PROCESSING || leaseToken == null || !leaseToken.equals(claimedToken)
                 || lockedUntil == null || !lockedUntil.isAfter(now)) {
