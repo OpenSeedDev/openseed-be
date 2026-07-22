@@ -8,6 +8,7 @@ public record AiJobResultResponse(
         AiJobPublicStatus status,
         AiCandidateResult result,
         String failureCode,
+        AiJobManualForm manualForm,
         Instant createdAt,
         Instant updatedAt) {
 }

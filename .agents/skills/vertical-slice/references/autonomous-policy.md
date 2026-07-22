@@ -32,7 +32,7 @@ Do not create speculative dependent PRs. A future task may be planned, but its b
 - Poll open task PRs at the configured interval.
 - Review processing has priority over starting new tasks.
 - Treat a review as processed only after its comment ID and resulting commit are recorded.
-- Rebase or merge `main` into an open branch only when needed to resolve an actual dependency or conflict. Run focused tests and use final-head CI for the full regression run; also run local full tests for high-risk changes.
+- Before user approval, update a review-ready branch whenever its recorded base SHA differs from the latest `main`. Run focused tests when conflict resolution changes code and use final-head CI for the full regression run; also run local full tests for high-risk conflict changes.
 - Approval is bound to the PR head SHA. Any code-changing push invalidates earlier approval.
 
 ## Merge Gate
@@ -41,6 +41,8 @@ Only the configured approver can authorize a merge by posting a comment whose tr
 
 Before enabling merge, verify from GitHub:
 
+- the PR base SHA equals the latest `main` SHA;
+- Build and Test and Vertical Slice Merge Guard succeeded before the approval comment was created;
 - the approval comment was created for the current head SHA;
 - all review threads are resolved;
 - Build and Test and Vertical Slice Merge Guard pass;
@@ -48,7 +50,7 @@ Before enabling merge, verify from GitHub:
 - the PR is mergeable;
 - no active failure is recorded.
 
-Do not write these observations back to the open PR branch. A `synchronize` event disables an existing auto-merge request so a later push always requires a fresh approval comment.
+Do not write these observations back to the open PR branch. A `synchronize` event or a newer `main` disables an existing auto-merge request. Synchronize the branch, wait for fresh checks, and require a new approval comment in that order.
 
 GitHub branch protection must remain enabled. Do not use administrator bypass, force push, or direct push to `main`.
 

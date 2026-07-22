@@ -172,21 +172,26 @@ class AiJobWorkerIntegrationTest {
     }
 
     @Test
-    void increasesBackoffExponentiallyAndCapsItAtFifteenMinutes() throws Exception {
+    void increasesBackoffExponentiallyUntilTheThirdAndFinalAttempt() throws Exception {
         String token = signupAndLogin("backoff@example.com", "backoff_worker");
         UUID jobId = createJob(token, "backoff");
-        long[] expectedDelays = {30, 60, 120, 240, 480, 900, 900};
+        long[] expectedDelays = {30, 60};
 
         for (long expectedDelay : expectedDelays) {
             AiJobClaim claim = worker.claimNext("worker-backoff").orElseThrow();
             Instant failedAt = clock.instant();
-            worker.scheduleRetry(jobId, claim.leaseToken(), AiJobFailure.SERVER_ERROR);
+            assertThat(worker.scheduleRetry(jobId, claim.leaseToken(), AiJobFailure.SERVER_ERROR)).isTrue();
             assertThat(jdbc.queryForObject("SELECT next_attempt_at FROM ai_jobs WHERE id=?", Instant.class, jobId))
                     .isEqualTo(failedAt.plusSeconds(expectedDelay));
             clock.advanceSeconds(expectedDelay);
         }
 
-        assertThat(jdbc.queryForObject("SELECT retry_count FROM ai_jobs WHERE id=?", Integer.class, jobId)).isEqualTo(7);
+        AiJobClaim finalAttempt = worker.claimNext("worker-final").orElseThrow();
+        assertThat(worker.scheduleRetry(jobId, finalAttempt.leaseToken(), AiJobFailure.SERVER_ERROR)).isFalse();
+        assertThat(jdbc.queryForMap("SELECT status, retry_count, failure_code FROM ai_jobs WHERE id=?", jobId))
+                .containsEntry("status", "FAILED")
+                .containsEntry("retry_count", 3)
+                .containsEntry("failure_code", "AI_GENERATION_FAILED");
     }
 
     private UUID createJob(String token, String key) throws Exception {

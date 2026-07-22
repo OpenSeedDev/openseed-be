@@ -123,12 +123,12 @@ erDiagram
         jsonb input_snapshot "keyword, background"
         varchar prompt_version
         varchar idempotency_key "unique per owner"
-        int retry_count "0 or greater"
+        int retry_count "0..3, final provider failure included"
         timestamptz locked_until "nullable"
         varchar lease_owner "nullable worker id"
         uuid lease_token "nullable fencing token"
         timestamptz next_attempt_at "nullable backoff"
-        varchar failure_code "nullable, INVALID_RESPONSE_SCHEMA"
+        varchar failure_code "nullable, INVALID_RESPONSE_SCHEMA | AI_GENERATION_FAILED"
         timestamptz created_at
         timestamptz updated_at
     }
