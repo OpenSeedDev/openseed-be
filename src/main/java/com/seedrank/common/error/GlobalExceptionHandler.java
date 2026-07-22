@@ -22,6 +22,7 @@ import com.seedrank.company.verification.InvalidCompanyVerificationTokenExceptio
 import com.seedrank.idea.draft.IdeaDraftNotFoundException;
 import com.seedrank.idea.archive.IdeaNotArchivableException;
 import com.seedrank.feedback.manage.FeedbackNotFoundException;
+import com.seedrank.feedback.accept.FeedbackAlreadyAcceptedException;
 import com.seedrank.idea.publish.IdeaAlreadyPublishedException;
 import com.seedrank.idea.publish.IdeaNotReadyToPublishException;
 import com.seedrank.idea.update.IdeaNotPublishedException;
@@ -259,6 +260,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "FEEDBACK_NOT_FOUND",
                 "피드백을 찾을 수 없습니다.",
+                requestId(request),
+                List.of()));
+    }
+
+    @ExceptionHandler(FeedbackAlreadyAcceptedException.class)
+    ResponseEntity<ApiError> handleFeedbackAlreadyAccepted(
+            FeedbackAlreadyAcceptedException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                "FEEDBACK_ALREADY_ACCEPTED",
+                "이미 채택된 피드백입니다.",
                 requestId(request),
                 List.of()));
     }
