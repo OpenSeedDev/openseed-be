@@ -8,9 +8,15 @@ import java.time.Instant;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
 public interface SeedUnitLotRepository extends JpaRepository<SeedUnitLot, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select lot from SeedUnitLot lot join fetch lot.idea join fetch lot.user where lot.id = :id")
+    Optional<SeedUnitLot> findByIdForUpdate(@Param("id") UUID id);
 
     Optional<SeedUnitLot> findByUserIdAndPurchaseRequestKey(UUID userId, String purchaseRequestKey);
 

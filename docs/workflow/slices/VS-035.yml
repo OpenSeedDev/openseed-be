@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-035
+  title: "24시간 후 Lot 회수"
+  dependencies: [VS-032]
+  resource_locks: [unit, wallet]
+
+status: CREATING_PR
+branch: codex/vs-035-lot-recovery
+base_commit: e7a13dc7ec2c12f03a0b596b999b91e85644349b
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-032
+      pr_number: 50
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/50"
+      merge_commit: 535d258ea66545359f1ad501e57f9aca5545b5dd
+      merged_at: "2026-07-21T11:05:09Z"
+  red_test: "2026-07-22T15:26:16+09:00 ./gradlew test --tests com.seedrank.unit.recovery.SeedUnitRecoveryIntegrationTest --no-daemon: 회수 테이블·API 부재로 7/7 의도된 실패"
+  focused_tests: "2026-07-22T15:31:08+09:00 Recovery·Purchase·PurchaseConcurrency·OwnedLot·Wallet 집중 회귀 26/26 성공; 리팩터링 후 Recovery 7/7 재검증"
+  full_tests: "2026-07-22T15:35:30+09:00 ./gradlew test --no-daemon: 전체 276/276 성공"
+  migration: "V20260722062630__create_seed_unit_recoveries.sql: Lot당 고정 회수 기록, 금액 제약, UNIT_RECOVERY 원장 유형과 사용자 일일 지급 조회 인덱스"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T15:23:29+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice worker: VS-035"
+    note: "백로그·기획·기능 명세와 GitHub의 VS-032 실제 Merge를 확인하고 Lot 전체 회수 범위를 계획했다."
+  - at: "2026-07-22T15:23:29+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice worker: VS-035"
+    note: "24시간 경계, 소유권, 전체 회수, 지급 한도, 가격 고정과 동시 멱등성 Red 테스트부터 작성한다."
+  - at: "2026-07-22T15:35:30+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-035"
+    note: "Red 7건 뒤 Lot·지갑 잠금, 전체 회수, 일일 500P·지갑 상한 지급, 가격 고정 대기 잔액과 멱등 회수를 구현했다. 집중 26건과 전체 276건이 성공했다."
+
+created_at: "2026-07-22T15:23:29+09:00"
+updated_at: "2026-07-22T15:35:30+09:00"
