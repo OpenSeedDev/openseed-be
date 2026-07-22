@@ -25,6 +25,8 @@ erDiagram
     IDEAS ||--o{ MESSAGE_THREADS : receives
     COMPANY_PROFILES ||--o{ MESSAGE_THREADS : starts
     USERS ||--o{ MESSAGE_THREADS : receives
+    MESSAGE_THREADS ||--o{ MESSAGE_THREAD_MESSAGES : contains
+    USERS ||--o{ MESSAGE_THREAD_MESSAGES : sends
     USERS ||--o{ IDEA_LIKES : likes
     IDEAS ||--o{ IDEA_LIKES : receives
     COMPANY_PROFILES ||--o{ COMPANY_INTERESTS : registers
@@ -82,6 +84,14 @@ erDiagram
         uuid family_id
         uuid rotated_from_id FK
         varchar revocation_reason "ROTATED, REUSE_DETECTED, USER_SUSPENDED, LOGOUT, LOGOUT_ALL"
+    }
+
+    MESSAGE_THREAD_MESSAGES {
+        uuid id PK
+        uuid thread_id FK
+        uuid sender_id FK
+        varchar content "trimmed, 1..2000"
+        timestamptz sent_at
     }
 
     COMPANY_PROFILES {
@@ -394,6 +404,14 @@ erDiagram
 - `(idea_id, company_profile_id, author_id)` 유일 제약과 회사 프로필 행 잠금으로 순차·동시 생성 요청을 멱등 처리한다.
 - 스레드 생성 응답은 ID·아이디어 ID·생성 시각만 제공하며 회사 이메일이나 아이디어 상세를 노출하지 않는다.
 - 메시지, 읽음 상태, 상세 열람 요청은 후속 슬라이스 범위다.
+
+## VS-048 제약
+
+- 문의 스레드의 Company와 아이디어 게시자만 텍스트 메시지를 전송하고 조회한다.
+- 메시지는 앞뒤 공백 제거 후 1~2,000자이며 메시지 ID·텍스트·발신자 ID·발신 시각만 제공한다.
+- 메시지는 발신 시각·ID 오름차순 Cursor로 조회하며 같은 시각에도 중복·누락되지 않는다.
+- 읽음 상태·미읽음 수·실시간·첨부·수정·삭제·차단·신고·운영자 기능은 MVP에서 제공하지 않는다.
+- 메시지 발송 시 스레드 `updated_at`을 같은 발신 시각으로 갱신한다.
 
 ## VS-032 제약
 
