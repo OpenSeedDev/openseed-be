@@ -34,6 +34,7 @@ import com.seedrank.ai.job.AiJobNotSelectableException;
 import com.seedrank.member.profile.ProfileIdValidationException;
 import com.seedrank.messaging.thread.MessageThreadIdeaNotFoundException;
 import com.seedrank.messaging.thread.VerifiedCompanyRequiredException;
+import com.seedrank.messaging.message.MessageThreadNotFoundException;
 import com.seedrank.unit.purchase.InsufficientPointException;
 import com.seedrank.unit.purchase.IdempotencyKeyValidationException;
 import com.seedrank.unit.purchase.PurchaseLimitExceededException;
@@ -255,6 +256,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 "IDEA_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
+    }
+
+    @ExceptionHandler(MessageThreadNotFoundException.class)
+    ResponseEntity<ApiError> handleMessageThreadNotFound(
+            MessageThreadNotFoundException exception,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
+                "MESSAGE_THREAD_NOT_FOUND", exception.getMessage(), requestId(request), List.of()));
     }
 
     @ExceptionHandler(CompanyInterestIdeaNotFoundException.class)

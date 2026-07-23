@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "message_threads")
-class MessageThread {
+public class MessageThread {
 
     @Id
     private UUID id;
@@ -44,6 +44,11 @@ class MessageThread {
 
     static MessageThread start(UUID ideaId, UUID companyProfileId, UUID authorId, Instant now) {
         return new MessageThread(ideaId, companyProfileId, authorId, now);
+    }
+
+    public void touch(Instant now) {
+        if (now == null) throw new IllegalArgumentException("Update time is required");
+        this.updatedAt = now;
     }
 
     UUID id() { return id; }

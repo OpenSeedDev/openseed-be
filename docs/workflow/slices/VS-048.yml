@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-048
+  title: "읽음 없는 텍스트 메시지"
+  dependencies: [VS-047]
+  resource_locks: [messaging]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-048-text-message
+base_commit: 6e6a04d55d267f17016b470c9f153e9d3d865609
+current_commit: 907f1a78cd701a9caee14fe7f8277d28621fcd9f
+
+review:
+  pr_number: 80
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/80"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-047
+      pr_number: 51
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/51"
+      merge_commit: 402e56cb8c9786eff799167388fb30259dff9dae
+      merged_at: "2026-07-21T11:34:06Z"
+  red_test: "2026-07-22T16:32:23+09:00 ./gradlew test --tests com.seedrank.messaging.message.MessageIntegrationTest --no-daemon: 메시지 테이블·API 부재로 7개 실패"
+  focused_tests: "2026-07-22T16:39:40+09:00 MessageIntegrationTest 8개, MessageThreadIntegrationTest 7개, LoginIntegrationTest 6개 총 21개 성공"
+  full_tests: "Fast Build: 로컬 전체 테스트 생략, 최종 main 통합 Head CI에서 전체 회귀 필수"
+  migration: "V20260722073148__create_message_thread_messages.sql: Thread·발신자 FK, 1~2000자 CHECK, 시간·ID Cursor 인덱스 추가; PostgreSQL ddl-auto validate 및 집중 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T16:29:49+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build worker: VS-048"
+    note: "VS-047 PR #51의 실제 Merge와 VS-044 PR #74 Head 기반 Stack을 확인하고 메시지 발송·Cursor 목록 범위를 계획했다."
+  - at: "2026-07-22T16:29:49+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build TDD: VS-048"
+    note: "Thread 참여자 전용 텍스트·발신자·발신 시각 계약과 읽음·미읽음 제외 정책을 테스트 목록으로 확정했다."
+  - at: "2026-07-22T16:40:29+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build stacked delivery: VS-048"
+    note: "Red 7건 후 최소 구현과 리팩터링을 완료했다. 메시징·Thread·로그인 집중 회귀 21개와 OpenAPI·ERD·새 UTC Migration, 워크플로우 검증을 통과했다."
+  - at: "2026-07-22T16:42:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build stacked PR delivery: VS-048"
+    note: "구현 커밋 907f1a7을 Push하고 미병합 VS-044 PR #74를 base로 Draft PR #80을 생성했다. 최종 상태 Push 후 Ready로 전환하며 최종 main 통합 Head CI에서 전체 회귀를 수행한다."
+
+created_at: "2026-07-22T16:29:49+09:00"
+updated_at: "2026-07-22T16:42:00+09:00"
