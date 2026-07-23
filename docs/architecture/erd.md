@@ -37,6 +37,8 @@ erDiagram
     IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
     IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
     IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
+    IDEAS ||--o| RANKING_CURRENT : ranked_as
+    RANKING_RUNS ||--o{ RANKING_CURRENT : publishes
 
     USERS {
         uuid id PK
@@ -281,6 +283,25 @@ erDiagram
         timestamptz created_at
     }
 
+    RANKING_PUBLISH_LOCK {
+        smallint id PK "singleton 1"
+    }
+
+    RANKING_RUNS {
+        timestamptz target_hour PK "UTC hour"
+        int idea_count
+        timestamptz published_at
+    }
+
+    RANKING_CURRENT {
+        uuid idea_id PK,FK
+        int rank_position UK
+        int previous_rank_position "nullable for first appearance"
+        double total_score
+        jsonb components "investment, diversity, company, feedback, reaction, growth, decay, subtotal"
+        timestamptz calculated_at FK
+    }
+
     COMPANY_INTERESTS {
         uuid id PK
         uuid idea_id FK
@@ -463,6 +484,15 @@ erDiagram
 - 같은 아이디어·조회자·UTC 시간 버킷의 이벤트는 unique 제약으로 한 번만 인정한다.
 - 새 이벤트와 현재 누계·시간별 증가량은 하나의 트랜잭션에서 원자적으로 upsert한다.
 - 상세 응답은 공개 범위와 무관한 공통 공개 지표 `viewCount`를 포함한다.
+
+## VS-039 제약
+
+- 매 UTC 정시의 `target_hour`는 `ranking_runs`에 한 번만 기록하고, 단일 `ranking_publish_lock` 행을 먼저 잠가 여러 인스턴스의 계산·게시를 직렬화한다.
+- 최신 성공 시간과 같거나 오래된 실행은 현재 랭킹을 변경하지 않는다.
+- 게시된 아이디어의 활성 Lot 원금·고유 보유자, 삭제되지 않은 피드백·채택, 좋아요, 누적 조회와 직전 24시간 조회 증가량을 한 SQL 문장 스냅샷으로 집계한다.
+- 24시간 성장 입력은 같은 실행의 최대 조회 증가량 대비 0~15로 정규화하며 기업 관심은 VS-044에서 연결하기 전까지 0이다.
+- 기존 `rank_position`을 새 행의 `previous_rank_position`으로 옮기고 `ranking_current` 전체를 같은 트랜잭션에서 교체한다.
+- 실행 기록 선점, 결과 교체 또는 실행 메타데이터 갱신 중 실패하면 트랜잭션 전체를 롤백해 직전 현재 랭킹을 유지하고 같은 시간을 재시도할 수 있다.
 
 ## VS-044 제약
 
