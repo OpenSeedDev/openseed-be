@@ -25,13 +25,13 @@ review:
     head_sha: null
 
 evidence:
-  dependencies_satisfied: false
+  dependencies_satisfied: true
   dependency_prs:
     - task_id: VS-039
       pr_number: 77
       pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/77"
-      merge_commit: null
-      merged_at: null
+      merge_commit: a59c759825face11e429631bf6cc105743bcb0e0
+      merged_at: "2026-07-23T02:22:22Z"
   red_test: "2026-07-22T16:32:06+09:00 API·OpenAPI·원시 반응 수 부재 5건 실패; fan-in 후 2026-07-22T16:42:46+09:00 기업 관심 2건이 랭킹에 0으로 저장되는 회귀 1건 실패"
   focused_tests: "2026-07-22T16:44:09+09:00 CompanyInterest 7, RankingMain 4, RankingPublication 6, RankingCalculator 5, IdeaLike 7로 집중 회귀 29개 성공"
   full_tests: "2026-07-22T16:46:44+09:00 ./gradlew test --no-daemon --console=plain: 298개 성공, 실패·오류 0개"
@@ -74,4 +74,4 @@ history:
     note: "구현 커밋 5bcb5ff를 Push하고 미병합 parent PR #77을 base로 Draft PR #79를 생성했다. 최종 상태 Push 뒤 Ready로 전환한다."
 
 created_at: "2026-07-22T16:29:55+09:00"
-updated_at: "2026-07-22T16:46:58+09:00"
+updated_at: "2026-07-23T11:31:00+09:00"
