@@ -32,6 +32,9 @@ app:
     cookie-secure: ${AUTH_COOKIE_SECURE:true}
   ai:
     prompt-version: ${AI_IDEA_PROMPT_VERSION:idea-candidates-v1}
+  financial-consistency:
+    enabled: ${FINANCIAL_CONSISTENCY_ENABLED:true}
+    cron: "${FINANCIAL_CONSISTENCY_CRON:0 15 * * * *}"
   company-verification:
     expires-in: ${COMPANY_VERIFICATION_EXPIRES_IN:PT30M}
     confirm-url: ${COMPANY_VERIFICATION_CONFIRM_URL:http://localhost:3000/company-verification/confirm}
