@@ -1,0 +1,76 @@
+schema_version: 2
+
+task:
+  id: VS-037
+  title: "재무 정합성 검사"
+  dependencies: [VS-036]
+  resource_locks: [unit, wallet]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-037-financial-consistency
+base_commit: 9e96282fe395e5c3f54a60f24a7dd1fdecb9a18f
+current_commit: 11f68bc56c5d16eb2b64e3fe86b2673971e12b2a
+
+review:
+  pr_number: 81
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/81"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-036
+      pr_number: 78
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/78"
+      merge_commit: null
+      merged_at: null
+  red_test: "2026-07-22T16:30:00+09:00 ./gradlew test --tests com.seedrank.unit.consistency.FinancialConsistencyCheckIntegrationTest --no-daemon: 서비스·결과 타입 부재 컴파일 오류 9건의 의도된 Red"
+  focused_tests: "2026-07-22T16:40:40+09:00 FinancialConsistency·Purchase·PurchaseConcurrency·Recovery·Payout·OwnedLot·WalletQuery 집중 회귀 45/45 성공"
+  full_tests: "2026-07-22T16:43:55+09:00 ./gradlew test --no-daemon: 전체 293/293 성공"
+  migration: "V20260722073100__create_financial_consistency_checks.sql: append-only 검사 실행·발견 기록과 운영 추적 인덱스"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T16:29:44+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "fast-build vertical-slice worker: VS-037"
+    note: "백로그·기획·VS-035/036 구현과 재무 관련 교훈을 확인하고 읽기 전용 정합성 검사 범위를 계획했다."
+  - at: "2026-07-22T16:29:44+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "fast-build vertical-slice worker: VS-037"
+    note: "사용자 override로 미병합 VS-036 PR #78 Head를 선행 증거로 사용하며 정합성 Red 테스트부터 작성한다."
+  - at: "2026-07-22T16:44:23+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "fast-build vertical-slice delivery: VS-037"
+    note: "Red 뒤 시간별 읽기 전용 검사, 다중 서버 advisory lock, 7종 정합성 탐지와 append-only 추적 결과를 구현했다. 집중 45건과 전체 293건이 성공했다."
+  - at: "2026-07-22T16:45:26+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "fast-build vertical-slice PR delivery: VS-037"
+    note: "구현 커밋 11f68bc를 Push하고 미병합 parent #78 기반 Draft PR #81을 생성했다. 최종 상태 Push 후 Ready로 전환한다."
+created_at: "2026-07-22T16:29:44+09:00"
+updated_at: "2026-07-22T16:45:26+09:00"

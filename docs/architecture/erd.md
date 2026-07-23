@@ -16,6 +16,8 @@ erDiagram
     SEED_UNIT_LOTS ||--o| SEED_UNIT_RECOVERIES : realizes
     USERS ||--o{ SEED_UNIT_RECOVERIES : receives
     IDEAS ||--o{ SEED_UNIT_RECOVERIES : prices
+    USERS ||--o{ PENDING_RECOVERY_PAYOUTS : requests
+    FINANCIAL_CONSISTENCY_CHECKS ||--o{ FINANCIAL_CONSISTENCY_FINDINGS : detects
     USERS ||--o{ AI_JOBS : requests
     AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     AI_JOBS ||--o| IDEAS : selected_into
@@ -39,6 +41,8 @@ erDiagram
     IDEAS ||--o{ IDEA_VIEW_EVENTS : receives
     IDEAS ||--o| IDEA_METRIC_CURRENT : aggregates
     IDEAS ||--o{ IDEA_METRIC_HOURLY : buckets
+    IDEAS ||--o| RANKING_CURRENT : ranked_as
+    RANKING_RUNS ||--o{ RANKING_CURRENT : publishes
 
     USERS {
         uuid id PK
@@ -67,7 +71,7 @@ erDiagram
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE, UNIT_RECOVERY"
+        varchar source_type "includes UNIT_RECOVERY, PENDING_RECOVERY_PAYOUT"
         uuid source_id
         uuid reward_scope_id "nullable, idea scope for accepted feedback"
         date policy_date "nullable for signup, Asia/Seoul"
@@ -187,7 +191,7 @@ erDiagram
     IDEA_TIMELINE_EVENTS {
         uuid id PK
         uuid idea_id FK
-        varchar event_type "PUBLISHED | UPDATED | FEEDBACK_ACCEPTED"
+        varchar event_type "PUBLISHED | UPDATED | FEEDBACK_ACCEPTED | COMPANY_INTERESTED | COMPANY_INTEREST_REMOVED"
         uuid actor_id FK
         uuid source_id "nullable, accepted feedback"
         timestamptz created_at
@@ -284,11 +288,59 @@ erDiagram
         timestamptz created_at
     }
 
+    PENDING_RECOVERY_PAYOUTS {
+        uuid id PK
+        uuid user_id FK
+        int paid_amount "positive"
+        int balance_after "0..2000"
+        date policy_date "Asia/Seoul"
+        timestamptz paid_at
+    }
+
+    FINANCIAL_CONSISTENCY_CHECKS {
+        uuid id PK
+        varchar status "CONSISTENT | INCONSISTENT"
+        int finding_count
+        timestamptz started_at
+        timestamptz completed_at
+    }
+
+    FINANCIAL_CONSISTENCY_FINDINGS {
+        uuid id PK
+        uuid check_id FK
+        varchar code "stable invariant code"
+        uuid user_id "nullable trace key"
+        varchar entity_type
+        uuid entity_id "nullable trace key"
+        bigint expected_value "nullable"
+        bigint actual_value "nullable"
+        timestamptz created_at
+    }
+
     IDEA_LIKES {
         uuid id PK
         uuid idea_id FK
         uuid user_id FK
         timestamptz created_at
+    }
+
+    RANKING_PUBLISH_LOCK {
+        smallint id PK "singleton 1"
+    }
+
+    RANKING_RUNS {
+        timestamptz target_hour PK "UTC hour"
+        int idea_count
+        timestamptz published_at
+    }
+
+    RANKING_CURRENT {
+        uuid idea_id PK,FK
+        int rank_position UK
+        int previous_rank_position "nullable for first appearance"
+        double total_score
+        jsonb components "investment, diversity, company, feedback, reaction, growth, decay, subtotal"
+        timestamptz calculated_at FK
     }
 
     COMPANY_INTERESTS {
@@ -326,6 +378,13 @@ erDiagram
 - Access Token의 `sid` 클레임은 `auth_sessions.id`를 가리키며, 서명·만료와 해당 세션 활성 상태를 함께 검증한다.
 - 현재 로그아웃은 세션 family를 `LOGOUT`으로, 전체 로그아웃은 사용자의 모든 활성 세션을 `LOGOUT_ALL`로 폐기한다.
 - 로그인·갱신·로그아웃의 세션 변경은 사용자 행 잠금 후 수행해 동시 요청을 직렬화한다.
+
+## VS-037 제약
+
+- 매시간 15분(UTC)에 Wallet·Ledger·Lot·Recovery·대기 지급 정합성을 읽기 전용으로 검사한다.
+- PostgreSQL transaction advisory lock으로 여러 서버의 같은 시각 중복 실행을 방지한다.
+- 지갑과 최신 원장 잔액, 원장 잔액 연속성, 회수 대기 합계, Lot·Recovery·지급과 출처 원장의 대응을 검사한다.
+- 검사 실행과 발견 사항은 append-only로 보존하며 자동으로 경제 데이터를 정정하지 않는다.
 
 ## VS-006 제약
 
@@ -432,6 +491,14 @@ erDiagram
 - Lot 행과 사용자 지갑 행을 잠가 같은 Lot 재요청과 서로 다른 Lot의 동시 회수가 중복 지급되지 않게 한다.
 - 즉시 지급분은 `CREDIT/UNIT_RECOVERY` append-only 원장으로 남기며 회수 기록은 Lot당 하나만 존재한다.
 
+## VS-036 제약
+
+- 사용자의 명시적 요청에만 이미 고정된 `pending_recovery_balance`를 지급하며 가격이나 실현액을 다시 계산하지 않는다.
+- 사용자 지갑 행 잠금 안에서 대기 잔액, 지갑 2,000P 여유분, Asia/Seoul 정책 날짜별 남은 회수 지급 한도의 최솟값을 지급한다.
+- 당일 `UNIT_RECOVERY` 즉시 지급액과 `PENDING_RECOVERY_PAYOUT` 수동 지급액의 합은 500P를 넘지 않는다.
+- 실제 지급이 0이면 지급 기록과 원장을 만들지 않으며, 동시 요청도 대기 잔액보다 많이 지급할 수 없다.
+- 실제 지급은 `pending_recovery_payouts`와 `CREDIT/PENDING_RECOVERY_PAYOUT` append-only 원장에 일대일로 기록한다.
+
 ## VS-011 조회 제약
 
 - 공개형은 Guest를 포함한 모든 조회자에게 아이디어 전체 내용과 검증 질문을 반환한다.
@@ -482,10 +549,19 @@ erDiagram
 - 새 이벤트와 현재 누계·시간별 증가량은 하나의 트랜잭션에서 원자적으로 upsert한다.
 - 상세 응답은 공개 범위와 무관한 공통 공개 지표 `viewCount`를 포함한다.
 
+## VS-039 제약
+
+- 매 UTC 정시의 `target_hour`는 `ranking_runs`에 한 번만 기록하고, 단일 `ranking_publish_lock` 행을 먼저 잠가 여러 인스턴스의 계산·게시를 직렬화한다.
+- 최신 성공 시간과 같거나 오래된 실행은 현재 랭킹을 변경하지 않는다.
+- 게시된 아이디어의 활성 Lot 원금·고유 보유자, 삭제되지 않은 피드백·채택, 좋아요, 누적 조회와 직전 24시간 조회 증가량을 한 SQL 문장 스냅샷으로 집계한다.
+- 24시간 성장 입력은 같은 실행의 최대 조회 증가량 대비 0~15로 정규화하며 기업 관심은 현재 `company_interests`의 아이디어별 행 수를 사용한다.
+- 기존 `rank_position`을 새 행의 `previous_rank_position`으로 옮기고 `ranking_current` 전체를 같은 트랜잭션에서 교체한다.
+- 실행 기록 선점, 결과 교체 또는 실행 메타데이터 갱신 중 실패하면 트랜잭션 전체를 롤백해 직전 현재 랭킹을 유지하고 같은 시간을 재시도할 수 있다.
+
 ## VS-044 제약
 
 - 회사 이메일 인증을 완료한 `COMPANY`만 세 공개 범위의 게시 아이디어에 관심을 등록·취소한다.
 - `(idea_id, company_profile_id)` 유일 제약과 아이디어 행 잠금으로 순차·동시 등록 및 반복 취소를 멱등 처리한다.
 - Guest를 포함한 공개 목록은 회사명과 관심 등록 시각만 최신순으로 제공하며 회사 이메일·도메인·사용자 ID를 노출하지 않는다.
 - 실제 관심 상태가 바뀔 때만 `COMPANY_INTERESTED`, `COMPANY_INTEREST_REMOVED` 타임라인을 한 번 기록한다.
-- 랭킹 입력과 Company 마이페이지 조회는 현재 `company_interests`를 기준으로 후속 슬라이스에서 확장한다.
+- 랭킹 입력은 현재 `company_interests`를 기준으로 집계하며 Company 마이페이지 조회는 후속 슬라이스에서 확장한다.

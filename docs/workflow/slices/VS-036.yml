@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-036
+  title: "회수 대기 잔액 지급"
+  dependencies: [VS-035]
+  resource_locks: [unit, wallet]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-036-pending-recovery-credit
+base_commit: 082e629db0d3ed807f3b0e11f5919392f3d0ab1a
+current_commit: 643e0c1567f121cb0ee81fca6d0d92adcea22113
+
+review:
+  pr_number: 78
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/78"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-035
+      pr_number: 76
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/76"
+      merge_commit: 082e629db0d3ed807f3b0e11f5919392f3d0ab1a
+      merged_at: "2026-07-22T07:01:13Z"
+  red_test: "2026-07-22T16:05:23+09:00 ./gradlew test --tests com.seedrank.unit.recovery.payout.PendingRecoveryPayoutIntegrationTest --no-daemon: 지급 테이블·API 부재로 6/6 의도된 실패"
+  focused_tests: "2026-07-22T16:08:52+09:00 Payout·Recovery·Wallet·Purchase 집중 회귀 30/30 성공"
+  full_tests: "2026-07-22T16:13:08+09:00 ./gradlew test --no-daemon: 전체 288/288 성공"
+  migration: "V20260722070600__create_pending_recovery_payouts.sql: 수동 지급 기록, 원장 출처 유형, 사용자 지급 시각 인덱스"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T16:03:17+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice worker: VS-036"
+    note: "백로그·기획·기능 명세와 GitHub의 VS-035 실제 Merge를 확인하고 대기 잔액 수동 지급 범위를 계획했다."
+  - at: "2026-07-22T16:03:17+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice worker: VS-036"
+    note: "고정 대기액, 일일 500P, 지갑 2,000P, 정책 날짜와 동시 멱등성 Red 테스트부터 작성한다."
+  - at: "2026-07-22T16:13:08+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-036"
+    note: "Red 6건 뒤 지갑 잠금, 기존·수동 지급 합산 일일 한도, 대기액 차감, 지급 기록과 원장을 구현했다. 집중 30건과 전체 288건이 성공했다."
+  - at: "2026-07-22T16:14:50+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-036"
+    note: "구현 커밋 643e0c1을 Push하고 Draft PR #78을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI는 다음 Coordinator tick에서 확인한다."
+
+created_at: "2026-07-22T16:03:17+09:00"
+updated_at: "2026-07-22T16:14:50+09:00"
