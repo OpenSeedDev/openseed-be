@@ -1,0 +1,82 @@
+schema_version: 2
+
+task:
+  id: VS-044
+  title: "기업 관심 전체 공개 목록"
+  dependencies: [VS-008, VS-010]
+  resource_locks: [company, idea]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-044-company-interest
+base_commit: cde1ae8a2ad2a466312d0429fee1d1c6a5ee78f5
+current_commit: 24cd4bced39b37b903f930861cd1c7dbfa1cc18f
+
+review:
+  pr_number: 74
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/74"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-008
+      pr_number: 45
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/45"
+      merge_commit: 3da0b57f270b85780800e521ad92338dcd9e11fd
+      merged_at: "2026-07-21T08:25:05Z"
+    - task_id: VS-010
+      pr_number: 48
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/48"
+      merge_commit: 72ab1b6fc8c0148bb09493864d280d709914b80b
+      merged_at: "2026-07-21T10:12:25Z"
+  red_test: "2026-07-22T13:46:53+09:00 ./gradlew test --tests com.seedrank.company.interest.CompanyInterestIntegrationTest --no-daemon: API·company_interests 테이블 부재로 7개 실패"
+  focused_tests: "2026-07-22T13:48:44+09:00 ./gradlew test --tests com.seedrank.company.interest.CompanyInterestIntegrationTest --no-daemon: 7개 성공"
+  full_tests: "2026-07-22T13:50:33+09:00 ./gradlew test --no-daemon: 267개 성공, 실패·오류·건너뜀 0개"
+  migration: "V20260722044500__create_company_interests.sql: 아이디어·회사 프로필 고유 관심과 공개 목록 인덱스, 관심 변경 타임라인 타입 추가; PostgreSQL ddl-auto validate 및 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T13:44:41+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-044"
+    note: "백로그, 제품 정책, 구현 계획과 VS-008·VS-010 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-22T13:44:41+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-044"
+    note: "인증 Company의 멱등 관심 변경과 세 공개 범위의 회사명·관심 시각 전체 공개 목록 계약을 확정했다."
+  - at: "2026-07-22T13:51:00+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-044"
+    note: "Red 7건 확인 후 최소 구현과 리팩터링을 완료했다. 순차·동시 멱등성을 포함한 집중 7개와 전체 267개 테스트, OpenAPI·ERD·새 UTC Migration을 검증했다."
+  - at: "2026-07-22T13:53:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-044"
+    note: "구현 커밋 24cd4bc를 Push하고 Draft PR #74를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-22T13:44:41+09:00"
+updated_at: "2026-07-22T13:53:00+09:00"

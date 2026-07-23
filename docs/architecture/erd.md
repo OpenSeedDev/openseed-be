@@ -27,6 +27,8 @@ erDiagram
     USERS ||--o{ MESSAGE_THREADS : receives
     USERS ||--o{ IDEA_LIKES : likes
     IDEAS ||--o{ IDEA_LIKES : receives
+    COMPANY_PROFILES ||--o{ COMPANY_INTERESTS : registers
+    IDEAS ||--o{ COMPANY_INTERESTS : receives
     IDEAS ||--o{ FEEDBACKS : receives
     FEEDBACKS ||--o{ FEEDBACK_REVISIONS : snapshots
     FEEDBACKS ||--o| CONTRIBUTIONS : accepted_as
@@ -299,6 +301,13 @@ erDiagram
         jsonb components "investment, diversity, company, feedback, reaction, growth, decay, subtotal"
         timestamptz calculated_at FK
     }
+
+    COMPANY_INTERESTS {
+        uuid id PK
+        uuid idea_id FK
+        uuid company_profile_id FK
+        timestamptz interested_at "public interest registration time"
+    }
 ```
 
 ## VS-001 제약
@@ -484,3 +493,11 @@ erDiagram
 - 24시간 성장 입력은 같은 실행의 최대 조회 증가량 대비 0~15로 정규화하며 기업 관심은 VS-044에서 연결하기 전까지 0이다.
 - 기존 `rank_position`을 새 행의 `previous_rank_position`으로 옮기고 `ranking_current` 전체를 같은 트랜잭션에서 교체한다.
 - 실행 기록 선점, 결과 교체 또는 실행 메타데이터 갱신 중 실패하면 트랜잭션 전체를 롤백해 직전 현재 랭킹을 유지하고 같은 시간을 재시도할 수 있다.
+
+## VS-044 제약
+
+- 회사 이메일 인증을 완료한 `COMPANY`만 세 공개 범위의 게시 아이디어에 관심을 등록·취소한다.
+- `(idea_id, company_profile_id)` 유일 제약과 아이디어 행 잠금으로 순차·동시 등록 및 반복 취소를 멱등 처리한다.
+- Guest를 포함한 공개 목록은 회사명과 관심 등록 시각만 최신순으로 제공하며 회사 이메일·도메인·사용자 ID를 노출하지 않는다.
+- 실제 관심 상태가 바뀔 때만 `COMPANY_INTERESTED`, `COMPANY_INTEREST_REMOVED` 타임라인을 한 번 기록한다.
+- 랭킹 입력과 Company 마이페이지 조회는 현재 `company_interests`를 기준으로 후속 슬라이스에서 확장한다.
