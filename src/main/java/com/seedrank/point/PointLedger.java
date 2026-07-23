@@ -156,6 +156,23 @@ public class PointLedger {
         return ledger;
     }
 
+    public static PointLedger pendingRecoveryPayout(
+            User user, UUID payoutId, int paidAmount, int balanceAfter, LocalDate policyDate, Instant now) {
+        PointLedger ledger = new PointLedger();
+        ledger.id = UUID.randomUUID();
+        ledger.user = user;
+        ledger.type = Type.CREDIT;
+        ledger.originalAmount = paidAmount;
+        ledger.paidAmount = paidAmount;
+        ledger.expiredAmount = 0;
+        ledger.balanceAfter = balanceAfter;
+        ledger.sourceType = SourceType.PENDING_RECOVERY_PAYOUT;
+        ledger.sourceId = payoutId;
+        ledger.createdAt = now;
+        ledger.policyDate = policyDate;
+        return ledger;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -210,6 +227,7 @@ public class PointLedger {
         FEEDBACK_CREATED,
         FEEDBACK_ACCEPTED,
         UNIT_PURCHASE,
-        UNIT_RECOVERY
+        UNIT_RECOVERY,
+        PENDING_RECOVERY_PAYOUT
     }
 }

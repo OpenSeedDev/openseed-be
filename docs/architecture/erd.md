@@ -16,6 +16,7 @@ erDiagram
     SEED_UNIT_LOTS ||--o| SEED_UNIT_RECOVERIES : realizes
     USERS ||--o{ SEED_UNIT_RECOVERIES : receives
     IDEAS ||--o{ SEED_UNIT_RECOVERIES : prices
+    USERS ||--o{ PENDING_RECOVERY_PAYOUTS : requests
     USERS ||--o{ AI_JOBS : requests
     AI_JOBS ||--o| AI_GENERATION_RESULTS : produces
     AI_JOBS ||--o| IDEAS : selected_into
@@ -67,7 +68,7 @@ erDiagram
         int paid_amount
         int expired_amount
         int balance_after "0..2000"
-        varchar source_type "SIGNUP_BONUS, DAILY_FIRST_ACCESS, IDEA_PUBLISHED, FEEDBACK_CREATED, FEEDBACK_ACCEPTED, UNIT_PURCHASE, UNIT_RECOVERY"
+        varchar source_type "includes UNIT_RECOVERY, PENDING_RECOVERY_PAYOUT"
         uuid source_id
         uuid reward_scope_id "nullable, idea scope for accepted feedback"
         date policy_date "nullable for signup, Asia/Seoul"
@@ -276,6 +277,15 @@ erDiagram
         timestamptz created_at
     }
 
+    PENDING_RECOVERY_PAYOUTS {
+        uuid id PK
+        uuid user_id FK
+        int paid_amount "positive"
+        int balance_after "0..2000"
+        date policy_date "Asia/Seoul"
+        timestamptz paid_at
+    }
+
     IDEA_LIKES {
         uuid id PK
         uuid idea_id FK
@@ -434,6 +444,14 @@ erDiagram
 - 즉시 지급하지 못한 금액은 소멸하지 않고 `pending_recovery_balance`와 변경 불가능한 회수 기록에 보존한다.
 - Lot 행과 사용자 지갑 행을 잠가 같은 Lot 재요청과 서로 다른 Lot의 동시 회수가 중복 지급되지 않게 한다.
 - 즉시 지급분은 `CREDIT/UNIT_RECOVERY` append-only 원장으로 남기며 회수 기록은 Lot당 하나만 존재한다.
+
+## VS-036 제약
+
+- 사용자의 명시적 요청에만 이미 고정된 `pending_recovery_balance`를 지급하며 가격이나 실현액을 다시 계산하지 않는다.
+- 사용자 지갑 행 잠금 안에서 대기 잔액, 지갑 2,000P 여유분, Asia/Seoul 정책 날짜별 남은 회수 지급 한도의 최솟값을 지급한다.
+- 당일 `UNIT_RECOVERY` 즉시 지급액과 `PENDING_RECOVERY_PAYOUT` 수동 지급액의 합은 500P를 넘지 않는다.
+- 실제 지급이 0이면 지급 기록과 원장을 만들지 않으며, 동시 요청도 대기 잔액보다 많이 지급할 수 없다.
+- 실제 지급은 `pending_recovery_payouts`와 `CREDIT/PENDING_RECOVERY_PAYOUT` append-only 원장에 일대일로 기록한다.
 
 ## VS-011 조회 제약
 
