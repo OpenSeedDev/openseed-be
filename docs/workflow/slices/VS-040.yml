@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-040
+  title: "7필드 랭킹순 메인"
+  dependencies: [VS-039]
+  resource_locks: [ranking]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-040-ranking-main
+base_commit: 563a9141987bff1766943c43fa2f54a22648f115
+current_commit: 0e4859322582c720c5f835bd83f350c0665f8369
+
+review:
+  pr_number: 79
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/79"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-039
+      pr_number: 77
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/77"
+      merge_commit: a59c759825face11e429631bf6cc105743bcb0e0
+      merged_at: "2026-07-23T02:22:22Z"
+  red_test: "2026-07-22T16:32:06+09:00 API·OpenAPI·원시 반응 수 부재 5건 실패; fan-in 후 2026-07-22T16:42:46+09:00 기업 관심 2건이 랭킹에 0으로 저장되는 회귀 1건 실패"
+  focused_tests: "2026-07-22T16:44:09+09:00 CompanyInterest 7, RankingMain 4, RankingPublication 6, RankingCalculator 5, IdeaLike 7로 집중 회귀 29개 성공"
+  full_tests: "2026-07-22T16:46:44+09:00 ./gradlew test --no-daemon --console=plain: 298개 성공, 실패·오류 0개"
+  migration: "PR #74 Migration V20260722044500과 PR #77 V20260722064500을 포함한 32개 버전 중복 없음; JPA validate·전체 테스트 성공, ERD에 양쪽 모델과 실제 기업 관심 집계를 반영"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-22T16:29:55+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-040 fast build"
+    note: "백로그, 통합 기획·기능 명세와 PR #77 Head를 확인했다. 사용자 override에 따라 미병합 parent Head를 선행 구현 증거로 사용한다."
+  - at: "2026-07-22T16:29:55+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-040 fast build"
+    note: "인증 없는 랭킹순 7필드 응답, 순위 변동, 공개 범위 비차등, 스냅샷 반응 수와 OpenAPI 테스트 범위를 확정했다."
+  - at: "2026-07-22T16:38:03+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-040 fast build"
+    note: "Red 5건 뒤 랭킹순 7필드 API와 원시 반응 수 스냅샷을 구현했다. 랭킹·게시·계산·좋아요 집중 회귀 21개와 최종 보강 테스트 10개가 성공했다."
+  - at: "2026-07-22T16:39:23+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-040 fast build"
+    note: "구현 커밋 5bcb5ff를 Push하고 미병합 parent PR #77을 base로 Draft PR #79를 생성했다. 최종 상태 Push 뒤 Ready로 전환한다."
+
+created_at: "2026-07-22T16:29:55+09:00"
+updated_at: "2026-07-23T11:31:00+09:00"
