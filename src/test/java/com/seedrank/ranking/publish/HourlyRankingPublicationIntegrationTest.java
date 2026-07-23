@@ -59,6 +59,8 @@ class HourlyRankingPublicationIntegrationTest {
         feedback(richIdea, firstInvestor, true);
         feedback(richIdea, secondInvestor, false);
         like(richIdea, firstInvestor);
+        companyInterest(richIdea, "company1");
+        companyInterest(richIdea, "company2");
         views(richIdea, 40, 12, FIRST_HOUR.minusSeconds(3_600));
         views(quietIdea, 2, 1, FIRST_HOUR.minusSeconds(3_600));
 
@@ -69,6 +71,12 @@ class HourlyRankingPublicationIntegrationTest {
         assertThat(jdbc.queryForObject(
                 "SELECT (components ->> 'growth')::double precision FROM ranking_current WHERE idea_id=?",
                 Double.class, richIdea)).isEqualTo(15.0);
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'companyInterestCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, richIdea)).isEqualTo(2);
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'likeCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, richIdea)).isEqualTo(1);
         assertThat(jdbc.queryForObject(
                 "SELECT (components ->> 'growth')::double precision FROM ranking_current WHERE idea_id=?",
                 Double.class, quietIdea)).isEqualTo(1.25);
@@ -120,6 +128,23 @@ class HourlyRankingPublicationIntegrationTest {
         assertThat(jdbc.queryForObject(
                 "SELECT previous_rank_position FROM ranking_current WHERE idea_id=?", Integer.class, second))
                 .isEqualTo(2);
+    }
+
+    @Test
+    void storesRawCompanyInterestAndLikeCountsForRankingCards() {
+        UUID ideaId = publishedIdea("card_counts");
+        RankingScore score = new RankingScore(1, 2, 3, 4, 5, 6, 0, 21, 21);
+        RankingResult result = new RankingResult(
+                ideaId, 1, score, 2, 1, 4, 6,
+                FIRST_HOUR.minusSeconds(86_400), FIRST_HOUR);
+
+        assertThat(currentStore.replace(FIRST_HOUR, List.of(result)).published()).isTrue();
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'companyInterestCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, ideaId)).isEqualTo(4);
+        assertThat(jdbc.queryForObject(
+                "SELECT (components ->> 'likeCount')::integer FROM ranking_current WHERE idea_id=?",
+                Integer.class, ideaId)).isEqualTo(6);
     }
 
     @Test
@@ -177,7 +202,7 @@ class HourlyRankingPublicationIntegrationTest {
     }
 
     private RankingResult result(UUID ideaId, int position, RankingScore score, Instant calculatedAt) {
-        return new RankingResult(ideaId, position, score, 0, 0, 0,
+        return new RankingResult(ideaId, position, score, 0, 0, 0, 0,
                 calculatedAt.minusSeconds(86_400), calculatedAt);
     }
 
@@ -233,6 +258,25 @@ class HourlyRankingPublicationIntegrationTest {
                 UUID.randomUUID(), ideaId, userId, Timestamp.from(FIRST_HOUR.minusSeconds(100)));
     }
 
+    private void companyInterest(UUID ideaId, String suffix) {
+        UUID userId = user(suffix);
+        jdbc.update("UPDATE users SET role='COMPANY' WHERE id=?", userId);
+        UUID companyProfileId = UUID.randomUUID();
+        Instant now = FIRST_HOUR.minusSeconds(500);
+        jdbc.update("""
+                INSERT INTO company_profiles(
+                    id, user_id, company_name, company_email, company_domain,
+                    verified_at, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 'example.com', ?, ?, ?)
+                """, companyProfileId, userId, "Company " + suffix,
+                suffix + "-" + companyProfileId + "@example.com",
+                Timestamp.from(now), Timestamp.from(now), Timestamp.from(now));
+        jdbc.update("""
+                INSERT INTO company_interests(id, idea_id, company_profile_id, interested_at)
+                VALUES (?, ?, ?, ?)
+                """, UUID.randomUUID(), ideaId, companyProfileId, Timestamp.from(now));
+    }
+
     private void views(UUID ideaId, long current, long delta, Instant bucketHour) {
         jdbc.update("""
                 INSERT INTO idea_metric_current(idea_id, view_count, updated_at) VALUES (?, ?, ?)
@@ -256,6 +300,7 @@ class HourlyRankingPublicationIntegrationTest {
     private void cleanRankingAndFixtures() {
         jdbc.update("DELETE FROM ranking_current");
         jdbc.update("DELETE FROM ranking_runs");
+        jdbc.update("DELETE FROM company_interests");
         jdbc.update("DELETE FROM idea_likes");
         jdbc.update("DELETE FROM feedback_revisions");
         jdbc.update("DELETE FROM contributions");
@@ -267,6 +312,8 @@ class HourlyRankingPublicationIntegrationTest {
         jdbc.update("DELETE FROM validation_questions");
         jdbc.update("DELETE FROM ideas");
         jdbc.update("DELETE FROM auth_sessions");
+        jdbc.update("DELETE FROM company_verifications");
+        jdbc.update("DELETE FROM company_profiles");
         jdbc.execute("TRUNCATE TABLE point_ledgers");
         jdbc.update("DELETE FROM point_wallets");
         jdbc.update("DELETE FROM users");

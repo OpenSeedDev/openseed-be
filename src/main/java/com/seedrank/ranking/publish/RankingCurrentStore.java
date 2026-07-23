@@ -67,11 +67,14 @@ public class RankingCurrentStore {
                         'reaction', ?::double precision,
                         'growth', ?::double precision,
                         'decay', ?::double precision,
-                        'subtotal', ?::double precision
+                        'subtotal', ?::double precision,
+                        'companyInterestCount', ?::integer,
+                        'likeCount', ?::integer
                     ), ?)
                     """, result.ideaId(), result.position(), previousPositions.get(result.ideaId()), score.totalScore(),
                     score.investmentScore(), score.diversityScore(), score.companyScore(), score.feedbackScore(),
                     score.reactionScore(), score.growthScore(), score.decayScore(), score.subtotalScore(),
+                    result.companyInterestCount(), result.likeCount(),
                     Timestamp.from(targetHour));
         }
         jdbc.update("UPDATE ranking_runs SET idea_count=?, published_at=CURRENT_TIMESTAMP WHERE target_hour=?",

@@ -42,6 +42,11 @@ class RankingSignalQuery {
                     FROM idea_likes
                     GROUP BY idea_id
                 ),
+                company_interest_metrics AS (
+                    SELECT idea_id, COUNT(*) AS company_interest_count
+                    FROM company_interests
+                    GROUP BY idea_id
+                ),
                 growth_metrics AS (
                     SELECT idea_id, COALESCE(SUM(view_delta), 0) AS recent_views
                     FROM idea_metric_hourly
@@ -58,6 +63,7 @@ class RankingSignalQuery {
                        COALESCE(lot.unique_investors, 0) AS unique_investors,
                        COALESCE(feedback.feedback_count, 0) AS feedback_count,
                        COALESCE(feedback.accepted_count, 0) AS accepted_count,
+                       COALESCE(company_interest.company_interest_count, 0) AS company_interest_count,
                        COALESCE(likes.like_count, 0) AS like_count,
                        COALESCE(metric.view_count, 0) AS view_count,
                        CASE WHEN maximum.max_recent_views = 0 THEN 0.0
@@ -66,6 +72,7 @@ class RankingSignalQuery {
                 FROM ideas idea
                 LEFT JOIN lot_metrics lot ON lot.idea_id = idea.id
                 LEFT JOIN feedback_metrics feedback ON feedback.idea_id = idea.id
+                LEFT JOIN company_interest_metrics company_interest ON company_interest.idea_id = idea.id
                 LEFT JOIN like_metrics likes ON likes.idea_id = idea.id
                 LEFT JOIN idea_metric_current metric ON metric.idea_id = idea.id
                 LEFT JOIN growth_metrics growth ON growth.idea_id = idea.id
@@ -76,7 +83,7 @@ class RankingSignalQuery {
                         resultSet.getObject("idea_id", java.util.UUID.class),
                         resultSet.getLong("active_principal"),
                         resultSet.getInt("unique_investors"),
-                        0,
+                        resultSet.getInt("company_interest_count"),
                         resultSet.getInt("feedback_count"),
                         resultSet.getInt("accepted_count"),
                         resultSet.getInt("like_count"),
