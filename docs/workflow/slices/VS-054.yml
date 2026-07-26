@@ -1,0 +1,82 @@
+schema_version: 2
+
+task:
+  id: VS-054
+  title: "Company 관심과 문의"
+  dependencies: [VS-044, VS-048]
+  resource_locks: [company, messaging]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-054-company-summary
+base_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
+current_commit: fff37325da55e0ffad130c1fa621beb1c396faad
+
+review:
+  pr_number: 83
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/83"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-044
+      pr_number: 74
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/74"
+      merge_commit: dffc21a80771c623ffa6e243d4ec45fbadea3856
+      merged_at: "2026-07-23T01:57:49Z"
+    - task_id: VS-048
+      pr_number: 80
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/80"
+      merge_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
+      merged_at: "2026-07-23T02:46:13Z"
+  red_test: "2026-07-26T10:43:15+09:00 ./gradlew test --tests com.seedrank.company.activity.CompanyActivityIntegrationTest --no-daemon: Company 활동 API·OpenAPI 계약 부재로 4개 실패"
+  focused_tests: "2026-07-26T10:44:42+09:00 CompanyActivity·CompanyInterest·MessageThread·Message·Login 통합 테스트 총 32개 성공"
+  full_tests: "2026-07-26T10:47:41+09:00 ./gradlew test --no-daemon: 322개 성공, 실패·오류 0개"
+  migration: "기존 company_interests와 message_threads 및 조회 인덱스를 사용하므로 새 Migration·ERD 변경 없음; OpenAPI는 Controller와 응답 스키마로 갱신"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-26T10:41:14+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-054"
+    note: "백로그, 선행 PR의 실제 Merge 증거, 기존 관심·문의 계약과 구현 교훈을 확인했다."
+  - at: "2026-07-26T10:41:14+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice TDD: VS-054"
+    note: "인증 Company 마이페이지에서 본인의 관심 아이디어와 문의 스레드를 안전한 필드로 통합 조회하는 계약을 확정했다."
+  - at: "2026-07-26T10:48:00+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-054"
+    note: "Red 4건 후 최소 구현과 리팩터링을 완료했다. 관심·문의·메시지·로그인 집중 32개와 인증·권한 고위험 전체 322개 테스트, OpenAPI와 워크플로우 검증을 수행한다."
+  - at: "2026-07-26T10:50:00+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-054"
+    note: "구현 커밋 fff3732를 Push하고 Draft PR #83을 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-26T10:41:14+09:00"
+updated_at: "2026-07-26T10:50:00+09:00"
