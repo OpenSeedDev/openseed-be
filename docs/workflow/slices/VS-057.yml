@@ -1,0 +1,77 @@
+schema_version: 2
+
+task:
+  id: VS-057
+  title: "기여자 Top 5"
+  dependencies: [VS-027]
+  resource_locks: [feedback]
+
+status: AWAITING_PR_REVIEW
+branch: codex/vs-057-top-contributors
+base_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
+current_commit: 999d847ac89c3f44874b5f8a4e79c31ff2e260b8
+
+review:
+  pr_number: 82
+  pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/82"
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-027
+      pr_number: 73
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/73"
+      merge_commit: e7a13dc7ec2c12f03a0b596b999b91e85644349b
+      merged_at: "2026-07-22T06:19:03Z"
+  red_test: "2026-07-26T10:44:59+09:00 ./gradlew test --tests com.seedrank.feedback.top.TopContributorIntegrationTest --no-daemon: 기여자 Top 5 API와 OpenAPI 경로 부재로 4개 중 4개 실패"
+  focused_tests: "2026-07-26T10:46:07+09:00 TopContributorIntegrationTest 4개와 FeedbackAcceptIntegrationTest 9개 성공: 최대 5명·정렬 동점·30일 경계·현재 프로필·주요 카테고리·익명 OpenAPI 및 선행 채택 회귀"
+  full_tests: null
+  migration: "없음: 기존 contributions·ideas·users 읽기 집계만 추가"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-26T10:41:00+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-057"
+    note: "백로그, 기여자 정책과 VS-027 GitHub Merge 증거를 확인했다."
+  - at: "2026-07-26T10:41:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-057"
+    note: "전체 기여 수, 최근 30일 수, 마지막 기여 시각 순위와 현재 프로필·주요 카테고리 익명 조회 범위를 확정했다."
+  - at: "2026-07-26T10:46:20+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-057"
+    note: "기여자 API 부재 Red 4건 확인 후 집계 쿼리와 익명 OpenAPI를 구현했다. 집중 13개와 워크플로우 검증이 성공했으며 일반 조회 변경의 전체 회귀는 최종 Head CI에서 수행한다."
+  - at: "2026-07-26T10:47:29+09:00"
+    from: CREATING_PR
+    to: AWAITING_PR_REVIEW
+    command: "vertical-slice PR delivery: VS-057"
+    note: "구현 커밋 999d847을 Push하고 Draft PR #82를 생성했다. 최종 상태 Push 후 Ready로 전환하며 CI 결과는 다음 Coordinator tick에서 동기화한다."
+
+created_at: "2026-07-26T10:41:00+09:00"
+updated_at: "2026-07-26T10:47:29+09:00"
