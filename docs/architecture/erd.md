@@ -10,6 +10,7 @@ erDiagram
     USERS ||--o| COMPANY_PROFILES : registers
     COMPANY_PROFILES ||--o{ COMPANY_VERIFICATIONS : verifies
     USERS ||--o{ IDEAS : authors
+    IDEAS ||--o{ IDEA_KEYWORDS : describes
     USERS ||--o{ FEEDBACKS : writes
     USERS ||--o{ SEED_UNIT_LOTS : purchases
     IDEAS ||--o{ SEED_UNIT_LOTS : holds
@@ -137,6 +138,12 @@ erDiagram
         int source_ai_candidate_number "nullable, 1..5"
         timestamptz created_at
         timestamptz updated_at
+    }
+
+    IDEA_KEYWORDS {
+        uuid id PK
+        uuid idea_id FK
+        varchar keyword "trimmed, max 100"
     }
 
     AI_JOBS {
@@ -565,3 +572,11 @@ erDiagram
 - Guest를 포함한 공개 목록은 회사명과 관심 등록 시각만 최신순으로 제공하며 회사 이메일·도메인·사용자 ID를 노출하지 않는다.
 - 실제 관심 상태가 바뀔 때만 `COMPANY_INTERESTED`, `COMPANY_INTEREST_REMOVED` 타임라인을 한 번 기록한다.
 - 랭킹 입력은 현재 `company_interests`를 기준으로 집계하며 Company 마이페이지 조회는 후속 슬라이스에서 확장한다.
+
+## VS-041 제약
+
+- Guest를 포함한 사용자는 최대 20자의 앞뒤 공백을 제거한 검색어로 현재 랭킹의 게시 아이디어를 검색한다.
+- 제목과 `idea_keywords.keyword`는 PostgreSQL `ILIKE` 부분 일치를 사용하고 `%`, `_`, `\`는 와일드카드가 아닌 문자로 처리한다.
+- 세 공개 범위를 구분하지 않고 랭킹 카드와 같은 7개 안전 필드만 순위 오름차순으로 반환한다.
+- 제목과 여러 키워드가 함께 일치해도 `EXISTS` 조회로 아이디어 카드는 한 번만 반환한다.
+- 키워드는 아이디어별 대소문자·앞뒤 공백 정규화 기준으로 중복 저장하지 않는다.

@@ -1,0 +1,72 @@
+schema_version: 2
+
+task:
+  id: VS-041
+  title: "20자 제목·키워드 검색"
+  dependencies: [VS-040]
+  resource_locks: [ranking, search]
+
+status: CREATING_PR
+branch: codex/vs-041-ranking-search
+base_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task_id: VS-040
+      pr_number: 79
+      pr_url: "https://github.com/OpenSeedDev/openseed-be/pull/79"
+      merge_commit: a0199e72ff6d5585d82d2d5061fad6490c8126ba
+      merged_at: "2026-07-23T02:33:55Z"
+  red_test: "2026-07-26T10:43:42+09:00 ./gradlew test --tests com.seedrank.search.IdeaSearchIntegrationTest: idea_keywords 테이블과 검색 API 부재로 PostgreSQL BadSqlGrammarException 5건 실패"
+  focused_tests: "2026-07-26T10:45:51+09:00 IdeaSearchIntegrationTest 5건과 RankingMainIntegrationTest 4건, 총 9건 성공"
+  full_tests: "2026-07-26T10:48:49+09:00 ./gradlew test --no-daemon --console=plain: 323개 성공, 실패·오류 0개"
+  migration: "V20260726014500__create_idea_keywords.sql: IdeaKeyword FK·빈 값 제약·아이디어별 정규화 키워드 유일 인덱스 추가; Flyway/JPA validate와 전체 테스트 성공"
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-26T10:41:57+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "vertical-slice-worker: VS-041"
+    note: "백로그·기획·기능 명세와 GitHub PR #79 실제 병합 증거를 확인했다."
+  - at: "2026-07-26T10:41:57+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "vertical-slice-worker: VS-041"
+    note: "최대 20자 제목·키워드 ILIKE 검색, 랭킹순 7필드, 공개 범위 비차등과 입력 검증 테스트를 확정했다."
+  - at: "2026-07-26T10:49:06+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "vertical-slice delivery: VS-041"
+    note: "Red 5건 뒤 검색 API·IdeaKeyword Migration·OpenAPI·ERD를 구현하고 집중 9개와 전체 323개 테스트를 통과했다."
+
+created_at: "2026-07-26T10:41:57+09:00"
+updated_at: "2026-07-26T10:49:06+09:00"
