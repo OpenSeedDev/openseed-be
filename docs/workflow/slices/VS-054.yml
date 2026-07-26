@@ -9,7 +9,7 @@ task:
 status: AWAITING_PR_REVIEW
 branch: codex/vs-054-company-summary
 base_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
-current_commit: fff3732fdd195878f2bed57b84296d152152e75e
+current_commit: fff37325da55e0ffad130c1fa621beb1c396faad
 
 review:
   pr_number: 83
