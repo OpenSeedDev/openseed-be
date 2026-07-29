@@ -2,6 +2,15 @@ spring:
   application:
     name: seedrank-backend
 
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  task:
+    scheduling:
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
   jpa:
     open-in-view: false
     hibernate:
@@ -50,3 +59,6 @@ management:
       probes:
         enabled: true
       show-details: never
+
+server:
+  shutdown: graceful

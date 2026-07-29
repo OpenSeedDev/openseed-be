@@ -1,0 +1,9 @@
+spring:
+  main:
+    web-application-type: servlet
+
+app:
+  ranking:
+    scheduling-enabled: false
+  financial-consistency:
+    enabled: false
