@@ -1,0 +1,12 @@
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	reverse_proxy api:8080 {
+		health_uri /actuator/health/readiness
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

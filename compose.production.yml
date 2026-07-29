@@ -1,0 +1,88 @@
+x-app-environment: &app-environment
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+  SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+  SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+  JWT_SECRET: ${JWT_SECRET}
+  AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE}
+  COMPANY_VERIFICATION_CONFIRM_URL: ${COMPANY_VERIFICATION_CONFIRM_URL}
+  MAIL_HOST: ${MAIL_HOST}
+  MAIL_PORT: ${MAIL_PORT}
+  MAIL_USERNAME: ${MAIL_USERNAME}
+  MAIL_PASSWORD: ${MAIL_PASSWORD}
+  MAIL_FROM: ${MAIL_FROM}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    stop_grace_period: 35s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: seedrank-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *app-environment
+      SPRING_PROFILES_ACTIVE: api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/actuator/health/readiness"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 40s
+    stop_grace_period: 35s
+
+  worker:
+    image: seedrank-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *app-environment
+      SPRING_PROFILES_ACTIVE: worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    stop_grace_period: 35s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/lightsail/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    stop_grace_period: 35s
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:

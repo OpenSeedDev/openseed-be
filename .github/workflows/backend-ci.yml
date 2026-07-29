@@ -64,6 +64,10 @@ jobs:
         if: steps.test-scope.outputs.scope == 'full'
         run: ./gradlew test --no-daemon
 
+      - name: Build production Docker image
+        if: steps.test-scope.outputs.scope == 'full'
+        run: docker build --tag seedrank-backend:ci .
+
       - name: Skip backend tests for workflow-only changes
         if: steps.test-scope.outputs.scope == 'workflow-only'
         run: echo "Java source, tests, migrations, and Gradle inputs are unchanged."

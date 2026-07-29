@@ -1,0 +1,84 @@
+schema_version: 2
+
+task:
+  id: OPS-05
+  title: "Docker 이미지와 Graceful Shutdown"
+  dependencies: [SETUP-08]
+  resource_locks: [ops, ci]
+
+status: CREATING_PR
+branch: codex/ops-05-docker-image
+base_commit: 19b8b1ac7dfdb3fe897fe85eeb291b36fd32bf06
+current_commit: null
+
+review:
+  pr_number: null
+  pr_url: null
+  handled_comment_ids: []
+  unresolved_thread_count: null
+  merge_approval:
+    command: /merge-approved
+    approved_by: null
+    comment_id: null
+    comment_url: null
+    approved_at: null
+    head_sha: null
+
+evidence:
+  dependencies_satisfied: true
+  dependency_prs:
+    - task: SETUP-08
+      source: initial_merged
+      evidence: "backlog initial_merged와 현재 main 19b8b1a에 포함된 foundation"
+  red_test:
+    command: "./gradlew test --tests com.seedrank.ops.deployment.DeploymentPackagingContractTest --no-daemon"
+    conclusion: expected_failure
+    at: "2026-07-29T16:05:00+09:00"
+    evidence: "Dockerfile, API·Worker profile, 운영 Compose, 배포 스크립트 부재와 Graceful Shutdown 설정 부재로 계약 테스트 5개가 실패했다."
+  focused_tests:
+    command: "./gradlew test --tests com.seedrank.ops.deployment.DeploymentPackagingContractTest --no-daemon; docker build; docker compose up; readiness and SIGTERM verification"
+    conclusion: success
+    at: "2026-07-29T16:22:48+09:00"
+    evidence: "패키징·CI 계약 6개 성공. Java 21 이미지를 빌드하고 PostgreSQL 17, API, Worker, Caddy를 기동해 migration 35개, API·Caddy readiness UP, UID 10001 non-root, Worker non-web profile, SIGTERM graceful shutdown 완료와 재시작 readiness를 확인했다."
+  full_tests:
+    command: "./gradlew test --no-daemon"
+    conclusion: success
+    at: "2026-07-29T16:25:04+09:00"
+    evidence: "PostgreSQL Testcontainers 포함 전체 323개 테스트 성공"
+  migration:
+    required: false
+    evidence: "이미지, 실행 profile, 배포 구성만 변경하며 DB 스키마와 ERD 변경이 없다."
+  ci_url: null
+  ci_result: null
+  merge_commit: null
+  synced_main_commit: null
+
+failure:
+  active: false
+  category: null
+  stage: null
+  command: null
+  summary: null
+  evidence: null
+  retry_condition: null
+  attempts: 0
+
+history:
+  - at: "2026-07-29T16:02:40+09:00"
+    from: NOT_STARTED
+    to: PLANNING
+    command: "OPS-05 Lightsail deployment dispatch"
+    note: "GitHub에서 OPS-05 open PR이 없고 SETUP-08 의존성이 실제 main에 포함됐음을 확인했다."
+  - at: "2026-07-29T16:04:00+09:00"
+    from: PLANNING
+    to: IMPLEMENTING
+    command: "OPS-05 plan complete"
+    note: "단일 이미지 API·Worker profile, Graceful Shutdown, Lightsail Compose와 1회 배포 스크립트의 계약 테스트를 확정했다."
+  - at: "2026-07-29T16:25:17+09:00"
+    from: IMPLEMENTING
+    to: CREATING_PR
+    command: "OPS-05 delivery verification"
+    note: "초기 Red 5개와 CI 계약 Red 1개, 집중 Green 6개, 실제 4개 컨테이너 기동·readiness·SIGTERM 검증과 전체 323개 테스트를 완료했다. DB와 ERD 변경은 없다."
+
+created_at: "2026-07-29T16:02:40+09:00"
+updated_at: "2026-07-29T16:25:17+09:00"
